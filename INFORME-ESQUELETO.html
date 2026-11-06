@@ -1,0 +1,556 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Informe del esqueleto — TEMPLATE ESTRUCTURA IA</title><style>
+:root{--ink:#1f2328;--paper:#fff;--muted:#57606a;--line:#d0d7de;--soft:#f6f8fa;--acento:#0b5fff;--acento-s:#e8f0ff;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font:15px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper)}
+header.portada{background:linear-gradient(135deg,#0b2a66,#0b5fff);color:#fff;padding:48px 48px 40px}
+header.portada h1{margin:0 0 8px;font-size:34px;letter-spacing:-.5px}header.portada p{margin:4px 0;opacity:.92;max-width:900px}
+.meta{font-family:var(--mono);font-size:12px;opacity:.85;margin-top:16px}
+.layout{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
+nav{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;border-right:1px solid var(--line);padding:20px 16px;background:var(--soft)}
+nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:8px 8px 10px}
+nav a{display:block;padding:6px 10px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:14px}nav a:hover{background:var(--acento-s)}
+nav a span{display:inline-block;min-width:26px;color:var(--muted);font-family:var(--mono);font-size:12px}
+main{padding:28px 48px 80px;max-width:1240px}
+section{padding:28px 0 8px;border-bottom:1px solid var(--line)}section:last-of-type{border-bottom:0}
+h2{font-size:24px;margin:0 0 6px;letter-spacing:-.3px}h3{font-size:17px;margin:22px 0 8px}
+.lead{color:var(--muted);margin:0 0 18px;max-width:900px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0 6px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--soft)}
+.tile b{display:block;font-size:28px;letter-spacing:-.5px}.tile span{color:var(--muted);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin:12px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff}
+.card h4{margin:0 0 6px;font-family:var(--mono);font-size:14px}.card p{margin:0;color:var(--muted);font-size:13.5px}
+.card .pie{margin-top:8px;font-size:12px;color:var(--muted)}
+.badge{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:var(--soft);vertical-align:middle;margin-left:6px}
+.badge.ok{color:var(--ok);border-color:#aceebb;background:#dafbe1}.badge.warn{color:var(--warn);border-color:#f0d58c;background:#fff8c5}
+.badge.bad{color:var(--bad);border-color:#ffb3b3;background:#ffebe9}.badge.acento{color:var(--acento);border-color:#b6ccff;background:var(--acento-s)}
+table{border-collapse:collapse;width:100%;margin:10px 0 16px;font-size:14px}th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+th{background:var(--soft);font-weight:600}td code,p code,li code{font-family:var(--mono);font-size:12.5px;background:var(--soft);padding:1px 5px;border-radius:4px}
+pre{background:#0d1117;color:#e6edf3;padding:14px 16px;border-radius:10px;overflow:auto;font-size:12.5px;line-height:1.5}
+.diagrama{width:100%;height:auto;max-width:1100px;display:block;margin:12px 0 18px}
+.caja{fill:#fff;stroke:var(--line);stroke-width:1.5}.caja.acento{fill:var(--acento-s);stroke:#b6ccff}.caja.suave{fill:var(--soft)}
+.caja-t{font-size:13.5px;font-weight:600;fill:var(--ink)}.caja-s{font-size:11.5px;fill:var(--muted)}
+.linea{stroke:#8b949e;stroke-width:1.6}.flecha{fill:#8b949e}
+.timeline{list-style:none;padding:0;margin:14px 0;border-left:2px solid var(--line)}
+.timeline li{position:relative;padding:0 0 18px 22px}.timeline li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--acento);border:2px solid #fff}
+.timeline time{font-family:var(--mono);font-size:12px;color:var(--muted)}.timeline b{display:block}
+.check{list-style:none;padding:0}.check li{padding:8px 0 8px 30px;position:relative;border-bottom:1px dashed var(--line)}
+.check li::before{content:"";position:absolute;left:4px;top:12px;width:14px;height:14px;border:2px solid var(--acento);border-radius:4px}
+.nota{border-left:4px solid var(--acento);background:var(--acento-s);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:900px){.layout{grid-template-columns:1fr}nav{position:static;height:auto}.dos{grid-template-columns:1fr}main{padding:20px}}
+footer{color:var(--muted);font-size:13px;padding:24px 48px;border-top:1px solid var(--line)}
+.prompt-maestro{margin:0;padding:28px 48px 24px;background:#eef3ff;border-bottom:1px solid #c9d6f5}.prompt-maestro h2{margin-top:0}.prompt-maestro pre{max-height:520px}.pasos-previos{margin:6px 0 12px 20px}.barra-prompt{display:flex;align-items:center;gap:12px;margin:8px 0}.copiar{background:#0b5fff;color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:14px;cursor:pointer}.copiar:hover{background:#0b2a66}.prompt-maestro details{margin-top:12px}.prompt-maestro summary{cursor:pointer;font-weight:600}
+@media print{nav{display:none}.copiar{display:none}.layout{grid-template-columns:1fr}header.portada{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<header class="portada"><h1>TEMPLATE ESTRUCTURA IA — informe del esqueleto</h1>
+<p>Qué tiene, cómo fluye, qué mide y qué falta. Un Cerebro Digital (OKF) con agentes, skills y scripts determinísticos para crear, absorber, refactorizar o migrar aplicaciones con IA, con un «sí» humano en cada barrera.</p>
+<p class="meta">Generado el 2026-11-05 10:11 por bin/generar-informe.py (pruebas y Doctor corridos hoy) · raíz: C:\Users\marti\OneDrive\Desktop\TEMPLATE ESTRUCTURA IA</p></header>
+<section id="prompt" class="prompt-maestro"><h2>00 · Prompt maestro — para pegar en Claude Code con el template abierto</h2>
+<p class="lead">Copiá el template a la carpeta del proyecto, abrí Claude Code ahí y pegá esto. Reemplazá cada <code>&lt;…&gt;</code>; borrá los bloques que no apliquen. Lo que no completes, la skill <code>arrancar-proyecto</code> lo pregunta en un solo mensaje y no inventa nada. Fuente única: <code>cerebro-digital/configuracion-ia/skills/arrancar-proyecto/references/prompt-maestro.md</code>.</p>
+<ol class="pasos-previos"><li>Copiá la carpeta del template a la carpeta donde va a vivir el núcleo del proyecto (fuera de OneDrive si vas a trabajar con git). El template original queda intacto como molde.</li><li>Abrí Claude Code parado en esa carpeta nueva y pegá el prompt.</li></ol>
+<div class="barra-prompt"><button type="button" class="copiar" onclick="copiarPrompt()">Copiar el prompt</button><span id="copiado" class="meta"></span></div>
+<pre id="prompt-texto">Arrancá un proyecto con este template: &lt;nombre del proyecto&gt;.
+
+Contexto decidido (no lo vuelvas a preguntar):
+- Modo: &lt;solo | equipo&gt;. Tablero: &lt;local | Azure DevOps (org, proyecto, team) | Jira | otro&gt;. Soy &lt;tu nombre, como en git&gt;.
+- Producto: &lt;nombre del producto&gt;. Organización: &lt;tu nombre o la empresa&gt;. Módulo del Cerebro: &lt;slug corto, p. ej. reservas&gt;.
+- Tipo de aplicación: &lt;web | Electron | escritorio con webview (Tauri) | escritorio nativo | móvil | línea de comandos | API&gt;.
+- Stack: back &lt;lenguaje + framework, o &quot;lo que digan los documentos del proyecto&quot;&gt;; front &lt;framework, o &quot;no hay&quot;&gt;; base &lt;motor, o &quot;no hay&quot;&gt;;
+  comando de la suite de tests del back &lt;…&gt; y del front &lt;…&gt;. Lo que no sepa queda a definir en DEC-003: no lo inventes.
+- Pruebas de punta a punta: motor según el tipo de aplicación (Playwright para web/Electron; Playwright sobre el front con la
+  API nativa simulada + WebDriver para escritorio con webview; Appium o Maestro para móvil; proceso para CLI; HTTP para API).
+- Las claves (Stitch, MCP) las cargo yo después, por máquina; nunca en archivos.
+
+[Si el proyecto YA EXISTE, dejá este bloque; si es nuevo, borralo]
+- El proyecto está en &lt;ruta de la carpeta&gt;. Enchufalo por enlace, no lo muevas. Sumale a su CLAUDE.md la línea que importa las
+  reglas del núcleo. Trae: &lt;documentos | decisiones de arquitectura | archivos .feature | skills propias | código en &lt;lenguaje&gt; | nada&gt;.
+- No toques su código ni sus documentos: leés, proponés y escribís sólo en el Cerebro de este núcleo, con mi «sí».
+
+[Si el proyecto es NUEVO, dejá este bloque; si ya existe, borralo]
+- Todavía no hay nada. Lo que sé del producto, en criollo: &lt;dos o tres frases: para quién es, qué hace, qué problema resuelve&gt;.
+
+Qué quiero de esta sesión, en este orden, frenando en cada «sí»:
+1. Mostrame el plan de arranque en un solo mensaje (con lo propuesto al lado de cada dato) y esperá mi «sí» antes de correr nada.
+2. [existente] Leé los informes de la adopción (relevamiento, inventario, radiografía) y decime qué trae el proyecto y qué choca
+   con el núcleo (nombres de skills repetidos, idioma, reglas). [nuevo] Preguntame, ítem por ítem, lo que falte para la primera ficha funcional.
+3. [existente] Procesá los documentos con la curaduría del Cerebro: decisiones de arquitectura como DEC heredadas (con fecha y origen),
+   .feature como Escenarios de sus Historias, reglas como candidatas; ítem por ítem, con mi «sí», nada en bloque. Si hay código,
+   absorbelo en modo documentar: inventario y radiografía por script, lectura por módulo, matriz de cobertura.
+4. [existente, si tiene skills propias] Proponeme qué hacer con cada una: se queda, la cubre una del núcleo, o sobra. No borres nada sin mi «sí».
+5. Con el Cerebro poblado, proponeme el primer slice y sus Historias por flujo, cada una con su Gherkin completo y sus Notas para QA
+   (pantalla y ruta, rol, datos iniciales, identificadores, ambiente). Bajalas al tablero con mi «sí».
+6. Cerrá con un resumen: qué quedó hecho, qué quedó pendiente a confirmar, y qué sigue.
+
+Reglas de esta sesión: no inventes datos ni reglas; lo que no esté en los documentos o en lo que te dije es una pregunta o un
+pendiente marcado. Nada de datos de personas. Todo en español.</pre>
+<details><summary>Lo que sigue, en frases (no hace falta leer pasos)</summary><table><tr><th>Querés…</th><th>Decile a Claude</th></tr><tr><td>Programar lo que está listo en el tablero</td><td>«desarrollá mis tareas asignadas» (worktrees y agentes en paralelo; un «Aprobar» por Tarea en modo solo lo da DEC-005)</td></tr><tr><td>Redactar una Historia o una Tarea</td><td>«redactá la Historia de &lt;flujo&gt;» · «derivá las Tareas de la Historia #N»</td></tr><tr><td>Diseñar una pantalla</td><td>«diseñá la pantalla de &lt;X&gt; con Stitch»</td></tr><tr><td>Pruebas de punta a punta</td><td>«diseñá las pruebas de la Historia #N» · «automatizá la Historia #N» · «qué cobertura de punta a punta tenemos»</td></tr><tr><td>Una app que ya existe</td><td>«absorbé la app de &lt;carpeta&gt;» → «¿refactorizo o migro?» → «ponele red al slice &lt;X&gt;» → «migrá el slice &lt;X&gt;»</td></tr><tr><td>Documentar al cerrar</td><td>«armá el manual» · «armá la bitácora técnica»</td></tr><tr><td>Un diagrama</td><td>«dibujame la arquitectura de &lt;X&gt;»</td></tr><tr><td>Saber cómo venimos</td><td>«¿cómo venimos?» (la tendencia de las últimas sesiones) · «corré el Doctor»</td></tr><tr><td>Mejorar el propio ecosistema</td><td>«¿qué mejorarías del ecosistema?» (propone de a uno; vos decidís)</td></tr></table></details>
+<script>function copiarPrompt(){var t=document.getElementById("prompt-texto").innerText;var m=document.getElementById("copiado");function ok(){m.textContent="Copiado. Pegalo en Claude Code.";}function fb(){var r=document.createRange();r.selectNodeContents(document.getElementById("prompt-texto"));var s=window.getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand("copy");ok();}catch(e){m.textContent="Seleccioná el texto y copialo con Ctrl+C.";}}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,fb);}else{fb();}}</script>
+</section>
+<div class="layout"><nav><h2>Índice</h2>
+<a href="#prompt"><span>00</span>Prompt maestro</a>
+<a href="#resumen"><span>01</span>Resumen ejecutivo</a>
+<a href="#mapa"><span>02</span>Mapa del esqueleto</a>
+<a href="#bucles"><span>03</span>Los tres bucles</a>
+<a href="#codigo"><span>04</span>Cómo se construye código</a>
+<a href="#pruebas"><span>05</span>Pruebas: tres capas</a>
+<a href="#inversa"><span>06</span>Ingeniería inversa, refactor y migración</a>
+<a href="#autocorreccion"><span>07</span>Autocorrección consultada</a>
+<a href="#skills"><span>08</span>Skills</a>
+<a href="#scripts"><span>09</span>Scripts determinísticos</a>
+<a href="#doctor"><span>10</span>El Doctor</a>
+<a href="#instalacion"><span>11</span>Instalación e instanciación</a>
+<a href="#bitacora"><span>12</span>Bitácora</a>
+<a href="#pendientes"><span>13</span>Pendientes y decisiones</a>
+<a href="#regenerar"><span>14</span>Cómo se regenera este informe</a>
+</nav><main>
+<section id="resumen"><h2>01 · Resumen ejecutivo</h2>
+<p class="lead">El esqueleto separa <b>conocimiento</b> (el Cerebro), <b>reglas</b> (AGENTS.md y sus barreras), <b>habilidades</b> (skills, una pregunta por skill) y <b>hechos</b> (scripts que cuentan siempre igual). Lo que es conteo lo hace un script; lo que pide criterio lo hace el modelo; lo que es decisión la toma una persona.</p>
+<div class="tiles">
+<div class="tile"><b>33</b><span>skills canónicas</span></div>
+<div class="tile"><b>11</b><span>skills scoped back/front</span></div>
+<div class="tile"><b>32</b><span>scripts determinísticos</span></div>
+<div class="tile"><b>28</b><span>suites de prueba</span></div>
+<div class="tile"><b>599</b><span>casos en OK hoy</span></div>
+<div class="tile"><b>23</b><span>sondas del Doctor</span></div>
+<div class="tile"><b>28</b><span>documentos de método</span></div>
+<div class="tile"><b>13</b><span>propuestas de mejora</span></div>
+</div>
+<div class="nota"><b>Principios que sostienen todo.</b> Fuente única de verdad en <code>cerebro-digital/</code>. Nada se inventa: lo que no está es pendiente. Lo que se cuenta lo cuenta un script y un script que no corrió es <code>SIN DATOS</code>, no OK. Quien verifica no es quien produce. Nada se escribe en el tablero, en el Cerebro ni afuera sin un «sí» sobre lo ya mostrado. Sin PHI, nunca. Todo en español (Argentina).</div></section>
+<section id="mapa"><h2>02 · Mapa del esqueleto</h2><p class="lead">Un repositorio de conocimiento y reglas; el código de la aplicación vive en repositorios propios que se clonan adentro de <code>back/</code>, <code>front/</code> y <code>qa/</code> (DEC-001).</p>
+<table><tr><th>Carpeta</th><th>Qué es</th></tr>
+<tr><td><code>AGENTS.md · CLAUDE.md · GEMINI.md · opencode.json</code></td><td>Las reglas y las barreras, una sola fuente; los otros tres la importan para Claude Code, Gemini CLI y opencode. Antigravity la lee nativa.</td></tr>
+<tr><td><code>cerebro-digital/</code></td><td>El Cerebro Digital (OKF): contexto, fuentes, roadmap, log, el módulo con sus cuatro pilares, la configuración de IA (agentes, skills, orquestador, mejoras, integraciones MCP).</td></tr>
+<tr><td><code>.claude/skills · .agents/skills</code></td><td>Espejos versionados de las skills, idénticos a la fuente (el hook y el instalador lo verifican). Los agentes se materializan por máquina.</td></tr>
+<tr><td><code>bin/</code></td><td>Scripts determinísticos (Python, biblioteca estándar, exit 0/1/2) y sus pruebas; instalador, instanciador, sincronizadores.</td></tr>
+<tr><td><code>doctor/</code></td><td>El Doctor: 23 sondas sobre el repositorio y, si hay código clonado, sobre el código.</td></tr>
+<tr><td><code>tablero/</code></td><td>El toolkit de tickets: método, plantillas, checklists, ejemplos neutros, guías HTML.</td></tr>
+<tr><td><code>back/ · front/ · qa/</code></td><td>Dónde se clonan los repositorios de código y de pruebas de aceptación; traen sus skills scoped (back 6, front 5).</td></tr>
+<tr><td><code>documentos/ · borrador/ · entregables/</code></td><td>Lo que se recibe del equipo funcional; el borrador de trabajo (no se versiona); lo promovido.</td></tr>
+<tr><td><code>.githooks/ · .gitlab-ci.yml</code></td><td>El hook pre-commit (espejos, conteos, BOM, control chars, especificación de skills) y el pipeline opcional del propio Cerebro.</td></tr>
+</table><h3>El Cerebro, por dentro</h3><svg viewBox="0 0 860 400" class="diagrama" role="img" aria-label="estructura del Cerebro">
+<rect x="20" y="20" width="250" height="40" rx="8" class="caja acento"/>
+<text x="145" y="45" text-anchor="middle" class="caja-t">cerebro-digital/</text>
+<rect x="20" y="120" width="250" height="40" rx="8" class="caja "/>
+<text x="145" y="145" text-anchor="middle" class="caja-t">index · contexto · fuentes</text>
+<rect x="20" y="175" width="250" height="40" rx="8" class="caja "/>
+<text x="145" y="200" text-anchor="middle" class="caja-t">roadmap · log · autores</text>
+<rect x="20" y="230" width="250" height="40" rx="8" class="caja "/>
+<text x="145" y="255" text-anchor="middle" class="caja-t">diseno/diseno-sistema.md</text>
+<rect x="300" y="120" width="250" height="40" rx="8" class="caja suave"/>
+<text x="425" y="145" text-anchor="middle" class="caja-t">configuracion-ia/</text>
+<rect x="300" y="175" width="250" height="40" rx="8" class="caja "/>
+<text x="425" y="200" text-anchor="middle" class="caja-t">agentes/ (4) · skills/ (31)</text>
+<rect x="300" y="230" width="250" height="40" rx="8" class="caja "/>
+<text x="425" y="255" text-anchor="middle" class="caja-t">orquestador-desarrollo · mejoras</text>
+<rect x="300" y="285" width="250" height="40" rx="8" class="caja "/>
+<text x="425" y="310" text-anchor="middle" class="caja-t">integracion-azure-mcp · gitlab-mcp</text>
+<rect x="580" y="120" width="250" height="40" rx="8" class="caja suave"/>
+<text x="705" y="145" text-anchor="middle" class="caja-t">&lt;modulo&gt;/  (modulo-ejemplo)</text>
+<rect x="580" y="175" width="250" height="40" rx="8" class="caja "/>
+<text x="705" y="200" text-anchor="middle" class="caja-t">funcional/ · metodologia/</text>
+<rect x="580" y="230" width="250" height="40" rx="8" class="caja "/>
+<text x="705" y="255" text-anchor="middle" class="caja-t">arquitectura/ (DEC-nnn, esqueleto)</text>
+<rect x="580" y="285" width="250" height="40" rx="8" class="caja acento"/>
+<text x="705" y="310" text-anchor="middle" class="caja-t">aplicacion/ (mapa · AP · DT)</text>
+<rect x="580" y="340" width="250" height="40" rx="8" class="caja "/>
+<text x="705" y="365" text-anchor="middle" class="caja-t">pendientes.md · extraccion-reuniones/</text>
+<line x1="145" y1="60" x2="145" y2="120" class="linea"/>
+<line x1="145" y1="60" x2="425" y2="120" class="linea"/>
+<line x1="145" y1="60" x2="705" y2="120" class="linea"/>
+<line x1="28" y1="160" x2="28" y2="350" class="linea"/>
+<line x1="308" y1="160" x2="308" y2="350" class="linea"/>
+<line x1="588" y1="160" x2="588" y2="350" class="linea"/>
+</svg>
+<p>Los cuatro pilares del módulo: <b>funcional/</b> (el qué: reglas <code>RN-&lt;MOD&gt;-nnn</code>, flujos con su bloque <code>## Derivación a backlog</code>), <b>metodologia/</b> (cómo trabaja el equipo), <b>arquitectura/</b> (cómo se construye: <code>DEC-nnn</code>, esqueleto, C1..C8) y <b>aplicacion/</b> (qué existe y qué se aprendió: <code>mapa.md</code>, <code>AP-nnn</code>, <code>DT-nnn</code>). <code>pendientes.md</code> (<code>P-nnn</code>) cruza a los cuatro.</p></section>
+<section id="bucles"><h2>03 · Los tres bucles</h2><p class="lead">Construir, autocorregirse y alimentar el Cerebro. Cada uno con un «sí» humano en el punto que importa.</p><svg viewBox="0 0 900 300" class="diagrama" role="img" aria-label="los tres bucles">
+<defs><marker id="b" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="flecha"/></marker></defs>
+<rect x="20" y="110" width="250" height="90" rx="12" class="caja acento"/>
+<text x="145" y="145" text-anchor="middle" class="caja-t">1. Construir</text>
+<text x="145" y="168" text-anchor="middle" class="caja-s">conocimiento → tickets → código → verificación</text>
+<rect x="325" y="20" width="250" height="90" rx="12" class="caja"/>
+<text x="450" y="55" text-anchor="middle" class="caja-t">3. Alimentar el Cerebro</text>
+<text x="450" y="78" text-anchor="middle" class="caja-s">7-bis: funcional / aplicacion/ / mejoras.md</text>
+<rect x="630" y="110" width="250" height="90" rx="12" class="caja suave"/>
+<text x="755" y="145" text-anchor="middle" class="caja-t">2. Autocorregirse</text>
+<text x="755" y="168" text-anchor="middle" class="caja-s">mejorar-ecosistema: propone, nunca aplica</text>
+<path d="M270,140 C300,60 320,60 325,60" class="linea" fill="none" marker-end="url(#b)"/>
+<path d="M575,60 C600,60 620,80 630,130" class="linea" fill="none" marker-end="url(#b)"/>
+<path d="M755,200 C755,270 145,270 145,205" class="linea" fill="none" marker-end="url(#b)"/>
+<text x="450" y="262" text-anchor="middle" class="caja-s">cada vuelta deja el esqueleto y el Cerebro mejor que antes, con un «sí» humano en cada cambio</text>
+</svg>
+<div class="cards"><div class="card"><h4>1. Construir</h4><p>Documento funcional → ficha del Cerebro con su bloque de derivación → tickets 1:1 (<code>derivar-arbol.py</code>) → Tareas con contrato, SDD y lista de tests → código con TDD en worktrees aislados → verificación por otro motor → Merge Request → cierre en la tarjeta.</p></div>
+<div class="card"><h4>2. Autocorregirse</h4><p>Lo que el ecosistema muestra que tiene mal (una convención que todos rompen, un control siempre SIN DATOS, un script que cuenta mal) va a <code>mejoras.md</code> como propuesta, de a una, y se pregunta. Nunca se aplica solo.</p></div>
+<div class="card"><h4>3. Alimentar el Cerebro</h4><p>Paso 7-bis: lo del negocio a <code>funcional/</code> o <code>decisiones.md</code> por la Consulta Interactiva; lo de la aplicación a <code>aplicacion/</code> (mapa, aprendizajes, deuda) con datos de <code>datos-cierre.py</code>; lo del ecosistema a <code>mejoras.md</code>.</p></div></div></section>
+<section id="codigo"><h2>04 · Cómo se construye código</h2><p class="lead">Un worker por Tarea, en un worktree aislado, con una misión única generada por script; verifica otro agente, con otro motor; aprueba una persona.</p>
+<svg viewBox="0 0 1136 218" class="diagrama" role="img" aria-label="flujo">
+<defs><marker id="f" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="flecha"/></marker></defs>
+<rect x="10" y="10" width="196" height="66" rx="10" class="caja "/>
+<text x="108" y="37" text-anchor="middle" class="caja-t">Tarea lista (DoR)</text>
+<text x="108" y="58" text-anchor="middle" class="caja-s">contrato · SDD · tests · modo de pruebas</text>
+<line x1="206" y1="43" x2="238" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="240" y="10" width="196" height="66" rx="10" class="caja "/>
+<text x="338" y="37" text-anchor="middle" class="caja-t">GATE de WORKTREE</text>
+<text x="338" y="58" text-anchor="middle" class="caja-s">gate-worktree.py · base, techo, árbol</text>
+<line x1="436" y1="43" x2="468" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="470" y="10" width="196" height="66" rx="10" class="caja acento"/>
+<text x="568" y="37" text-anchor="middle" class="caja-t">Misión única</text>
+<text x="568" y="58" text-anchor="middle" class="caja-s">armar-mision.py · Tarea + Gherkin + C1..C8</text>
+<line x1="666" y1="43" x2="698" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="700" y="10" width="196" height="66" rx="10" class="caja acento"/>
+<text x="798" y="37" text-anchor="middle" class="caja-t">Worker · TDD</text>
+<text x="798" y="58" text-anchor="middle" class="caja-s">guiar-tdd · test(rojo) → verde</text>
+<line x1="896" y1="43" x2="928" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="930" y="10" width="196" height="66" rx="10" class="caja acento"/>
+<text x="1028" y="37" text-anchor="middle" class="caja-t">Verificador · otro agente</text>
+<text x="1028" y="58" text-anchor="middle" class="caja-s">5 · 5-bis · 5-ter · 5-quater</text>
+<path d="M1028,76 V94 H108 V111" class="linea" fill="none" marker-end="url(#f)"/>
+<rect x="10" y="114" width="196" height="66" rx="10" class="caja "/>
+<text x="108" y="141" text-anchor="middle" class="caja-t">Aprobar</text>
+<text x="108" y="162" text-anchor="middle" class="caja-s">una persona, con el veredicto a la vista</text>
+<line x1="206" y1="147" x2="238" y2="147" class="linea" marker-end="url(#f)"/>
+<rect x="240" y="114" width="196" height="66" rx="10" class="caja "/>
+<text x="338" y="141" text-anchor="middle" class="caja-t">Merge Request</text>
+<text x="338" y="162" text-anchor="middle" class="caja-s">commits por importancia · evidencia/&lt;ID&gt;</text>
+<line x1="436" y1="147" x2="468" y2="147" class="linea" marker-end="url(#f)"/>
+<rect x="470" y="114" width="196" height="66" rx="10" class="caja "/>
+<text x="568" y="141" text-anchor="middle" class="caja-t">Cierre en la Tarea</text>
+<text x="568" y="162" text-anchor="middle" class="caja-s">comentar-tarea · datos-cierre.py</text>
+<line x1="666" y1="147" x2="698" y2="147" class="linea" marker-end="url(#f)"/>
+<rect x="700" y="114" width="196" height="66" rx="10" class="caja suave"/>
+<text x="798" y="141" text-anchor="middle" class="caja-t">7-bis · Cerebro</text>
+<text x="798" y="162" text-anchor="middle" class="caja-s">funcional / aplicacion / mejoras</text>
+</svg>
+<h3>Los cuatro controles, una pregunta cada uno</h3><table><tr><th>Control</th><th>Pregunta</th><th>Quién</th><th>Lo mecánico</th></tr>
+<tr><td><b>5 · verificar-tdd</b></td><td>¿El ciclo rojo → verde ocurrió?</td><td>otro agente (DEC-005)</td><td><code>verificar-tdd.py --modo</code>: commits <code>test(rojo): n</code> sólo con tests, verde después, <code>evidencia/&lt;ID&gt;</code></td></tr>
+<tr><td><b>5-bis · code-review.md</b></td><td>¿El código está bien escrito?</td><td>el mismo verificador</td><td>cinco dimensiones; en Claude Code <code>/code-review</code> es un atajo</td></tr>
+<tr><td><b>5-ter · auditar-codigo</b></td><td>¿La entrega cumple lo que el pipeline exige?</td><td>el mismo verificador</td><td><code>auditar-diff.py</code>: secretos, PHI, elegibilidad; contrato y límites de módulo</td></tr>
+<tr><td><b>5-quater · C1..C8</b></td><td>¿Cumple las convenciones del Cerebro?</td><td>el mismo verificador</td><td>un veredicto por regla; C8 es SIN DATOS (pendiente DEC-003) hasta que el equipo lo escriba</td></tr>
+</table><h3>El veredicto, siempre igual</h3><pre>VEREDICTO-INICIO
+5        verificar-tdd   : OK | HALLAZGO | SIN DATOS (&lt;motivo&gt;)
+5-bis    code-review     : OK | HALLAZGO | SIN DATOS (&lt;motivo&gt;)
+5-ter    auditar-codigo  : OK | HALLAZGO | SIN DATOS (&lt;motivo&gt;)
+5-quater C1..C8          : C1 OK · C2 … · C8 SIN DATOS (pendiente DEC-003)
+BLOQUEANTES: n   SIN DATOS (no se pudo mirar): n   SIN DATOS (pendiente declarado): n
+Verificado por: &lt;motor&gt; v&lt;versión&gt; · &lt;modelo&gt;
+VEREDICTO-FIN</pre>
+<div class="nota"><b>Dos clases de SIN DATOS.</b> «No se pudo mirar» frena (el script no corrió, la suite no se ejecutó). «Pendiente declarado» (C8, SAST, cobertura, la guía del stack: lo que una DEC todavía no fijó) se lista y no frena. Sin esta distinción nada se aprobaría hasta DEC-003.</div>
+<h3>TDD por defecto, con alternativas declaradas</h3><table><tr><th>Modo de pruebas (campo de la Tarea)</th><th>Cuándo</th><th>Qué exige igual</th></tr>
+<tr><td><b>TDD (default)</b></td><td>reglas, casos de uso, endpoints, lógica de front, bugs</td><td>el ciclo entero con el commit de rojo por ítem</td></tr>
+<tr><td><b>test-después, con motivo</b></td><td>esqueleto, configuración, migraciones, UI puramente visual</td><td>la red mínima: tests y producción en el rango; sin motivo se audita como TDD</td></tr>
+<tr><td><b>caracterización primero</b></td><td>código existente sin red (refactor o migración)</td><td><code>test(caracterizacion)</code> antes de tocar producción</td></tr>
+<tr><td><b>sin tests, con motivo</b></td><td>un spike que no va a producción</td><td>SIN DATOS declarado; que no entre a una rama de entrega</td></tr>
+</table><p><b>Back y front en paralelo</b> porque el contrato ya está cerrado en la Tarea: el back simula al front y el front simula la API desde el contrato (<code>simular-api-desde-el-contrato.md</code>). Dos modos de lanzamiento de <code>desarrollar-asignadas</code>: dentro de Orca o sin Orca (IntelliJ o terminal, <code>references/sin-orca.md</code>); la misión es la misma. En modo solo (DEC-006) el tablero es local y verifica otro agente del mismo motor. <b>Hoy el flujo es supervisado por diseño</b>: pregunta la base del worktree, el motor y el «Aprobar». Con <code>DEC-005</code> confirmada, esas respuestas salen de la decisión escrita y se citan.</p></section>
+<section id="pruebas"><h2>05 · Pruebas: tres capas, ninguna redundante</h2><svg viewBox="0 0 700 260" class="diagrama" role="img" aria-label="tres capas de pruebas">
+<polygon points="350,20 470,110 230,110" class="caja acento"/>
+<polygon points="230,116 470,116 540,176 160,176" class="caja suave"/>
+<polygon points="160,182 540,182 620,242 80,242" class="caja"/>
+<text x="350" y="92" text-anchor="middle" class="caja-t">Aceptación · qa/</text>
+<text x="350" y="153" text-anchor="middle" class="caja-t">Integración · back/ front/ (si la Tarea lo declara)</text>
+<text x="350" y="219" text-anchor="middle" class="caja-t">Unitaria y de contrato · guiar-tdd · test(rojo) → verde</text>
+<text x="620" y="60" text-anchor="start" class="caja-s">pocas, contra el</text>
+<text x="620" y="78" text-anchor="start" class="caja-s">sistema desplegado,</text>
+<text x="620" y="96" text-anchor="start" class="caja-s">trazadas al #ID</text>
+</svg>
+<p>Las dos primeras prueban <b>piezas</b> y viven en los repositorios de código; la tercera prueba <b>el sistema desplegado</b> contra los Escenarios de la Historia, trazada al <code>#ID</code>, y vive en <code>qa/</code> o donde decida <code>DEC-003</code>. Un repositorio de QA existente se absorbe con <code>absorber-aplicacion</code>. Método: <code>pruebas-de-aceptacion.md</code>.</p></section>
+<section id="inversa"><h2>06 · Ingeniería inversa, refactor y migración</h2><p class="lead">La skill <code>absorber-aplicacion</code> lee una aplicación existente, la vuelca al Cerebro ítem por ítem con su marca de confianza, y recién después, si se quiere, decide con una persona si se refactoriza o se migra. También sirve <b>sólo para documentar</b>.</p><svg viewBox="0 0 906 218" class="diagrama" role="img" aria-label="flujo">
+<defs><marker id="f" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="flecha"/></marker></defs>
+<rect x="10" y="10" width="196" height="66" rx="10" class="caja "/>
+<text x="108" y="37" text-anchor="middle" class="caja-t">Fase 0 · Encuadre</text>
+<text x="108" y="58" text-anchor="middle" class="caja-s">qué app, qué se espera, qué no se toca</text>
+<line x1="206" y1="43" x2="238" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="240" y="10" width="196" height="66" rx="10" class="caja acento"/>
+<text x="338" y="37" text-anchor="middle" class="caja-t">Fase 1 · Inventario</text>
+<text x="338" y="58" text-anchor="middle" class="caja-s">inventariar-codigo.py (+ Para DEC-004)</text>
+<line x1="436" y1="43" x2="468" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="470" y="10" width="196" height="66" rx="10" class="caja acento"/>
+<text x="568" y="37" text-anchor="middle" class="caja-t">Fase 1-bis · Radiografía</text>
+<text x="568" y="58" text-anchor="middle" class="caja-s">radiografiar-codigo.py (+ --mermaid)</text>
+<line x1="666" y1="43" x2="698" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="700" y="10" width="196" height="66" rx="10" class="caja "/>
+<text x="798" y="37" text-anchor="middle" class="caja-t">Fase 2 · Lectura</text>
+<text x="798" y="58" text-anchor="middle" class="caja-s">por módulo, marca CONFIRMADO / INFERIDO / HUECO</text>
+<path d="M798,76 V94 H108 V111" class="linea" fill="none" marker-end="url(#f)"/>
+<rect x="10" y="114" width="196" height="66" rx="10" class="caja "/>
+<text x="108" y="141" text-anchor="middle" class="caja-t">Cobertura</text>
+<text x="108" y="162" text-anchor="middle" class="caja-s">matriz: cada módulo leído o HUECO</text>
+<line x1="206" y1="147" x2="238" y2="147" class="linea" marker-end="url(#f)"/>
+<rect x="240" y="114" width="196" height="66" rx="10" class="caja suave"/>
+<text x="338" y="141" text-anchor="middle" class="caja-t">Modo documentar</text>
+<text x="338" y="162" text-anchor="middle" class="caja-s">termina acá: Cerebro poblado</text>
+<line x1="436" y1="147" x2="468" y2="147" class="linea" marker-end="url(#f)"/>
+<rect x="470" y="114" width="196" height="66" rx="10" class="caja "/>
+<text x="568" y="141" text-anchor="middle" class="caja-t">Fase 3 · DEC-004</text>
+<text x="568" y="162" text-anchor="middle" class="caja-s">tabla medida → decide una persona</text>
+<line x1="666" y1="147" x2="698" y2="147" class="linea" marker-end="url(#f)"/>
+<rect x="700" y="114" width="196" height="66" rx="10" class="caja "/>
+<text x="798" y="141" text-anchor="middle" class="caja-t">Fase 4 · Plan</text>
+<text x="798" y="162" text-anchor="middle" class="caja-s">fichas → tickets → TDD (refactor o migración)</text>
+</svg>
+<h3>Las siete fuentes, en orden</h3><table><tr><th>#</th><th>Fuente</th><th>Qué da</th><th>Quién</th></tr>
+<tr><td>1</td><td><b>Inventario</b></td><td>qué hay: lenguajes, build, pipeline, contratos, migraciones, tests, deuda</td><td><code>inventariar-codigo.py</code></td></tr>
+<tr><td>2</td><td><b>Radiografía</b></td><td>dónde mirar: endpoints, entidades, estados, pantallas, reglas candidatas, integraciones, permisos, dependencias; cada hecho con archivo:línea</td><td><code>radiografiar-codigo.py</code></td></tr>
+<tr><td>3</td><td><b>Lectura por módulo</b></td><td>qué hace cada cosa, empezando por lo que la radiografía señaló</td><td>la skill</td></tr>
+<tr><td>4</td><td><b>Contrato y tests existentes</b></td><td>lo prometido y lo que alguien consideró importante</td><td>lectura</td></tr>
+<tr><td>5</td><td><b>Base de datos</b></td><td>estados reales, volúmenes, tablas muertas; esquema y conteos, nunca filas</td><td>con un «sí»</td></tr>
+<tr><td>6</td><td><b>Runtime</b></td><td>qué se usa de verdad; agregados</td><td>con un «sí»</td></tr>
+<tr><td>7</td><td><b>Personas</b></td><td>el porqué; preguntas juntas y numeradas</td><td>el turno de preguntas</td></tr>
+</table><p>Cada afirmación lleva su marca: <b>CONFIRMADO</b> (archivo:línea), <b>INFERIDO</b> (entra sólo como ⚠), <b>HUECO</b> (<code>P-nnn</code>, nunca una suposición). Una regla candidata se presenta con su fragmento de 10 a 20 líneas y el test que la cubre, o no se presenta. La <b>matriz de cobertura</b> dice qué módulo quedó sin leer. Los diagramas que van al Cerebro son texto: <code>--mermaid</code> (módulos, cruces de capa, ER del DDL); Archify, si está instalado, dibuja el HTML interactivo para presentar.</p>
+<h3>Refactor o migración (DEC-004, la toma una persona)</h3><svg viewBox="0 0 900 250" class="diagrama" role="img" aria-label="refactor o migración">
+<rect x="20" y="20" width="410" height="210" rx="12" class="caja suave"/>
+<rect x="470" y="20" width="410" height="210" rx="12" class="caja suave"/>
+<text x="225" y="50" text-anchor="middle" class="caja-t">Refactor — se modifica en su lugar</text>
+<text x="675" y="50" text-anchor="middle" class="caja-t">Migración — se construye de nuevo</text>
+<text x="40" y="85" class="caja-s" text-anchor="start">1. RED: test(caracterizacion) congela lo que hace hoy</text>
+<text x="40" y="110" class="caja-s" text-anchor="start">2. LÍMITES: módulos de dominio (DEC-002), sin cambiar conducta</text>
+<text x="40" y="135" class="caja-s" text-anchor="start">3. FORMA · 4. REGLAS con rojo normal</text>
+<text x="40" y="160" class="caja-s" text-anchor="start">5. La red sigue en verde; otro agente audita</text>
+<text x="40" y="200" class="caja-s" text-anchor="start">El Doctor mide el avance módulo por módulo</text>
+<text x="490" y="85" class="caja-s" text-anchor="start">1. CONTRATO: openapi.yaml sacado del código viejo</text>
+<text x="490" y="110" class="caja-s" text-anchor="start">2. ORÁCULO: paridad, el mismo caso contra las dos</text>
+<text x="490" y="135" class="caja-s" text-anchor="start">3. SLICE NUEVO con el pipeline normal</text>
+<text x="490" y="160" class="caja-s" text-anchor="start">4. CORTE de tráfico por slice (estrangulador)</text>
+<text x="490" y="200" class="caja-s" text-anchor="start">5. APAGADO de la vieja, con un «sí»</text>
+</svg><p>La regla que ordena las dos: <b>primero la red, después el cambio</b>. Sin red no se refactoriza ni se migra: SIN DATOS. Método: <code>refactor-y-migracion.md</code>.</p></section>
+<section id="autocorreccion"><h2>07 · Autocorrección consultada</h2><p class="lead">La IA propone cambios al esqueleto (arquitectura, reglas, skills, scripts) con señal, cambio exacto, impacto y qué pasa si no; los registra en <code>mejoras.md</code> y pregunta de a uno. Nunca aplica solo. Es la regla 8 de AGENTS.md.</p>
+<table><tr><th>#</th><th>Señal</th><th>Qué cambiar</th><th>Estado</th></tr>
+<tr><td><b>M-001</b></td><td>Claude Code admite `disable-model-invocation: true` en el frontmatter (documentación de skills)</td><td>Las seis skills que escriben en el tablero (`sincronizar-backlog`, `planificar-lote`, `cargar-a-azure`, `tomar-tarea`, `comentar-tarea`, `desarrollar-asignadas`)</td><td><span class="badge ">descartada 2026-11-04: con `disable-mode</span></td></tr>
+<tr><td><b>M-002</b></td><td>Revisión del template: `desarrollar-asignadas` y `trabajar-con-intellij` (hoy, su modo sin Orca) comparten misión y difieren en el entorno</td><td>Una sola skill `desarrollar-en-paralelo` con dos modos (Orca / IntelliJ)</td><td><span class="badge ok">aceptada · aplicada 2026-11-02 (fusión e</span></td></tr>
+<tr><td><b>M-003</b></td><td>Claude Code trae `/doctor prompt-audit` (revisa instrucciones viejas o contradictorias en CLAUDE.md, AGENTS.md y skills)</td><td>Agregarlo como señal periódica de `mejorar-ecosistema`, junto al Doctor</td><td><span class="badge ok">aceptada · aplicada 2026-11-02: `/doctor</span></td></tr>
+<tr><td><b>M-004</b></td><td>Auditoría del template: `desarrollar-asignadas` y `trabajar-con-intellij` (hoy, su modo sin Orca) exigen «el otro motor» para verificar; en una máquina con un solo CLI el flujo 100 % automático se frena en todas las Tare</td><td>Regla «Quien verifica ≠ quien produce, y es el otro motor» (`orquestador-desarrollo.md`, las dos skills): permitir, **declarado en el veredicto**, un agente distinto del mismo motor con contexto limpio cuando no hay otro motor</td><td><span class="badge ok">aceptada · aplicada 2026-11-02 para el m</span></td></tr>
+<tr><td><b>M-005</b></td><td>Pregunta del equipo por diagramas (Archify)</td><td>`DEPENDENCIAS-EXTERNAS.md`: sumar Archify (Apache-2.0, Node, `npx skills add tt-a1i/archify -g`) como skill externa **opcional** para diagramas HTML de presentación; el Cerebro sigue guardando Mermaid de `radiografiar-codigo.py --mermaid`</td><td><span class="badge ok">aceptada · aplicada 2026-10-30 (DEPENDEN</span></td></tr>
+<tr><td><b>M-006</b></td><td>Auditoría: `desarrollar-asignadas` y `trabajar-con-intellij` (hoy, su modo sin Orca) piden un humano en 3 a 5 turnos por Tarea (base del worktree, motor, tomar la tarjeta, «Aprobar», push, Merge Request) y `desarrollar-a</td><td>Una `DEC-00n` «modo desatendido» en `decisiones.md`: base fija, motor fijo, modo de permisos, carpeta de worktrees, repos, y auto-«Aprobar» sólo con 0 HALLAZGO y 0 `SIN DATOS (no se pudo mirar)`; las skills la leen antes de preguntar</td><td><span class="badge ok">aplicada 2026-11-02: DEC-005 confirmada </span></td></tr>
+<tr><td><b>M-007</b></td><td>Auditoría: los GATEs y 5 skills nombran herramientas de un solo servidor MCP de Azure (`create_work_item`, `manage_work_item_link`, `get_me`)</td><td>Declarar el servidor como `DEC-00n` y mantener la tabla «herramientas por función» de `integracion-azure-mcp/00-index.md` como fuente de los nombres</td><td><span class="badge ">cubierta 2026-11-04 por `DEC-006` (el ta</span></td></tr>
+<tr><td><b>M-008</b></td><td>Auditoría: `cerebro-consultar-cambios` es `git log --author` con otro nombre; `tablero/USO-FUNCIONAL.html` (76 KB) no lo enlaza nadie y se solapa con `GUIA-FUNCIONAL.html`</td><td>Borrar la skill (el hook baja el conteo en `AGENTS.md`, `README.md`, `INSTALACION.md` e `index.md`) y el HTML, fundiendo en la guía lo que tenga de único</td><td><span class="badge ok">aplicada 2026-11-04: `cerebro-consultar-</span></td></tr>
+<tr><td><b>M-009</b></td><td>Auditoría: el GATE de WORKTREE está copiado en 6 archivos y la política de commits (~10, `evidencia/&lt;ID&gt;`, sin squash) en otros 6, con redacciones distintas</td><td>Una fuente por regla (`AGENTS.md` para el GATE; `orquestador-desarrollo.md` §Commits para los commits) y punteros de una línea en los demás</td><td><span class="badge ok">aplicada en parte 2026-11-03/04: una sol</span></td></tr>
+<tr><td><b>M-010</b></td><td>Pedido del equipo: que el esqueleto se pode solo lo obsoleto, sin repetir el sobregiro del proyecto de origen</td><td>A los 60 días de uso real, correr `bin/medir-uso-skills.py --proyecto &lt;núcleo&gt;` y proponer sacar o fusionar lo que no se usó y cuya pregunta cubre otra skill (criterio en `mejorar-ecosistema` §Poda)</td><td><span class="badge ok">aceptada 2026-11-04: corre a los 60 días</span></td></tr>
+<tr><td><b>M-011</b></td><td>Los GATEs de escritura al tablero viven en texto; Claude Code admite hooks `PreToolUse` que bloquean una herramienta de verdad</td><td>Un hook versionado en `.claude/settings.json` que bloquee `create_work_item` / `update_work_item` (y los equivalentes de Jira) salvo que exista una marca de confirmación escrita por la skill en `borrador/`</td><td><span class="badge ">diferida 2026-11-04: con tablero local e</span></td></tr>
+<tr><td><b>M-012</b></td><td>El tablero local sirve para arrancar solo; un proyecto puede pasar a Azure o Jira después</td><td>`bin/exportar-tablero-local.py`: lee `backlog/` y produce, por ítem, el texto pegable o la llamada de `cargar-a-azure` (con el mapeo de la tabla de herramientas por función), sin escribir solo</td><td><span class="badge ">diferida 2026-11-04: hasta que un proyec</span></td></tr>
+<tr><td><b>M-013</b></td><td>QA de punta a punta: `bin/cobertura-e2e.py` cuenta Escenarios con y sin prueba, pero el Doctor no lo muestra</td><td>Una sonda «Cobertura de punta a punta» en `doctor/codigo.py` que corra `cobertura-e2e.py` sobre `qa/` contra el `backlog/` del módulo</td><td><span class="badge ">diferida 2026-11-04: se hace con el prim</span></td></tr>
+</table></section>
+<section id="skills"><h2>08 · Skills (33 canónicas + 11 scoped)</h2><p class="lead">Una pregunta por skill, sin solapes. La fuente es <code>cerebro-digital/configuracion-ia/skills/</code>; los espejos se regeneran con <code>bin/sync-skills</code> y el hook exige que sean idénticos y que cada <code>SKILL.md</code> cumpla la especificación abierta (nombre igual a la carpeta, descripción de hasta 1024 caracteres).</p>
+<h3>Cerebro Digital (9)</h3><div class="cards">
+<div class="card"><h4>cerebro-orquestador</h4><p>Director ÚNICO del ecosistema de agentes de {{PROYECTO}}.</p><div class="pie">187 líneas · 0 referencias</div></div>
+<div class="card"><h4>cerebro-knowledge</h4><p>Directivas de consulta obligatoria del Cerebro Digital (OKF) del proyecto: qué se lee, en qué orden y cómo se cita.</p><div class="pie">34 líneas · 0 referencias</div></div>
+<div class="card"><h4>cerebro-architect-ui</h4><p>Analiza maquetas y prototipos visuales del proyecto (exportaciones de Stitch en HTML o PNG, Figma, HTML a mano) y los traduce a especificaciones técnicas, mapeando CADA control a su regla de negocio del OKF con wikilink.</p><div class="pie">99 líneas · 0 referencias</div></div>
+<div class="card"><h4>cerebro-mockup-design</h4><p>Design system y principios visuales para mockups HTML del proyecto.</p><div class="pie">245 líneas · 0 referencias</div></div>
+<div class="card"><h4>cerebro-ppt-generator</h4><p>Habilidad para generar presentaciones interactivas en HTML del proyecto.</p><div class="pie">45 líneas · 0 referencias</div></div>
+<div class="card"><h4>cerebro-meet-analyst</h4><p>Habilidad para analizar transcripciones de reuniones del equipo del proyecto y extraerlas al OKF con estructura estandarizada.</p><div class="pie">205 líneas · 0 referencias</div></div>
+<div class="card"><h4>cognitive-doc-design</h4><p>Patrones de diseño de documentación cognitiva para borradores funcionales del proyecto.</p><div class="pie">99 líneas · 0 referencias</div></div>
+<div class="card"><h4>engram-memory-protocol</h4><p>Protocolo de persistencia estructurada en Engram (mem_save/mem_search/mem_session_summary).</p><div class="pie">110 líneas · 0 referencias</div></div>
+<div class="card"><h4>disenar-con-stitch</h4><p>Diseñar las pantallas del producto con Google Stitch (por MCP o pegando el prompt): armar el brief desde la ficha del Cerebro (propósito, pasos, reglas, estados, glosario, tokens), generar la pantalla en Stitch, dejar que la pers…</p><div class="pie">69 líneas · 0 referencias</div></div>
+</div>
+<h3>Pipeline Azure DevOps (13)</h3><div class="cards">
+<div class="card"><h4>redactar-tarea</h4><p>Convertir un ticket POBRE (texto suelto, &quot;ver adjunto&quot;, un link, o el ID de una tarjeta de Azure DevOps) en un work item PROFESIONAL, detallado y listo para pegar o crear en el board.</p><div class="pie">234 líneas · 0 referencias</div></div>
+<div class="card"><h4>estimar-story-points</h4><p>Calcular los Puntos de historia (Story Points) de una historia / tarea / habilitador cuando el desarrollo lo hace la IA: el puntaje sale de la COMPLEJIDAD a nivel sistema + el CONSUMO DE TOKENS para resolver el desarrollo y para…</p><div class="pie">121 líneas · 0 referencias</div></div>
+<div class="card"><h4>consultar-backlog</h4><p>(Solo lectura) Consultar y AUDITAR el backlog de Azure DevOps sin escribir nada: responder si una funcionalidad ya tiene historia y dónde está, auditar la COBERTURA (fichas del Cerebro Digital sin ticket, tickets sin documento fu…</p><div class="pie">99 líneas · 0 referencias</div></div>
+<div class="card"><h4>analizar-tareas</h4><p>(Solo análisis, no escribe) Chequear la CONSISTENCIA del conjunto de Tareas que salió de partir una Historia (el paso &quot;analyze&quot;): que los Contratos OpenAPI no se pisen entre Tareas, que cada regla [RN-…] y cada ESCENARIO del Gher…</p><div class="pie">156 líneas · 0 referencias</div></div>
+<div class="card"><h4>auditar-historia</h4><p>(Solo lectura, adversarial) Auditar UNA Historia de usuario ya escrita —el segundo chequeo, hecho por un agente DISTINTO del que la redactó— antes de derivar Tareas de ella: que el Gherkin de los Criterios de aceptación sea VERIF…</p><div class="pie">392 líneas · 0 referencias</div></div>
+<div class="card"><h4>auditar-tarea</h4><p>(Solo lectura, adversarial) Auditar UNA Tarea técnica ya escrita —el segundo chequeo, hecho por un agente DISTINTO del que la redactó— con foco en la lista &quot;Tests a escribir PRIMERO&quot;: que no falte ningún caso (cada validación, ca…</p><div class="pie">459 líneas · 0 referencias</div></div>
+<div class="card"><h4>sincronizar-backlog<span class="badge warn">escribe en el tablero</span></h4><p>Tomar una ficha del Cerebro Digital (cerebro-digital/) y DERIVAR de ella el árbol de tickets de Azure DevOps: Épica → Features → Historias (las Tareas quedan para Dev/planning).</p><div class="pie">274 líneas · 0 referencias</div></div>
+<div class="card"><h4>planificar-lote<span class="badge warn">escribe en el tablero</span></h4><p>(Modo lote / planificación rápida) Derivar en una sola pasada, con agentes en paralelo, las Historias de una ficha del Cerebro, las Tareas de varias Historias, o las dos cosas, con SOLO DOS turnos humanos: el ARRANQUE (alcance +…</p><div class="pie">226 líneas · 0 referencias</div></div>
+<div class="card"><h4>cargar-a-azure<span class="badge warn">escribe en el tablero</span></h4><p>(Avanzada / opcional) Con el MCP de Azure DevOps configurado y un PAT con scope de ESCRITURA, crear o actualizar el work item en el board a partir del ticket que produjo la skill redactar-tarea (create_work_item / update_work_ite…</p><div class="pie">311 líneas · 0 referencias</div></div>
+<div class="card"><h4>tomar-tarea<span class="badge warn">escribe en el tablero</span></h4><p>Antes de ponerse a trabajar una historia/tarea/bug de Azure DevOps, &quot;tomarla&quot;: asignarla a la persona y pasarla a Active, avisando ANTES si ya la tomó otra persona (evita que dos trabajen la misma en paralelo y se desincronicen).</p><div class="pie">62 líneas · 0 referencias</div></div>
+<div class="card"><h4>comentar-tarea<span class="badge warn">escribe en el tablero</span></h4><p>Agregar un comentario a un work item de Azure DevOps (queda en el Historial / Discusión de la tarjeta) y, si hace falta, leer los comentarios existentes.</p><div class="pie">317 líneas · 0 referencias</div></div>
+<div class="card"><h4>desarrollar-asignadas<span class="badge warn">escribe en el tablero</span></h4><p>Revisar el tablero (Azure DevOps por MCP, o el tablero local de archivos según DEC-006), tomar las Tareas asignadas sin dependencias pendientes y desarrollarlas en paralelo: un worktree y un worker por tarjeta, con la misión únic…</p><div class="pie">466 líneas · 1 referencias</div></div>
+<div class="card"><h4>atender-hallazgos</h4><p>Tomar el informe del Doctor y recorrer sus hallazgos UNO POR UNO, en turnos separados, proponiendo el arreglo concreto y esperando la decision del humano en cada caso.</p><div class="pie">145 líneas · 0 referencias</div></div>
+</div>
+<h3>Desarrollo, QA y evolución (10)</h3><div class="cards">
+<div class="card"><h4>arrancar-proyecto</h4><p>Arrancar un proyecto con este template conversando: preguntar en UN solo mensaje lo básico que hace falta (nuevo o existente, nombres, módulo, solo o equipo, tablero, quién sos, dónde está el código), mostrar el plan con los coma…</p><div class="pie">95 líneas · 1 referencias</div></div>
+<div class="card"><h4>desarrollo</h4><p>Punto de entrada ÚNICO para escribir, revisar o migrar código del proyecto —back, front, base de datos, seguridad, entrega—.</p><div class="pie">259 líneas · 29 referencias</div></div>
+<div class="card"><h4>absorber-aplicacion</h4><p>Tomar una aplicación EXISTENTE (con o sin documentación) y absorberla al ecosistema: inventariarla y radiografiarla con scripts (endpoints, entidades, estados, pantallas, reglas candidatas, integraciones, permisos, dependencias,…</p><div class="pie">149 líneas · 0 referencias</div></div>
+<div class="card"><h4>planificar-modernizacion</h4><p>Con el Cerebro ya poblado por absorber-aplicacion, decidir CON EL HUMANO qué se hace con una aplicación existente y dejar el plan listo: compara las estrategias (refactor en el lugar, migración por estrangulador slice por slice,…</p><div class="pie">99 líneas · 0 referencias</div></div>
+<div class="card"><h4>caracterizar-comportamiento</h4><p>Ponerle una RED a una aplicación existente antes de tocarla: armar el corpus de casos de un slice desde la radiografía (bin/armar-corpus.py), completarlo con una persona con datos de prueba y marcadores, grabarlo contra la aplica…</p><div class="pie">94 líneas · 0 referencias</div></div>
+<div class="card"><h4>modernizar-slice</h4><p>Ejecutar UN slice de la modernización decidida en DEC-004, de punta a punta y con barreras: el contrato sacado del código viejo, la construcción por el pipeline normal (Tareas con TDD en el repositorio nuevo, o refactor en el lug…</p><div class="pie">116 líneas · 3 referencias</div></div>
+<div class="card"><h4>disenar-pruebas<span class="badge acento">nueva</span></h4><p>El rol de tester: a partir de una Historia con su Gherkin, armar el plan de pruebas de aceptación: qué Escenarios se automatizan de punta a punta y cuáles quedan exploratorios, los bordes y los datos de prueba (sin datos de perso…</p><div class="pie">81 líneas · 0 referencias</div></div>
+<div class="card"><h4>automatizar-e2e<span class="badge acento">nueva</span></h4><p>El rol de QA automatización: escribir y mantener las pruebas de punta a punta de una Historia con el motor que DEC-003 fija según el tipo de aplicación: Playwright para web y Electron (y para el front de una app de escritorio con…</p><div class="pie">92 líneas · 2 referencias</div></div>
+<div class="card"><h4>mejorar-ecosistema</h4><p>Autocorrección CONSULTADA del ecosistema: cuando la IA detecta que algo está mal o se puede mejorar en la arquitectura, las reglas, una skill, un script o el Cerebro —por un hallazgo del Doctor, un pendiente que se repite, una ve…</p><div class="pie">142 líneas · 0 referencias</div></div>
+<div class="card"><h4>documentar-aplicacion</h4><p>Producir, al cerrar una aplicación o un slice, dos entregables profesionales desde el Cerebro: la GUÍA DE USO para personas (empezar en pocos pasos, cada flujo con pantallas y paso a paso, glosario, preguntas frecuentes) y la DOC…</p><div class="pie">61 líneas · 0 referencias</div></div>
+</div>
+<h3>Externa, vendorizada (1)</h3><div class="cards">
+<div class="card"><h4>archify</h4><p>Create validated architecture, workflow, sequence, data-flow, lifecycle/state, ERD, class, tree, timeline, and waterfall diagrams as explorable standalone HTML with dark/light themes, motion and image/SVG/WebM export.</p><div class="pie">138 líneas · 9 referencias</div></div>
+</div>
+<h3>Skills scoped de los repositorios de código</h3><div class="dos">
+<div><h4><code>back/.claude/skills</code> (6)</h4><table><tr><th>Skill</th><th>Qué contesta</th></tr>
+<tr><td><code>armar-swagger</code></td><td>(Repo back · desarrollo) Consolidar los fragmentos de Contrato OpenAPI que cada Tarea del tablero dejó escritos, en un único openapi.yaml del slice; correr Spectral (lin…</td></tr>
+<tr><td><code>auditar-codigo</code></td><td>(Repos de codigo · desarrollo) Correr los CHEQUEOS DE ENTREGA sobre un cambio antes del Merge Request: lo que es propio de este pipeline y ningun revisor generico puede…</td></tr>
+<tr><td><code>consultar-cerebro</code></td><td>(Repo back · desarrollo) Traer, SOLO si se pide explícitamente, UNA ficha del Cerebro Digital (repo de conocimiento) para tener contexto de negocio mientras se desarroll…</td></tr>
+<tr><td><code>diagnosticar-repo</code></td><td>Se invoca SOLO de forma explicita (/diagnosticar-repo); NO se carga por contexto y nada del ciclo de desarrollo la dispara.</td></tr>
+<tr><td><code>guiar-tdd</code></td><td>(Repo back · desarrollo) Gobernar el ciclo TDD Red-Green-Refactor sobre la lista &quot;Tests a escribir PRIMERO&quot; que dejó la Tarea del tablero: primero el test que falla (roj…</td></tr>
+<tr><td><code>verificar-tdd</code></td><td>(Repo back · desarrollo) Auditar la evidencia del ciclo TDD de una Tarea: que cada ítem de la lista &quot;Tests a escribir PRIMERO&quot; tenga su prueba de rojo (el test fallando…</td></tr>
+</table></div>
+<div><h4><code>front/.claude/skills</code> (5)</h4><table><tr><th>Skill</th><th>Qué contesta</th></tr>
+<tr><td><code>auditar-codigo</code></td><td>(Repos de codigo · desarrollo) Correr los CHEQUEOS DE ENTREGA sobre un cambio antes del Merge Request: lo que es propio de este pipeline y ningun revisor generico puede…</td></tr>
+<tr><td><code>consultar-cerebro</code></td><td>(Repos de front · desarrollo) Traer, SOLO si se pide explícitamente, UNA ficha del Cerebro Digital (repo de conocimiento) para tener contexto de negocio mientras se desa…</td></tr>
+<tr><td><code>diagnosticar-repo</code></td><td>Se invoca SOLO de forma explicita (/diagnosticar-repo); NO se carga por contexto y nada del ciclo de desarrollo la dispara.</td></tr>
+<tr><td><code>guiar-tdd</code></td><td>(Repos de front · desarrollo) Gobernar el ciclo TDD Red-Green-Refactor sobre la lista &quot;Tests a escribir PRIMERO&quot; que dejó la Tarea del tablero: primero el test que falla…</td></tr>
+<tr><td><code>verificar-tdd</code></td><td>(Repos de front · desarrollo) Auditar la evidencia del ciclo TDD de una Tarea: que cada ítem de la lista &quot;Tests a escribir PRIMERO&quot; tenga su prueba de rojo (el test fall…</td></tr>
+</table></div>
+</div><p>El método de desarrollo vive en <code>desarrollo/references/metodo/</code> (28 documentos): <code>accesibilidad.md</code>, <code>adoptar-proyecto-existente.md</code>, <code>armar-la-suite.md</code>, <code>arrancar-funcionalidad.md</code>, <code>arreglar-un-bug.md</code>, <code>code-review.md</code>, <code>contrato-openapi.md</code>, <code>crear-endpoint.md</code>, <code>dependencias-y-config.md</code>, <code>depurar.md</code>, <code>entender-codigo-ajeno.md</code>, <code>entregar-a-produccion.md</code>, <code>incidentes.md</code>, <code>ingenieria-inversa.md</code>, <code>merge-request.md</code>, <code>migracion-de-base.md</code>, <code>observabilidad.md</code>, <code>pruebas-de-aceptacion.md</code>, <code>ramas-y-commits.md</code>, <code>refactor-y-migracion.md</code>, <code>refactor.md</code>, <code>rendimiento.md</code>, <code>seguridad-y-datos-sensibles.md</code>, <code>simular-api-desde-el-contrato.md</code>, <code>tdd-ciclo-y-evidencia.md</code>, <code>tdd-stack-back.md</code>, <code>tdd-stack-front.md</code>, <code>tests-unitarios.md</code>.</p></section>
+<section id="scripts"><h2>09 · Scripts determinísticos (32)</h2><p class="lead">Python, biblioteca estándar, salida en tres estados: 0 OK, 1 HALLAZGO, 2 SIN DATOS. Lo que cuentan no lo discute el modelo; lo que no corrió es SIN DATOS.</p><table><tr><th>Script</th><th>Qué hace</th></tr>
+<tr><td><code>bin/adoptar-proyecto.py</code></td><td>Enchufa un proyecto que YA existe (una carpeta en el Escritorio, con o sin Claude Code) a este nucleo, en un comando</td></tr>
+<tr><td><code>bin/analizar-tareas.py</code></td><td>Analisis MECANICO del SET de Tareas de una Historia: lo que de analizar-tareas es CONTEO</td></tr>
+<tr><td><code>bin/armar-corpus.py</code></td><td>Arma el ESQUELETO del corpus de paridad de un slice a partir de la radiografia. No inventa valores</td></tr>
+<tr><td><code>bin/armar-e2e.py</code></td><td>Arma el ESQUELETO de las pruebas de punta a punta de UNA Historia, a partir de su Gherkin. No inventa pasos</td></tr>
+<tr><td><code>bin/armar-mision.py</code></td><td>Arma la MISION de un worker o de un verificador, siempre con la misma plantilla. SOLO LECTURA del Cerebro</td></tr>
+<tr><td><code>bin/arrancar-proyecto.py</code></td><td>Arranca un proyecto con el template en UN comando, con las respuestas que la skill arrancar-proyecto ya pregunto</td></tr>
+<tr><td><code>bin/auditar-diff.py</code></td><td>La parte MECANICA de auditar-codigo: secretos y datos personales en el diff, y elegibilidad</td></tr>
+<tr><td><code>bin/auditar-historia.py</code></td><td>Auditoria MECANICA de una Historia de usuario: lo que de auditar-historia es CONTEO</td></tr>
+<tr><td><code>bin/auditar-tarea.py</code></td><td>Auditoria MECANICA de UNA Tarea: lo que se cuenta, lo cuenta este script</td></tr>
+<tr><td><code>bin/cobertura-e2e.py</code></td><td>Matriz Historia -&gt; Escenario -&gt; prueba de punta a punta: que Escenarios tienen prueba automatizada, cuales solo</td></tr>
+<tr><td><code>bin/datos-cierre.py</code></td><td>Los DATOS DUROS del comentario de cierre de una Tarea, leidos del repositorio. SOLO LECTURA</td></tr>
+<tr><td><code>bin/derivar-a-tablero-local.py</code></td><td>Baja una ficha del Cerebro al TABLERO LOCAL, 1:1 contra su bloque &#x27;## Derivacion a backlog&#x27;. Sin MCP</td></tr>
+<tr><td><code>bin/derivar-arbol.py</code></td><td>Deriva, de forma DETERMINISTA, el arbol Epica -&gt; Feature -&gt; Historia de una ficha del Cerebro,</td></tr>
+<tr><td><code>bin/esquema-base.py</code></td><td>Esquema REAL de una base de datos, a Markdown y Mermaid. SOLO LECTURA, nunca filas de datos</td></tr>
+<tr><td><code>bin/gate-worktree.py</code></td><td>GATE de WORKTREE, en datos duros: lo que hay que mostrar ANTES de crear un worktree. SOLO LECTURA</td></tr>
+<tr><td><code>bin/generar-documentacion.py</code></td><td>Genera la documentacion de la APLICACION (no del esqueleto) a partir del Cerebro: la guia de uso para personas</td></tr>
+<tr><td><code>bin/generar-informe.py</code></td><td>Genera INFORME-ESQUELETO.html: el informe visual del esqueleto (que tiene, como fluye, que mide, que falta)</td></tr>
+<tr><td><code>bin/instalar.py</code></td><td>Instalador del Cerebro: lo que hay que hacer UNA vez despues de clonar, y cada vez que se actualiza</td></tr>
+<tr><td><code>bin/instanciar.py</code></td><td>Instancia el TEMPLATE ESTRUCTURA IA para un proyecto concreto. Solo biblioteca estandar</td></tr>
+<tr><td><code>bin/inventariar-codigo.py</code></td><td>Inventario DETERMINISTA de una aplicacion existente, para absorberla al Cerebro. SOLO LECTURA</td></tr>
+<tr><td><code>bin/lote.py</code></td><td>Modo lote (skill planificar-lote): la parte MECANICA, hecha siempre igual</td></tr>
+<tr><td><code>bin/mapa-modernizacion.py</code></td><td>Mapa de avance de una modernizacion (refactor o migracion) por slice, y la BARRERA del corte de trafico</td></tr>
+<tr><td><code>bin/medir-uso-skills.py</code></td><td>Mide que skills del ecosistema se USAN de verdad, leyendo las transcripciones locales de Claude Code. SOLO LECTURA</td></tr>
+<tr><td><code>bin/paridad.py</code></td><td>Arnes de PARIDAD: graba lo que contesta la aplicacion VIEJA (el oraculo) y lo compara con lo que contesta la NUEVA</td></tr>
+<tr><td><code>bin/radiografiar-codigo.py</code></td><td>Radiografia DETERMINISTA de una aplicacion existente: los HECHOS del codigo, con archivo:linea. SOLO LECTURA</td></tr>
+<tr><td><code>bin/registrar-sesion.py</code></td><td>Registra UNA sesion de trabajo con Claude Code como una linea de metricas en cerebro-digital/configuracion-ia/sesiones.jsonl</td></tr>
+<tr><td><code>bin/relevar-config-ia.py</code></td><td>Releva la configuracion de IA que YA tiene un proyecto (Claude Code, Gemini, Cursor, Copilot, opencode)</td></tr>
+<tr><td><code>bin/tablero-local.py</code></td><td>Tablero LOCAL: el backlog como archivos markdown en el Cerebro, sin MCP ni servidor. Para trabajar solo</td></tr>
+<tr><td><code>bin/tendencia.py</code></td><td>Dice en una frase si el ecosistema viene MEJOR o PEOR, comparando las ultimas sesiones con las anteriores</td></tr>
+<tr><td><code>bin/verificar-sello.py</code></td><td>Dice si el sello de auditar-tarea / auditar-historia sigue VIGENTE</td></tr>
+<tr><td><code>bin/verificar-skills.py</code></td><td>Verifica cada SKILL.md contra la especificacion abierta de Agent Skills y los limites de Claude Code</td></tr>
+<tr><td><code>bin/verificar-tdd.py</code></td><td>La parte MECANICA de verificar-tdd: lee el historial de git y dice, por item, si hubo rojo antes</td></tr>
+</table><p>Con versión <code>.sh</code> y <code>.ps1</code>: <code>actualizar</code>, <code>analizar-tareas</code>, <code>auditar-historia</code>, <code>auditar-tarea</code>, <code>extraer-reunion</code>, <code>lote</code>, <code>probar-reglas</code>, <code>sync-agents</code>, <code>sync-skills</code>, <code>verificar-sello</code>.</p>
+<h3>Pruebas de los scripts</h3><table><tr><th>Suite</th><th>Resultado</th><th>Detalle</th></tr>
+<tr><td><code>probar-adoptar-proyecto.py</code></td><td><span class="badge ok">OK</span></td><td>8 de 8 casos</td></tr>
+<tr><td><code>probar-analizar-tareas.py</code></td><td><span class="badge ok">OK</span></td><td>47 de 47 casos</td></tr>
+<tr><td><code>probar-armar-corpus.py</code></td><td><span class="badge ok">OK</span></td><td>10 de 10 casos</td></tr>
+<tr><td><code>probar-armar-e2e.py</code></td><td><span class="badge ok">OK</span></td><td>14 de 14 casos</td></tr>
+<tr><td><code>probar-armar-mision.py</code></td><td><span class="badge ok">OK</span></td><td>24 de 24 casos</td></tr>
+<tr><td><code>probar-arrancar-proyecto.py</code></td><td><span class="badge ok">OK</span></td><td>10 de 10 casos</td></tr>
+<tr><td><code>probar-auditar-historia.py</code></td><td><span class="badge ok">OK</span></td><td>55 de 55 casos</td></tr>
+<tr><td><code>probar-auditar-tarea.py</code></td><td><span class="badge ok">OK</span></td><td>70 de 70 casos</td></tr>
+<tr><td><code>probar-cobertura-e2e.py</code></td><td><span class="badge ok">OK</span></td><td>6 de 6 casos</td></tr>
+<tr><td><code>probar-derivar-a-tablero-local.py</code></td><td><span class="badge ok">OK</span></td><td>9 de 9 casos</td></tr>
+<tr><td><code>probar-derivar-arbol.py</code></td><td><span class="badge ok">OK</span></td><td>8 de 8 casos</td></tr>
+<tr><td><code>probar-esquema-base.py</code></td><td><span class="badge ok">OK</span></td><td>15 de 15 casos</td></tr>
+<tr><td><code>probar-generar-documentacion.py</code></td><td><span class="badge ok">OK</span></td><td>14 de 14 casos</td></tr>
+<tr><td><code>probar-generar-informe.py</code></td><td><span class="badge ok">OK</span></td><td>10 de 10 casos</td></tr>
+<tr><td><code>probar-instalar.py</code></td><td><span class="badge ok">OK</span></td><td>8 de 8 casos</td></tr>
+<tr><td><code>probar-lote.py</code></td><td><span class="badge ok">OK</span></td><td>104 de 104 casos</td></tr>
+<tr><td><code>probar-mapa-modernizacion.py</code></td><td><span class="badge ok">OK</span></td><td>20 de 20 casos</td></tr>
+<tr><td><code>probar-medir-uso-skills.py</code></td><td><span class="badge ok">OK</span></td><td>10 de 10 casos</td></tr>
+<tr><td><code>probar-paridad.py</code></td><td><span class="badge ok">OK</span></td><td>21 de 21 casos</td></tr>
+<tr><td><code>probar-radiografiar.py</code></td><td><span class="badge ok">OK</span></td><td>23 de 23 casos</td></tr>
+<tr><td><code>probar-registrar-sesion.py</code></td><td><span class="badge ok">OK</span></td><td>9 de 9 casos</td></tr>
+<tr><td><code>probar-reglas.py</code></td><td><span class="badge ">no corre acá</span></td><td>mide a un modelo con su CLI; se corre a mano</td></tr>
+<tr><td><code>probar-relevar-config-ia.py</code></td><td><span class="badge ok">OK</span></td><td>11 de 11 casos</td></tr>
+<tr><td><code>probar-scripts-git.py</code></td><td><span class="badge ok">OK</span></td><td>33 de 33 casos</td></tr>
+<tr><td><code>probar-tablero-local.py</code></td><td><span class="badge ok">OK</span></td><td>20 de 20 casos</td></tr>
+<tr><td><code>probar-tendencia.py</code></td><td><span class="badge ok">OK</span></td><td>8 de 8 casos</td></tr>
+<tr><td><code>probar-verificar-sello.py</code></td><td><span class="badge ok">OK</span></td><td>19 de 19 casos</td></tr>
+<tr><td><code>probar-verificar-skills.py</code></td><td><span class="badge ok">OK</span></td><td>13 de 13 casos</td></tr>
+</table><p><b>27 suites en OK, 599 casos.</b></p></section>
+<section id="doctor"><h2>10 · El Doctor</h2><p class="lead"><code>doctor/doctor.py</code> revisa el repositorio en reposo (13 sondas) y, si hay código clonado en back/ o front/, el código (10 sondas). Es periódico y manual, nunca por Tarea; sus hallazgos se atienden uno por uno con <code>atender-hallazgos</code>. También existe <code>bin/verificar-skills.py</code> para la especificación de las skills y <code>bin/instalar.py</code> para el estado de un clone.</p>
+<table><tr><th>#</th><th>Sonda</th><th>Qué mira</th><th>Hoy</th></tr>
+<tr><td>1</td><td><b>Guardarraíles</b></td><td>Que el hook esté activo en este clone y que tenga sus cinco guardas. La guarda de BOM **exime a los `.ps1`**: PowerShell 5.1 necesita el BOM para leer UTF-8, así que ahí no es un descuido</td><td><span class="badge bad">HALLAZGO</span><br><span style="color:var(--muted);font-size:12px">El hook existe pero NO esta activado en este clone: corre `git config core.hooksPath .githooks`.</span></td></tr>
+<tr><td>2</td><td><b>Espejos de skills</b></td><td>Que `.agents/skills/` y `.claude/skills/` sean idénticos a la fuente</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">Los dos espejos coinciden con la fuente (33 skills).</span></td></tr>
+<tr><td>3</td><td><b>Conteos declarados</b></td><td>Que cuando un documento dice &quot;23 skills&quot; haya 23, **y que las nombre a todas**</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">Hay 33 skills en disco.</span></td></tr>
+<tr><td>4</td><td><b>Referencias a archivos</b></td><td>Rutas que las skills citan en su texto y que no existen</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">102 ruta(s) citadas en 43 skills. Todas resuelven. No se miraron 1 SKILL.md de skills vendorizadas (archify): son de terceros, declaradas en DEPENDENC</span></td></tr>
+<tr><td>5</td><td><b>Wikilinks</b></td><td>Enlaces `[[x]]` que no resuelven a ningún archivo</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">404 archivos .md escaneados (161 son copia byte identica de otro -los espejos- y se revisaron una sola vez); ningun wikilink roto.</span></td></tr>
+<tr><td>6</td><td><b>Estructura</b></td><td>Qué existe hoy del árbol prometido en los README</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">6 carpeta(s) del arbol prometido. Sin codigo clonado todavia: back/, front/ — por eso las sondas de codigo no miden sobre esa(s) carpeta(s).</span></td></tr>
+<tr><td>7</td><td><b>Asimetría back/front</b></td><td>Qué skill **existe** de un lado y no del otro</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">Simetricos, salvo 1 asimetria(s) declarada(s).</span></td></tr>
+<tr><td>8</td><td><b>Gemelas back vs. front</b></td><td>De las que existen en los dos, si **divergieron en estructura** — una perdió una sección que la otra tiene</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">5 skill(s) viven en los dos repositorios. Todas tienen las mismas secciones.</span></td></tr>
+<tr><td>9</td><td><b>Andamiaje obsoleto</b></td><td>`.gitkeep` en carpetas que ya tienen contenido</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">No hay archivos .gitkeep en el repositorio.</span></td></tr>
+<tr><td>10</td><td><b>Costo de contexto</b></td><td>Tokens por skill, en dos cifras (ver abajo)</td><td><span class="badge bad">HALLAZGO</span><br><span style="color:var(--muted);font-size:12px">33 skills · ~7152 tokens pesan SIEMPRE (las descripciones) · ~108891 tokens si se cargaran todas enteras, que no pasa. Grandes: auditar-tarea, desarro</span></td></tr>
+<tr><td>11</td><td><b>Deuda declarada</b></td><td>Marcas de pendiente, y qué archivos con pendientes nadie toca hace meses</td><td><span class="badge bad">HALLAZGO</span><br><span style="color:var(--muted);font-size:12px">314 marca(s) de pendiente en la documentacion (209 archivo(s) son copia byte identica de otro -los espejos de skills- y se contaron una sola vez). No </span></td></tr>
+<tr><td>12</td><td><b>Cómo venimos</b></td><td>Si los hallazgos **subieron o bajaron** respecto de la corrida anterior. Sale del histórico, y no corre con `--solo`</td><td><span class="badge ">SIN DATOS</span><br><span style="color:var(--muted);font-size:12px">0 de 2 carpeta(s) con codigo. Mientras falte codigo, estas nueve sondas quedan dormidas: limites del diseno, contrato declarado vs implementado, la co</span></td></tr>
+<tr><td>13</td><td><b>Autocontrol del informe</b></td><td>El Doctor revisándose a sí mismo (ver abajo)</td><td><span class="badge bad">HALLAZGO</span><br><span style="color:var(--muted);font-size:12px">Contra la corrida del 04-11-2026. 0 mejoraron · 1 empeoraron · 11 sin cambios. Empeoraron: Costo de contexto por skill.</span></td></tr>
+<tr><td>14</td><td><b>Repos conectados</b></td><td>Qué repositorios están clonados hoy, con qué stack y qué slices. Corre **siempre**: es la que explica a las otras ocho</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">41 chequeos de coherencia sobre las otras sondas. todos pasan.</span></td></tr>
+<tr><td>15</td><td><b>Límites del diseño</b></td><td>En el back, las reglas de dependencia del monolito modular (DEC-002): adentro del módulo `api → application, domain` · `application → domain` · `infra → application, domain` · `domain →` nada · `exceptions/` la usan toda</td><td>—</td></tr>
+<tr><td>16</td><td><b>Contrato vs. código</b></td><td>Que los endpoints del `openapi.yaml` y los del código digan lo mismo</td><td>—</td></tr>
+<tr><td>17</td><td><b>La costura back ↔ front</b></td><td>Que los mocks del front y los tests de API del back estén hablando del **mismo** `openapi.yaml`. Es el único punto donde los dos repositorios se tocan</td><td>—</td></tr>
+<tr><td>18</td><td><b>Trazabilidad test ↔ Tarea</b></td><td>Que cada archivo de test diga a qué Tarea del tablero pertenece. El cruce completo contra la lista de «Tests a escribir PRIMERO» lo hace el **pedido** del panel, porque esa lista vive en Azure y el Doctor no sale de la m</td><td>—</td></tr>
+<tr><td>19</td><td><b>Duplicación entre slices</b></td><td>Bloques de 10 líneas repetidos en dos slices distintos</td><td>—</td></tr>
+<tr><td>20</td><td><b>Dependencias sin usar</b></td><td>Paquetes declarados que ningún archivo importa</td><td>—</td></tr>
+<tr><td>21</td><td><b>Puerta de seguridad</b></td><td>Que SAST esté en el pipeline, que **frene** la entrega, que las supresiones traigan su motivo, y que no haya credenciales escritas</td><td>—</td></tr>
+<tr><td>22</td><td><b>Puerta de calidad</b></td><td>Linter, análisis estático y cobertura: **declarados** y, sobre todo, **exigidos por el build**</td><td>—</td></tr>
+<tr><td>23</td><td><b>Prácticas y patrones</b></td><td>Un puñado corto de cosas que el linter no mira y cuestan caro</td><td>—</td></tr>
+</table>
+<p class="lead">En la carpeta del template, «Guardarraíles» da HALLAZGO porque no es un repositorio git todavía, y «Tamaño» y «Deuda declarada» son informativas. En una instancia clonada con el instalador corrido, las tres dan OK o informan.</p>
+</section>
+<section id="instalacion"><h2>11 · Instalación e instanciación</h2><svg viewBox="0 0 906 218" class="diagrama" role="img" aria-label="flujo">
+<defs><marker id="f" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="flecha"/></marker></defs>
+<rect x="10" y="10" width="196" height="66" rx="10" class="caja "/>
+<text x="108" y="37" text-anchor="middle" class="caja-t">1 · Copiar</text>
+<text x="108" y="58" text-anchor="middle" class="caja-s">la carpeta del template, renombrarla</text>
+<line x1="206" y1="43" x2="238" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="240" y="10" width="196" height="66" rx="10" class="caja acento"/>
+<text x="338" y="37" text-anchor="middle" class="caja-t">2 · Instanciar</text>
+<text x="338" y="58" text-anchor="middle" class="caja-s">bin/instanciar.py: placeholders, módulo, espejos, fechas</text>
+<line x1="436" y1="43" x2="468" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="470" y="10" width="196" height="66" rx="10" class="caja acento"/>
+<text x="568" y="37" text-anchor="middle" class="caja-t">3 · git init + instalar</text>
+<text x="568" y="58" text-anchor="middle" class="caja-s">bin/instalar.py: hook, agentes, espejos, spec</text>
+<line x1="666" y1="43" x2="698" y2="43" class="linea" marker-end="url(#f)"/>
+<rect x="700" y="10" width="196" height="66" rx="10" class="caja "/>
+<text x="798" y="37" text-anchor="middle" class="caja-t">4 · Completar el Cerebro</text>
+<text x="798" y="58" text-anchor="middle" class="caja-s">contexto, DEC-002/003/005, tablero, autores</text>
+<path d="M798,76 V94 H108 V111" class="linea" fill="none" marker-end="url(#f)"/>
+<rect x="10" y="114" width="196" height="66" rx="10" class="caja "/>
+<text x="108" y="141" text-anchor="middle" class="caja-t">5 · MCP por máquina</text>
+<text x="108" y="162" text-anchor="middle" class="caja-s">Azure DevOps, GitLab; opcional Engram, Archify</text>
+<line x1="206" y1="147" x2="238" y2="147" class="linea" marker-end="url(#f)"/>
+<rect x="240" y="114" width="196" height="66" rx="10" class="caja "/>
+<text x="338" y="141" text-anchor="middle" class="caja-t">6 · Verificar</text>
+<text x="338" y="162" text-anchor="middle" class="caja-s">doctor + probar-*.py + hook</text>
+<line x1="436" y1="147" x2="468" y2="147" class="linea" marker-end="url(#f)"/>
+<rect x="470" y="114" width="196" height="66" rx="10" class="caja suave"/>
+<text x="568" y="141" text-anchor="middle" class="caja-t">7 · Primera ficha</text>
+<text x="568" y="162" text-anchor="middle" class="caja-s">plantilla-ficha-flujo → sincronizar-backlog</text>
+</svg>
+<pre>python -I bin/instanciar.py --proyecto "Gestión de Reservas" --producto "ReservaWeb" --organizacion "Acme" --modulo reservas --azure-org acme-devops --azure-proyecto "Reservas" --azure-team "Reservas Team"
+git init
+python -I bin/instalar.py            # --con-archify para sumar Archify (opcional, Node)
+bash doctor/bin/doctor.sh            # o .ps1
+for t in bin/probar-*.py; do python -B "$t"; done</pre>
+<p>Quien clona después corre sólo <code>python -I bin/instalar.py</code>. Guía completa: <code>COMO-USAR-ESTE-TEMPLATE.md</code> e <code>INSTALACION.md</code>.</p></section>
+<section id="bitacora"><h2>12 · Bitácora</h2><ul class="timeline">
+<li><time>2026-10-22</time><b>Nace el template</b>Ingeniería inversa del proyecto de origen (rama develop): Cerebro OKF, 5 agentes, 26 skills, toolkit de Azure DevOps, Doctor, hook, scripts. Sin negocio ni lenguajes; placeholders e instanciador.</li>
+<li><time>2026-10-30</time><b>Vuelta 1 — determinismo y evolución</b>Seis scripts nuevos (gate-worktree, verificar-tdd, auditar-diff, datos-cierre, derivar-arbol, inventariar-codigo); skills absorber-aplicacion (refactor o migración, DEC-004) y mejorar-ecosistema (autocorrección consultada, mejoras.md, regla 8); carpeta qa/ y método de pruebas de aceptación; «Modo de pruebas» por Tarea; paso 7-bis de retroalimentación al Cerebro; pipeline .gitlab-ci.yml.</li>
+<li><time>2026-10-30</time><b>Vuelta 2 — el Cerebro aprende con la aplicación</b>Cuarto pilar aplicacion/ (mapa, aprendizajes AP-nnn, deuda DT-nnn); verificar-skills.py contra la especificación abierta de Agent Skills (ocho descripciones acortadas; lo corre el hook); instalador bin/instalar.py; bloque «Para DEC-004» en el inventario; notas de carga por herramienta corregidas con la documentación oficial; propuestas M-001 a M-003.</li>
+<li><time>2026-10-30</time><b>Vuelta 3 — ingeniería inversa</b>radiografiar-codigo.py (endpoints, entidades, estados, pantallas, reglas candidatas, integraciones, permisos, dependencias; cada hecho con archivo:línea; --mermaid dibuja módulos y tablas); método ingenieria-inversa.md (siete fuentes, marcas CONFIRMADO/INFERIDO/HUECO, evidencia por regla, matriz de cobertura, modo sólo documentar).</li>
+<li><time>2026-10-30</time><b>Vuelta 4 — auditoría completa</b>Dos auditores en paralelo (skills de desarrollo; Cerebro, pipeline y docs). Arreglos: dos clases de SIN DATOS; bloque canónico del veredicto; armar-mision.py (misión única para Orca e IntelliJ); verificar-tdd.py --modo; auditar-codigo operativa y sin solapes; 5-bis con code-review.md en cualquier motor; DoD en una sola fuente; Engram condicional; restos del origen limpiados; CI sin probar-reglas; Gemini CLI en la guía del MCP; instanciar.py fija last_updated. Propuestas M-004 a M-009.</li>
+<li><time>2026-10-30</time><b>Vuelta 5 — modo desatendido, Archify e informe</b>DEC-005 «modo desatendido» como borrador a confirmar y el GATE de WORKTREE acepta una autorización escrita; Archify declarado como herramienta externa opcional (instalar.py --con-archify); este informe, generado por bin/generar-informe.py.</li>
+<li><time>2026-11-02</time><b>Vuelta 6 — modo solo, tablero local y fusión</b>El template se instancia en modo solo o equipo (DEC-006, se pregunta en cada proyecto); tablero local en archivos (bin/tablero-local.py) con los mismos GATEs; DEC-005 confirmada para el modo solo (Claude único, verificación por otro agente del mismo motor); DEC-002 confirmada para cualquier lenguaje; las dos skills de orquestación fusionadas en desarrollar-asignadas (modo sin Orca en references/sin-orca.md); Archify vendorizada con su licencia; adopción de proyectos que ya usan IA (relevar-config-ia.py + adoptar-proyecto-existente.md).</li>
+<li><time>2026-11-02</time><b>Vuelta 7 — automejora, adopción en un comando, tablero genérico</b>Señales de automejora con las herramientas de Claude Code (/doctor, /doctor prompt-audit, /usage, auto memory, skill-creator con evals) y el script bin/medir-uso-skills.py (uso real de cada skill desde las transcripciones locales); criterio de poda y ritual mensual en mejorar-ecosistema; bin/adoptar-proyecto.py enchufa una carpeta existente al núcleo en un comando; archify ruteada para todo diagrama; el modo equipo acepta Azure, Jira u otro tablero por MCP.</li>
+<li><time>2026-11-02</time><b>Vuelta 8 — la puerta de entrada</b>Skill arrancar-proyecto: «arrancá un proyecto» o «agarrá el proyecto X» pregunta lo básico en un mensaje, muestra el plan y con el «sí» corre bin/arrancar-proyecto.py (instanciar, git init, instalar, enchufar, informe) en orden fijo e idempotente. bin/derivar-a-tablero-local.py baja una ficha validada al tablero local 1:1, sin MCP. Propuestas M-011 (hook duro de escrituras al tablero) y M-012 (exportar el tablero local a Azure o Jira).</li>
+<li><time>2026-11-02</time><b>Vuelta 9 — Stitch y los entregables de cierre</b>Google Stitch como herramienta de diseño UX/UI por MCP (integracion-stitch-mcp/00-index.md) y la skill disenar-con-stitch: brief desde la ficha, generar, pulir en Stitch, exportar a entregables/disenos/ como maqueta vigente, tokens al design system, bajada al front por cerebro-architect-ui. Skill documentar-aplicacion con bin/generar-documentacion.py: guía de uso (empezar en pocos pasos, flujos con pantallas y paso a paso dibujado, glosario, FAQ) y documentación técnica y funcional (14 secciones con grafo de módulos, modelo de datos, API, reglas, decisiones, bitácora, diagramas de Archify).</li>
+<li><time>2026-11-03</time><b>Vuelta 10 — ensayo multiagente y postmortem</b>Un aplicativo descartable (reservas, Python puro, tablero local, modo solo) corrió el flujo real de punta a punta con agentes en paralelo: worker con guiar-tdd, verificador con el bloque VEREDICTO, absorción de un proyecto real en sólo lectura y un auditor en frío de las skills. Lo que el ensayo rompió y se arregló: commits chore(firma) y test(verde-de-entrada) para el rojo en la aserción y el ítem que nace verde; la misión ya no carga endpoints ni contratos a una Tarea sin API ni duplica el Gherkin; N/A en los controles que la Tarea no toca; la radiografía lee SQL y Mermaid dentro de .md y deja de ver estado= en diccionarios; el relevamiento saca comandos en línea; adoptar detecta un proyecto sin código y manda al flujo de documentos. Lo que el auditor en frío cerró: la fusión de desarrollar-asignadas terminada (dos modos, un flujo; verificador según DEC-005; tablero según DEC-006), una sola tabla «Quién contesta qué» que las skills citan, las ocho notas del tablero local reducidas a una línea, cerebro-mockup-design ya no se carga con cualquier HTML, y verificar-skills.py frena las frases muertas.</li>
+<li><time>2026-11-03</time><b>Vuelta 11 — estructura y flujo de modernización</b>Carpetas con los nombres de hoy: tablero/ (antes 04-integracion-azure-devops), borrador/ (antes output), documentos/ (antes funcionales); back/ y front/ siguen separados porque sus convenciones difieren. El flujo de una app existente deja de ser una sola skill: absorber-aplicacion (ingeniería inversa) → planificar-modernizacion (estrategias comparadas con lo medido, curaduría de reglas migrar/descartar/decide el humano, DEC-004, slices) → caracterizar-comportamiento (corpus desde la radiografía, golden firmado contra la vieja, test(caracterizacion)) → modernizar-slice (contrato del código viejo, construcción, paridad, corte sólo con la barrera en OK, apagado). Cuatro scripts nuevos con sus pruebas: esquema-base.py, armar-corpus.py, paridad.py y mapa-modernizacion.py. Estructura tomada de Fig, Reversa, el pack legacy-modernization y tbls; nada copiado. Postmortem en frío del 2026-11-04: la barrera del corte aceptaba un resultado de paridad escrito a mano; ahora paridad.py firma también el resultado, registra los campos volátiles y quién aceptó cada diferencia, rechaza aprobadores que son agentes, y mapa-modernizacion.py corte verifica las dos firmas, abre el golden que cita la tabla y prueba el refactor en el lugar con el bloque VEREDICTO. armar-corpus.py numera CP-nn, cubre los cinco tipos de regla y cuenta con --verificar qué endpoint o regla quedó sin caso; el VEREDICTO tiene el renglón 5-quinquies paridad.</li>
+<li><time>2026-11-04</time><b>Vuelta 12 — para una sola persona</b>Decisión del dueño: el template es para una persona, a lo sumo un segundo dev; él hace lo funcional, QA y UX/UI. Se eliminó lo que sólo sirve con varias personas: las skills cerebro-sync-knowledge, cerebro-auditor y cerebro-consultar-cambios, los scripts enviar-notas y actualizacion-semanal, el agente cerebro-auditor, autores-autorizados.txt y reporte-auditoria.md. Simplificado para modo solo: la revisión del Merge Request es el veredicto del verificador más el Aprobar (el MR es opcional), el GATE de NIVEL no se pregunta, sprints y tarjeta congelada aplican sólo en modo equipo, y el modo equipo existe sólo si al arrancar se dice que habrá equipo. Al arrancar un proyecto se pregunta además con qué se va a hacer (DEC-003), y lo que no se sabe queda a definir. Mejoras: M-008 aplicada; M-009 aplicada en las tablas únicas; M-007 cubierta por DEC-006; M-001 descartada (rompería el ruteo conversacional); M-010 aceptada para los 60 días; M-011 y M-012 diferidas hasta que un proyecto use un tablero por MCP.</li>
+<li><time>2026-11-04</time><b>Vuelta 13 — ensayo de front y base de datos</b>Segundo ensayo con un aplicativo descartable: back Python + SQLite con migraciones (V2 expandir, cancelar, listar activas) y front TypeScript + Vitest + jsdom (pantalla de lista con estado). Cuatro agentes con contexto limpio: dos workers (11 y 15 commits rojo → verde, suites en verde, typecheck limpio) y dos verificadores (cero bloqueantes, cada rojo verificado en su aserción, control de migraciones con esquema-base.py). Cincuenta y cuatro fricciones reportadas y arregladas en el template: la misión del front ya no copia las convenciones del back y reporta las reglas R1..R12; una Tarea que toca migraciones lleva el método y el control de migraciones; la guía del stack en plantilla no se manda a leer y los archivos vacíos se marcan; AGENTS.md se cita por sección; «pendiente a confirmar» es la vía por defecto; la aserción del rojo va en el cuerpo del commit; un ítem con dos comportamientos del mismo contrato son dos aserciones; la vuelta atrás de una migración nace como firma vacía; el modo de pruebas de la Tarea gana sobre la tabla; esquema-base.py --aplicar lee el esquema resultante de las migraciones; auditar-diff.py dice cuántos patrones miró; auditar-tarea.py avisa los ítems compuestos; el verificador no invoca /code-review ni corre módulos de la app con argumentos de prueba; instanciar completa las guías del stack con el comando de la suite; y en Windows con Git Bash, npm.cmd.</li>
+<li><time>2026-11-04</time><b>Vuelta 14 — QA de punta a punta sin esperar un repo</b>Dos skills nuevas: disenar-pruebas (el tester: plan de pruebas de aceptación desde el Gherkin, qué se automatiza y qué queda exploratorio, datos sin datos de personas) y automatizar-e2e (QA automatización). El motor no es siempre Playwright: lo fija DEC-003 según el tipo de aplicación: Playwright para web, Electron y el front de una app con webview; WebDriver para Tauri y escritorio nativo; Appium o Maestro para móvil; un proceso para línea de comandos; HTTP para una API. Dos scripts con pruebas: armar-e2e.py (esqueleto desde el Gherkin con la traza Historia #id · Escenario, cada test marcado sin automatizar, no pisa lo que existe) y cobertura-e2e.py (automatizado / sólo esqueleto / sin prueba, por Escenario). Ensayo real con Playwright sobre una página estática y el Edge instalado.</li>
+<li><time>2026-11-04</time><b>Vuelta 15 — la tendencia se mide sola, y la tarjeta trae lo que la prueba de punta a punta necesita</b>bin/registrar-sesion.py (hook SessionEnd) deja una línea de conteos por sesión en configuracion-ia/sesiones.jsonl: skills, veredictos con bloqueantes y SIN DATOS, fricciones, Tareas terminadas y fallidas, preguntas, errores de script, duración; nunca texto ni datos de personas. bin/tendencia.py (hook SessionStart) dice en una frase si las últimas sesiones vienen MEJOR, IGUAL o PEOR, con los números; PEOR es la señal con la que mejorar-ecosistema propone un ajuste, de a uno y con el sí de la persona. Los hooks viajan en .claude/settings.json. En QA: las Notas para QA de la Historia pasan a cinco líneas fijas (pantalla y ruta, rol y usuario de prueba, datos iniciales, identificadores estables, ambiente) que redactar-tarea completa y armar-e2e.py lee; lo que falte sale como aviso al armar el esqueleto, como pregunta a la Historia. El plan de disenar-pruebas es un comentario en la tarjeta, no un archivo: la tarjeta ya trae los Escenarios y la tabla SDD de sus Tareas.</li>
+</ul><p class="lead">El historial fino del Cerebro vive en <code>cerebro-digital/log.md</code>; el de las propuestas, en <code>mejoras.md</code>.</p></section>
+<section id="pendientes"><h2>13 · Pendientes y decisiones</h2><p class="lead">Lo que el esqueleto no puede decidir solo. Mientras falte, lo que depende de cada punto es SIN DATOS (pendiente declarado): se lista y no frena.</p><ul class="check">
+<li><b>DEC-003 — el stack</b><br><span style="color:var(--muted)">cerebro-digital/&lt;modulo&gt;/arquitectura/decisiones.md y las guías tdd-stack-back.md / tdd-stack-front.md de la skill desarrollo. Hasta que exista, C8, SAST, cobertura y la guía del stack son SIN DATOS (pendiente declarado): se listan, no frenan.</span></li>
+<li><b>DEC-005 — modo equipo</b><br><span style="color:var(--muted)">Confirmada para el modo solo (Claude único, auto-Aprobar con cero bloqueantes). La columna del modo equipo sigue en propuesta: quién aprueba, quién abre el Merge Request, el otro motor.</span></li>
+<li><b>DEC-002 — módulos de dominio</b><br><span style="color:var(--muted)">Confirmar la estructura &lt;modulo&gt;/{api,application,domain,infra,exceptions} + shared/ o cambiarla.</span></li>
+<li><b>Contexto del tablero</b><br><span style="color:var(--muted)">tablero/conocimiento/contexto-proyecto.md: slices, etiquetas temáticas, proceso del tablero. Y cerebro-digital/contexto.md.</span></li>
+<li><b>Propuestas M-001 a M-009</b><br><span style="color:var(--muted)">configuracion-ia/mejoras.md: cada una espera Aplicar / Rechazar / Posponer. Las que cambian reglas duras (M-004, M-006) son las que más pesan para el flujo automático.</span></li>
+<li><b>Repositorio de QA</b><br><span style="color:var(--muted)">Pasarlo para absorberlo con absorber-aplicacion y atar cada prueba a su #ID y Escenario.</span></li>
+<li><b>Primera poda por uso (M-010)</b><br><span style="color:var(--muted)">A los 60 días de uso real: python -B bin/medir-uso-skills.py --proyecto &lt;núcleo&gt;, más /doctor y /doctor prompt-audit en Claude Code; lo que no se usó y cuya pregunta cubre otra skill se propone sacar.</span></li>
+<li><b>Stitch: la clave y la primera pantalla</b><br><span style="color:var(--muted)">Crear la API key en stitch.withgoogle.com/settings, registrar el MCP (claude mcp add stitch …) y diseñar la primera pantalla desde una ficha con disenar-con-stitch.</span></li>
+<li><b>Primera radiografía real</b><br><span style="color:var(--muted)">Correr bin/radiografiar-codigo.py sobre una aplicación de verdad: las tablas de expresiones están calibradas sobre un fixture y una app real muestra qué stack falta.</span></li>
+</ul><h3>Decisiones de arquitectura (<code>decisiones.md</code>)</h3><table><tr><th>DEC</th><th>Qué</th><th>Estado</th></tr>
+<tr><td><b>DEC-001</b></td><td>El código de la aplicación no vive en este repositorio</td><td>Confirmado (viene con el template)</td></tr>
+<tr><td><b>DEC-002</b></td><td>Arquitectura del código por módulos de dominio con capas</td><td>Confirmado (2026-11-02). Vale para cualquier lenguaje del back (`DEC-003` lo fija por proyecto): las capas son carpetas o paquetes con esos nombres, en Java, Py</td></tr>
+<tr><td><b>DEC-003</b></td><td>Stack técnico del back, del front y del despliegue</td><td>⚠ A definir por el equipo. Hasta que exista, toda skill que dependa del stack</td></tr>
+<tr><td><b>DEC-004</b></td><td>Refactor o migración de la aplicación existente (si la hay)</td><td>⚠ No aplica todavía / a decidir por quien instanció (modo solo) o por el equipo. Sólo existe si</td></tr>
+<tr><td><b>DEC-005</b></td><td>Modo desatendido (autorizaciones permanentes del flujo de desarrollo)</td><td>Confirmado para el modo solo (2026-11-02); para el modo equipo sigue ⚠ a confirmar por el</td></tr>
+<tr><td><b>DEC-006</b></td><td>Modo de trabajo y tablero</td><td>Se fija al instanciar con `bin/instanciar.py --modo solo|equipo --tablero local|azure` y queda</td></tr>
+</table></section>
+<section id="regenerar"><h2>14 · Cómo se regenera este informe</h2><pre>python -B bin/generar-informe.py              # corre pruebas y Doctor; tarda unos minutos
+python -B bin/generar-informe.py --rapido     # sin correr nada: estructura y catálogo</pre><p>Las skills, los scripts, las sondas, las propuestas y las decisiones se leen de sus archivos; la bitácora y los pendientes se editan en el propio script, en un solo lugar. Los diagramas son SVG embebido: el informe no depende de nada externo y se abre en cualquier navegador o se imprime.</p></section>
+</main></div><footer>TEMPLATE ESTRUCTURA IA · informe generado el 2026-11-05 10:11 · bin/generar-informe.py · sin dependencias externas</footer></body></html>

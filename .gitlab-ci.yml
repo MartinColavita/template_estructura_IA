@@ -1,0 +1,45 @@
+# Pipeline del repositorio del Cerebro (opcional; se usa si el repo vive en GitLab).
+# No construye ninguna aplicacion: verifica que ESTE repositorio este sano, con lo mismo que
+# corre el hook y las pruebas de bin/. Solo necesita Python 3 y git. Si el repo vive en otra
+# plataforma, se traduce: son tres pasos (espejos, pruebas, doctor).
+
+image: python:3.12-slim
+
+stages:
+  - verificar
+
+variables:
+  GIT_DEPTH: "0"          # el Doctor y los scripts leen el historial
+
+espejos:
+  stage: verificar
+  script:
+    - apt-get update -qq && apt-get install -y -qq git > /dev/null
+    - diff -r cerebro-digital/configuracion-ia/skills .agents/skills
+    - diff -r cerebro-digital/configuracion-ia/skills .claude/skills
+    - python -B bin/verificar-skills.py
+    - if [ -d back/.claude/skills ]; then diff -r back/.claude/skills back/.agents/skills; fi
+    - if [ -d front/.claude/skills ]; then diff -r front/.claude/skills front/.agents/skills; fi
+    # los conteos declarados, con el mismo patron que el hook
+    - 'REAL=$(find cerebro-digital/configuracion-ia/skills -mindepth 1 -maxdepth 1 -type d | wc -l); DECL=$(grep -oE "\*\*[0-9]+ habilidades\*\*" AGENTS.md | grep -oE "[0-9]+"); test "$REAL" = "$DECL" || { echo "AGENTS.md declara $DECL skills y hay $REAL"; exit 1; }'
+
+pruebas:
+  stage: verificar
+  script:
+    - apt-get update -qq && apt-get install -y -qq git > /dev/null
+    - git config --global user.name ci && git config --global user.email ci@example.com
+    # probar-reglas.py mide a un modelo con su CLI (gemini/claude); sin el sale SIN DATOS (2) y aca no hay CLI
+    - for t in bin/probar-*.py; do case "$t" in *probar-reglas.py) echo "== $t salteado (necesita un CLI de LLM)"; continue;; esac; echo "== $t"; python -B "$t" || exit 1; done
+
+doctor:
+  stage: verificar
+  script:
+    - apt-get update -qq && apt-get install -y -qq git > /dev/null
+    - python -B doctor/doctor.py --json | tee doctor-resumen.json
+    # SIN DATOS no es error: es lo esperado mientras no haya codigo clonado. HALLAZGO tampoco frena:
+    # el Doctor informa; decide una persona (skill atender-hallazgos). Lo unico que frena es que explote.
+  artifacts:
+    paths:
+      - doctor/salida/
+      - doctor-resumen.json
+    expire_in: 2 weeks

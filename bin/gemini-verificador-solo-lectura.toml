@@ -1,0 +1,89 @@
+# Politica de Gemini CLI para el VERIFICADOR (solo lectura).
+#
+# Se carga con:
+#   gemini -i "<mision>" --approval-mode plan --policy <ruta a este archivo>   (Orca: consola a la vista)
+#   gemini -p "<mision>" --approval-mode plan --policy <ruta a este archivo>   (IntelliJ: en segundo plano)
+#
+# Por que hace falta: el modo "plan" de Gemini CLI NO es solo lectura garantizado.
+#   - Sin interaccion (-p) aprueba solo la salida del modo plan y pasa a YOLO.
+#   - En la consola interactiva (-i) cualquiera puede cambiar de modo con el teclado,
+#     y en YOLO quedan permitidas las herramientas de los servidores MCP (por ejemplo,
+#     escribir en el tablero o en GitLab).
+#   - Aun dentro de plan deja escribir archivos .md sueltos.
+# Esta politica entra en el nivel de usuario (gana sobre las politicas por defecto) y sus
+# reglas valen en TODOS los modos:
+#   1. prohibe salir (o entrar) del modo plan;
+#   2. prohibe escribir o editar archivos y guardar memoria;
+#   3. prohibe TODAS las herramientas de servidores MCP (el verificador no toca el tablero
+#      ni GitLab: la Tarea le llega escrita en la mision);
+#   4. prohibe lo que haria quedar a la consola esperando una respuesta (preguntarle al
+#      usuario, activar skills, buscar en la web);
+#   5. permite SOLO los comandos de git de lectura que necesita verificar-tdd, correr los tests
+#      (en Orca el verificador trabaja en su propio worktree, asi que lo que escriban los tests
+#      en sus carpetas de build no toca el del worker) y Spectral con su comando exacto;
+#      cualquier otro comando de terminal queda prohibido, y tambien los que escriben un
+#      archivo con --output o tocan ramas.
+# La usan desarrollar-asignadas (Orca, punto 6.2) y desarrollar-asignadas (modo sin Orca) (paso 10)
+# cuando el verificador es Gemini.
+
+[[rule]]
+toolName = ["exit_plan_mode", "enter_plan_mode"]
+decision = "deny"
+priority = 990
+denyMessage = "Verificador de solo lectura: no se cambia de modo."
+
+[[rule]]
+toolName = ["write_file", "replace", "save_memory"]
+decision = "deny"
+priority = 990
+denyMessage = "Verificador de solo lectura: no se escriben archivos."
+
+[[rule]]
+toolName = "*"
+mcpName = "*"
+decision = "deny"
+priority = 990
+denyMessage = "Verificador de solo lectura: no se usan servidores MCP."
+
+[[rule]]
+toolName = ["ask_user", "activate_skill", "web_fetch", "google_web_search"]
+decision = "deny"
+priority = 990
+denyMessage = "Verificador: sin preguntas al usuario, sin skills activables y sin web. La mision trae todo."
+
+[[rule]]
+toolName = "run_shell_command"
+# Ajustar a los goles/flags del runner elegido que escriben, actualizan snapshots o publican
+# (p. ej. formateadores con --apply, plugins de versiones, ejecucion de clases, limpieza de build).
+argsPattern = '(&&|\|\||;|\||>|<|`|\$\(|\s-u\b|--update|\s-o\b|\binstall\b|\bdeploy\b|\bclean\b)'
+decision = "deny"
+priority = 985
+denyMessage = "Verificador de solo lectura: sin encadenar comandos, redirigir, actualizar snapshots, instalar ni publicar."
+
+[[rule]]
+toolName = "run_shell_command"
+argsPattern = "--output"
+decision = "deny"
+priority = 985
+denyMessage = "Verificador de solo lectura: git no escribe archivos."
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["git log", "git diff", "git show", "git status", "git rev-parse", "git branch --show-current", "git branch --list", "git ls-files", "git merge-base"]
+decision = "allow"
+priority = 980
+
+# ⚠ ajustar a los comandos de test del stack elegido (acá quedan ejemplos): reemplazar los dos
+# marcadores por los prefijos exactos del runner del back y del front; los de Spectral se
+# conservan tal cual.
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["<comando de test del back>", "<comando de test del front>", "npx @stoplight/spectral-cli@6 lint", "npx -y @stoplight/spectral-cli@6 lint"]
+decision = "allow"
+priority = 980
+
+[[rule]]
+toolName = "run_shell_command"
+decision = "deny"
+priority = 970
+denyMessage = "Verificador de solo lectura: solo se permiten git de lectura, los tests y Spectral."

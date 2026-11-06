@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="es" data-tema="oscuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doctor de {{PROYECTO}} — tablero</title>
+<!--
+  Tablero del Doctor — el resumen de un vistazo.
+
+  Es el hermano corto del informe: aquel contesta "que pasa y que hago", este
+  contesta "como estamos" en una pantalla, sin leer. Los dos salen de la MISMA
+  corrida y de los mismos datos; si dicen cosas distintas, es un bug.
+
+  Mismo contrato que plantilla.html: un objeto JSON entre los marcadores, CSS y
+  JavaScript adentro, SVG escrito a mano. Cero librerias, cero CDN, cero red — el
+  tablero nombra rutas internas del proyecto y no tiene por que salir de la maquina.
+
+  EL COLOR NUNCA VA SOLO. Verde y naranja no se distinguen en protanopia -medido:
+  delta E 4.2 sobre fondo claro, y re-escalonarlos lo empeora-, asi que cada estado
+  lleva SIEMPRE su icono y su palabra al lado. Sacarle la etiqueta al semaforo para
+  que "se vea mas limpio" lo vuelve ilegible para una de cada doce personas.
+-->
+<style>
+:root[data-tema="oscuro"]{
+  --fondo:#0F1117; --papel:#1A1D26; --papel2:#21252f; --linea:#2D3140; --linea2:#262a35;
+  --txt:#E6E9EF; --txt2:#c9d0db; --tenue:#98a3b3;
+  /* tri-estado, re-escalonado para fondo oscuro: validado a delta E 9.3 en
+     protanopia y >=3:1 de contraste. No es el claro invertido. */
+  --ok:#3ecf8e; --hal:#ffb02e; --sd:#9aa5b5;
+  --ok-fon:rgba(62,207,142,.12); --hal-fon:rgba(255,176,46,.12); --sd-fon:rgba(154,165,181,.12);
+  --az:#7c8cf8; --az-fon:rgba(124,140,248,.14);
+  --grilla:#262a35;
+}
+:root[data-tema="claro"]{
+  --fondo:#eef0f3; --papel:#ffffff; --papel2:#f6f7f9; --linea:#e2e5ea; --linea2:#eef0f3;
+  --txt:#1A1D26; --txt2:#374151; --tenue:#6b7480;
+  /* los del informe, para que abrir uno y otro se sienta la misma herramienta */
+  --ok:#35a339; --hal:#f97316; --sd:#8390a2;
+  --ok-fon:#e2f5e3; --hal-fon:#ffeeda; --sd-fon:#eceef1;
+  --az:#1226aa; --az-fon:#eef1fe;
+  --grilla:#e2e5ea;
+}
+:root{
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --fm:'Cascadia Mono',Consolas,'SF Mono','DejaVu Sans Mono',monospace;
+  --r:8px; --rp:999px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--fondo); color:var(--txt2);
+  font:14px/1.45 var(--f);
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+
+/* ----------------------------------------------------------------- barra */
+.barra{
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  padding:14px 20px; border-bottom:1px solid var(--linea); background:var(--papel);
+  position:sticky; top:0; z-index:5;
+}
+.marca{display:flex; align-items:center; gap:10px; font-weight:600; color:var(--txt); font-size:15px}
+.marca svg{display:block; color:var(--az)}
+.marca .sub{font-weight:400; color:var(--tenue); font-size:13px}
+.meta{display:flex; align-items:center; gap:14px; color:var(--tenue); font-size:12.5px; margin-left:auto; flex-wrap:wrap}
+.meta b{color:var(--txt2); font-weight:600}
+.meta .mono{font-family:var(--fm); font-size:12px}
+.btn{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 13px; border:1px solid var(--linea); border-radius:var(--rp);
+  background:var(--papel2); color:var(--txt2); font:500 12.5px var(--f); cursor:pointer;
+  transition:150ms cubic-bezier(.4,0,.2,1);
+}
+.btn:hover{background:var(--az-fon); border-color:var(--az); color:var(--txt)}
+.btn svg{display:block}
+
+/* ----------------------------------------------------------------- grilla */
+main{padding:16px 20px 28px; display:grid; gap:14px; grid-template-columns:repeat(12,1fr); max-width:1680px; margin:0 auto}
+.panel{
+  background:var(--papel); border:1px solid var(--linea); border-radius:var(--r);
+  padding:14px 16px 16px; min-width:0;
+}
+.panel > h2{
+  margin:0 0 2px; font-size:12px; font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--tenue);
+}
+.panel > .ayuda{margin:0 0 12px; font-size:12.5px; color:var(--tenue)}
+.c3{grid-column:span 3} .c4{grid-column:span 4} .c5{grid-column:span 5}
+.c6{grid-column:span 6} .c7{grid-column:span 7} .c8{grid-column:span 8} .c12{grid-column:span 12}
+
+/* ----------------------------------------------------------------- tiles */
+.tile{display:flex; flex-direction:column; gap:2px; justify-content:center}
+.tile .val{font:600 40px/1.05 var(--f); color:var(--txt); letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.tile .val.chico{font-size:30px}
+.tile .rot{display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--tenue)}
+.tile .pie{font-size:12px; color:var(--tenue); margin-top:3px}
+.tile.ok .val{color:var(--ok)} .tile.hal .val{color:var(--hal)} .tile.sd .val{color:var(--sd)}
+
+/* punto de estado: el color va acompanado SIEMPRE de forma distinta */
+.pt{width:11px; height:11px; flex:none; display:block}
+.pt-ok{color:var(--ok)} .pt-hal{color:var(--hal)} .pt-sd{color:var(--sd)}
+
+/* ----------------------------------------------------------------- semaforo */
+.grupo{margin:0 0 7px; font-size:11.5px; color:var(--tenue); letter-spacing:.04em; text-transform:uppercase}
+.grupo:not(:first-child){margin-top:14px}
+.rejilla{display:grid; grid-template-columns:repeat(auto-fill,minmax(186px,1fr)); gap:7px}
+.celda{
+  display:flex; align-items:center; gap:9px; min-width:0;
+  padding:9px 11px; border:1px solid var(--linea); border-left-width:3px; border-radius:6px;
+  background:var(--papel2); color:var(--txt2); text-decoration:none;
+  transition:150ms cubic-bezier(.4,0,.2,1);
+}
+.celda:hover{background:var(--az-fon); border-color:var(--az); border-left-color:currentColor}
+.celda .tit{font-size:12.5px; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0; color:var(--txt)}
+.celda .est{font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; font-weight:600; white-space:nowrap}
+.celda.ok{border-left-color:var(--ok)} .celda.ok .est{color:var(--ok)} .celda.ok .pt{color:var(--ok)}
+.celda.hal{border-left-color:var(--hal)} .celda.hal .est{color:var(--hal)} .celda.hal .pt{color:var(--hal)}
+.celda.sd{border-left-color:var(--sd)} .celda.sd .est{color:var(--sd)} .celda.sd .pt{color:var(--sd)}
+
+/* ----------------------------------------------------------------- graficos */
+/* fila de numero duro: el numero manda, la etiqueta explica */
+.celda.duro{margin-bottom:7px}
+.celda .num{font-family:var(--fm); font-size:16px; color:var(--txt); flex:none; font-variant-numeric:tabular-nums}
+.celda .tit.larga{white-space:normal; overflow:visible; font-size:12px; color:var(--tenue)}
+
+.caja svg{display:block; width:100%; height:auto; overflow:visible}
+.caja svg text{font-family:var(--f)}
+.leyenda{display:flex; gap:16px; flex-wrap:wrap; margin:10px 0 0; font-size:12px; color:var(--tenue)}
+.leyenda span{display:inline-flex; align-items:center; gap:6px}
+.vacio{padding:22px 0; text-align:center; color:var(--tenue); font-size:12.5px}
+
+/* tooltip: uno solo, reposicionado. Va en el body para no pelear con el overflow */
+.tip{
+  position:fixed; z-index:20; pointer-events:none; opacity:0;
+  background:var(--papel); color:var(--txt); border:1px solid var(--linea);
+  border-radius:6px; padding:7px 10px; font-size:12px; line-height:1.4;
+  box-shadow:0 2px 12px rgba(0,0,0,.28); max-width:260px; transition:opacity .1s;
+}
+.tip b{font-weight:600}
+.tip .fila{display:flex; align-items:center; gap:6px; white-space:nowrap}
+
+/* ----------------------------------------------------------------- pie */
+.pie-nota{grid-column:span 12; color:var(--tenue); font-size:12px; padding:2px 2px 0}
+.pie-nota a{color:var(--az)}
+
+@media (max-width:1100px){ .c3,.c4,.c5,.c6,.c7,.c8{grid-column:span 12} }
+@media print{
+  :root{--fondo:#fff; --papel:#fff}
+  .barra{position:static} .btn{display:none}
+  .panel{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="barra">
+  <span class="marca">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 10.5h3l2-5 3 9 2-5.5h4"/>
+    </svg>
+    Doctor de {{PROYECTO}} <span class="sub">— tablero</span>
+  </span>
+  <span class="meta">
+    <span>alcance <b id="m-alcance">—</b></span>
+    <span>rama <b class="mono" id="m-rama">—</b></span>
+    <span>corrida del <b id="m-fecha">—</b></span>
+    <span>último commit <b id="m-commit">—</b></span>
+    <a class="btn" id="b-informe" href="informe.html">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/>
+      </svg>
+      Informe completo
+    </a>
+    <button class="btn" id="b-tema" type="button" aria-pressed="false">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="8" cy="8" r="3.2"/><path d="M8 1.4v1.6M8 13v1.6M14.6 8H13M3 8H1.4M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1M12.7 12.7l-1.1-1.1M4.4 4.4L3.3 3.3"/>
+      </svg>
+      <span id="b-tema-txt">Claro</span>
+    </button>
+  </span>
+</header>
+
+<main>
+  <section class="panel c3 tile" id="t-ok"></section>
+  <section class="panel c3 tile" id="t-hal"></section>
+  <section class="panel c3 tile" id="t-sd"></section>
+  <section class="panel c3 tile" id="t-pasos"></section>
+
+  <section class="panel c7">
+    <h2>Estado por sonda</h2>
+    <p class="ayuda">Cada una linkea a su panel en el informe completo, que es donde están el porqué y los pasos.</p>
+    <div id="semaforo"></div>
+  </section>
+
+  <section class="panel c5">
+    <h2>Cómo venimos</h2>
+    <p class="ayuda" id="tend-ayuda">Sondas por estado en cada corrida guardada.</p>
+    <div class="caja" id="tendencia"></div>
+    <div class="leyenda" id="tend-leyenda"></div>
+  </section>
+
+  <section class="panel c8">
+    <h2>Costo de contexto — las skills más grandes</h2>
+    <p class="ayuda" id="skills-ayuda">Líneas por skill. La línea marca el umbral a partir del cual conviene partirla.</p>
+    <div class="caja" id="skills"></div>
+  </section>
+
+  <section class="panel c4">
+    <h2>Números duros</h2>
+    <p class="ayuda">Salen de las tablas del informe, sin redondear.</p>
+    <div id="duros"></div>
+  </section>
+
+  <p class="pie-nota" id="pie"></p>
+</main>
+
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+/* Los datos de la corrida. plantilla.py reemplaza TODO lo que hay entre los dos
+   marcadores; lo que está acá abajo es un ejemplo para poder abrir este archivo
+   solo y ver el diseño sin correr el Doctor. */
+var DATOS =
+/*__DATOS__*/
+{
+  "rama": "develop", "fecha": "17-09-2026", "alcance": "proyecto", "corridas": 3,
+  "sondas": [
+    {"id":"espejos","titulo":"Espejos de skills","estado":"OK","resumen":"","acciones":0,"grupo":"proyecto"},
+    {"id":"deuda","titulo":"Deuda declarada","estado":"HALLAZGO","resumen":"","acciones":3,"grupo":"proyecto"},
+    {"id":"repos","titulo":"Repos de código conectados","estado":"SIN DATOS","resumen":"","acciones":3,"grupo":"codigo"}
+  ],
+  "serie": [
+    {"fecha":"15-09-2026","ok":10,"hal":2,"sd":0},
+    {"fecha":"16-09-2026","ok":10,"hal":2,"sd":1},
+    {"fecha":"17-09-2026","ok":11,"hal":2,"sd":1}
+  ],
+  "duros": [
+    {"id":"deuda","valor":214,"unidad":"marcas","etiqueta":"Deuda declarada en la documentación"}
+  ],
+  "skills": {"umbral":250,"unidad":"líneas","filas":[["auditar-tarea",360],["redactar-tarea",291]]}
+}
+/*__FIN__*/
+;
+
+/* ===================================================================== util */
+function $(s, r){ return (r || document).querySelector(s); }
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function miles(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+
+/* El estado NUNCA se comunica solo con color: cada uno trae su forma y su palabra.
+   Verde y naranja tienen delta E 4.2 en protanopia -medido, no estimado-, asi que
+   sin el icono y la etiqueta el semaforo es ilegible para una de cada doce personas. */
+var EST = {
+  "OK":        { cls:"ok",  pal:"En orden",
+                 svg:'<path d="M3.4 8.6l3 3 6.2-7.2"/>' },
+  "HALLAZGO":  { cls:"hal", pal:"Hallazgo",
+                 svg:'<path d="M8 2.6L1.7 13.4h12.6L8 2.6z"/><path d="M8 6.5v3"/><path d="M8 11.2h.01"/>' },
+  "SIN DATOS": { cls:"sd",  pal:"Sin datos",
+                 svg:'<circle cx="8" cy="8" r="5.3"/><path d="M4.3 11.7l7.4-7.4"/>' }
+};
+function icono(estado, px){
+  var e = EST[estado] || EST["SIN DATOS"], t = px || 12;
+  return '<svg class="pt pt-' + e.cls + '" width="' + t + '" height="' + t + '" viewBox="0 0 16 16" ' +
+         'fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" ' +
+         'stroke-linejoin="round" aria-hidden="true">' + e.svg + '</svg>';
+}
+function clase(estado){ return (EST[estado] || EST["SIN DATOS"]).cls; }
+function palabra(estado){ return (EST[estado] || EST["SIN DATOS"]).pal; }
+
+/* ===================================================================== tema */
+var TEMA = "oscuro";
+function ponerTema(t){
+  TEMA = t;
+  document.documentElement.setAttribute("data-tema", t);
+  $("#b-tema-txt").textContent = (t === "oscuro" ? "Claro" : "Oscuro");
+  $("#b-tema").setAttribute("aria-pressed", t === "claro" ? "true" : "false");
+  try { localStorage.setItem("doctor-tablero-tema", t); } catch (e) {}
+  dibujar();
+}
+try {
+  var guardado = localStorage.getItem("doctor-tablero-tema");
+  if (guardado === "claro" || guardado === "oscuro") TEMA = guardado;
+} catch (e) {}
+
+/* ===================================================================== tiles */
+function tile(sel, valor, etiqueta, estado, pie){
+  var cls = estado ? clase(estado) : "";
+  $(sel).className = "panel c3 tile " + cls;
+  $(sel).innerHTML =
+    '<div class="rot">' + (estado ? icono(estado, 12) : "") + esc(etiqueta) + '</div>' +
+    '<div class="val' + (String(valor).length > 3 ? " chico" : "") + '">' + esc(valor) + '</div>' +
+    (pie ? '<div class="pie">' + esc(pie) + '</div>' : "");
+}
+
+/* ================================================================= semaforo */
+var ORDEN_GRUPO = [["proyecto", "Documentación y configuración"], ["codigo", "Código de los repositorios"]];
+function semaforo(){
+  var cont = $("#semaforo"), html = "";
+  ORDEN_GRUPO.forEach(function(g){
+    var ss = DATOS.sondas.filter(function(s){ return (s.grupo || "proyecto") === g[0]; });
+    if (!ss.length) return;
+    html += '<p class="grupo">' + esc(g[1]) + " · " + ss.length + '</p><div class="rejilla">';
+    ss.forEach(function(s){
+      var t = s.titulo + " — " + palabra(s.estado) + (s.resumen ? ". " + s.resumen : "");
+      html += '<a class="celda ' + clase(s.estado) + '" href="' + esc(INFORME) + '#p-' + esc(s.id) + '" ' +
+              'data-tip="' + esc(t) + '">' + icono(s.estado, 13) +
+              '<span class="tit">' + esc(s.titulo) + '</span>' +
+              '<span class="est">' + esc(palabra(s.estado)) + '</span></a>';
+    });
+    html += '</div>';
+  });
+  cont.innerHTML = html || '<p class="vacio">Esta corrida no midió ninguna sonda.</p>';
+}
+
+/* ================================================================ SVG a mano
+   Todo el dibujo sale de aca: sin librerias y sin red. Los colores se escriben
+   como var(--x), asi que el interruptor de tema los cambia sin redibujar. */
+function svgTag(w, h, etiqueta, cuerpo){
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" ' +
+         'role="img" aria-label="' + esc(etiqueta) + '" ' +
+         'xmlns="http://www.w3.org/2000/svg">' + cuerpo + '</svg>';
+}
+/* rectangulo con SOLO el extremo del dato redondeado: la base se apoya en el eje */
+function barraPath(x, y, w, h, r, lado){
+  if (h <= 0 || w <= 0) return "";
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  if (!r) return "M" + x + " " + y + "h" + w + "v" + h + "h" + (-w) + "z";
+  if (lado === "arriba"){
+    return "M" + x + " " + (y + h) + "V" + (y + r) + "a" + r + " " + r + " 0 0 1 " + r + " " + (-r) +
+           "h" + (w - 2 * r) + "a" + r + " " + r + " 0 0 1 " + r + " " + r + "V" + (y + h) + "z";
+  }
+  return "M" + x + " " + y + "h" + (w - r) + "a" + r + " " + r + " 0 0 1 " + r + " " + r +
+         "v" + (h - 2 * r) + "a" + r + " " + r + " 0 0 1 " + (-r) + " " + r + "H" + x + "z";
+}
+function ancho(cont){ return Math.max(260, Math.floor(cont.clientWidth)); }
+
+/* ---------------------------------------------- columnas apiladas: la tendencia */
+var SERIES = [
+  { k:"ok",  estado:"OK",        color:"var(--ok)"  },
+  { k:"hal", estado:"HALLAZGO",  color:"var(--hal)" },
+  { k:"sd",  estado:"SIN DATOS", color:"var(--sd)"  }
+];
+function tendencia(){
+  var cont = $("#tendencia"), s = DATOS.serie || [];
+  if (s.length < 2){
+    cont.innerHTML = '<p class="vacio">Hace falta más de una corrida guardada para dibujar una ' +
+      'tendencia. Hoy hay ' + s.length + '.</p>';
+    $("#tend-leyenda").innerHTML = "";
+    return;
+  }
+  var W = ancho(cont), H = 196, izq = 26, der = 6, arr = 10, aba = 24;
+  var ph = H - arr - aba, pw = W - izq - der;
+  var max = 0;
+  s.forEach(function(d){ max = Math.max(max, (d.ok || 0) + (d.hal || 0) + (d.sd || 0)); });
+  max = Math.max(max, 1);
+  var paso = pw / s.length, bw = Math.min(46, paso * 0.62);
+  var cuerpo = "";
+
+  /* grilla y eje: recesivos, nunca compiten con el dato */
+  var ticks = max <= 5 ? max : 4;
+  for (var i = 0; i <= ticks; i++){
+    var v = Math.round(max * i / ticks), y = arr + ph - (v / max) * ph;
+    cuerpo += '<line x1="' + izq + '" y1="' + y + '" x2="' + (W - der) + '" y2="' + y +
+              '" stroke="var(--grilla)" stroke-width="1"/>';
+    cuerpo += '<text x="' + (izq - 6) + '" y="' + (y + 3.5) + '" text-anchor="end" font-size="10" ' +
+              'fill="var(--tenue)">' + v + '</text>';
+  }
+  s.forEach(function(d, i){
+    var cx = izq + paso * i + paso / 2, x = cx - bw / 2, y = arr + ph, total = 0;
+    SERIES.forEach(function(se){ total += (d[se.k] || 0); });
+    SERIES.forEach(function(se, j){
+      var v = d[se.k] || 0;
+      if (!v) return;
+      var h = (v / max) * ph;
+      /* 2px de aire entre segmentos: el fondo tiene que verse entre uno y otro */
+      var hh = Math.max(1, h - 2);
+      y -= h;
+      var ultimo = SERIES.slice(j + 1).every(function(o){ return !(d[o.k] || 0); });
+      cuerpo += '<path d="' + barraPath(x, y, bw, hh, 4, ultimo ? "arriba" : "") + '" fill="' + se.color +
+                '" data-tip="' + esc(d.fecha + " · " + v + " " + (v === 1 ? "sonda" : "sondas") +
+                " " + palabra(se.estado).toLowerCase() + " de " + total) + '"/>';
+    });
+    cuerpo += '<text x="' + cx + '" y="' + (H - 7) + '" text-anchor="middle" font-size="10" ' +
+              'fill="var(--tenue)">' + esc(String(d.fecha).slice(0, 5)) + '</text>';
+  });
+  cont.innerHTML = svgTag(W, H, "Sondas por estado en cada una de las " + s.length +
+                          " corridas guardadas", cuerpo);
+  $("#tend-leyenda").innerHTML = SERIES.map(function(se){
+    return '<span>' + icono(se.estado, 12) + esc(palabra(se.estado)) + '</span>';
+  }).join("");
+}
+
+/* ------------------------------------------- barras horizontales: las skills */
+function skills(){
+  var cont = $("#skills"), d = DATOS.skills;
+  /* "No corrio" y "corrio pero le falta la columna" son cosas distintas: la primera
+     es normal en una corrida acotada, la segunda es un desfasaje que hay que ver. */
+  if (d && d.falta){
+    cont.innerHTML = '<p class="vacio">' + icono("SIN DATOS", 13) + ' Sin datos: ' +
+                     esc(d.falta) + '.</p>';
+    return;
+  }
+  if (!d || !d.filas || !d.filas.length){
+    cont.innerHTML = '<p class="vacio">Esta corrida no midió el costo de contexto.</p>';
+    return;
+  }
+  var filas = d.filas.slice(0, 8), umbral = d.umbral || 0;
+  var W = ancho(cont), izq = 168, der = 46, fh = 26, H = filas.length * fh + 22;
+  var pw = W - izq - der, max = 0;
+  filas.forEach(function(f){ max = Math.max(max, f[1]); });
+  max = (Math.max(max, umbral) * 1.04) || 1;
+  var cuerpo = "";
+  filas.forEach(function(f, i){
+    var y = i * fh + 4, h = fh - 11, w = (f[1] / max) * pw;
+    var alto = umbral && f[1] > umbral;
+    cuerpo += '<text x="' + (izq - 9) + '" y="' + (y + h - 1) + '" text-anchor="end" font-size="11.5" ' +
+              'fill="var(--txt2)">' + esc(f[0]) + '</text>';
+    cuerpo += '<path d="' + barraPath(izq, y, Math.max(2, w), h, 4, "") + '" fill="' +
+              (alto ? "var(--hal)" : "var(--az)") + '" data-tip="' + esc(f[0] + " · " + miles(f[1]) +
+              " " + (d.unidad || "") + (alto ? " — pasa el umbral de " + miles(umbral) : "")) + '"/>';
+    cuerpo += '<text x="' + (izq + Math.max(2, w) + 7) + '" y="' + (y + h - 1) + '" font-size="11" ' +
+              'fill="var(--tenue)">' + miles(f[1]) + '</text>';
+  });
+  if (umbral){
+    var xu = izq + (umbral / max) * pw;
+    cuerpo += '<line x1="' + xu + '" y1="0" x2="' + xu + '" y2="' + (filas.length * fh) +
+              '" stroke="var(--hal)" stroke-width="1" stroke-dasharray="3 3"/>';
+    cuerpo += '<text x="' + xu + '" y="' + (filas.length * fh + 14) + '" text-anchor="middle" ' +
+              'font-size="10" fill="var(--tenue)">umbral ' + miles(umbral) + ' ' +
+              esc(d.unidad || "") + '</text>';
+  }
+  cont.innerHTML = svgTag(W, H, "Las " + filas.length + " skills más grandes, en " +
+                          (d.unidad || "unidades"), cuerpo);
+}
+
+/* ===================================================================== duros */
+function duros(){
+  var cont = $("#duros"), ds = DATOS.duros || [];
+  if (!ds.length){
+    cont.innerHTML = '<p class="vacio">Esta corrida no dejó números para resumir.</p>';
+    return;
+  }
+  cont.innerHTML = ds.map(function(d){
+    /* Un numero que no se pudo calcular se MUESTRA, con el motivo. Saltearlo lo
+       hace desaparecer sin que nadie se entere, que es la falla que esto ataja. */
+    if (d.falta){
+      return '<a class="celda sd duro" href="' + esc(INFORME) + '#p-' + esc(d.id) + '" ' +
+             'data-tip="' + esc(d.falta) + '">' + icono("SIN DATOS", 13) +
+             '<span class="tit larga"><b>' + esc(d.etiqueta) + '</b> — sin datos: ' +
+             esc(d.falta) + '</span></a>';
+    }
+    return '<a class="celda duro" href="' + esc(INFORME) + '#p-' + esc(d.id) + '" ' +
+           'data-tip="' + esc(d.etiqueta) + '"><span class="num">' + esc(miles(d.valor)) + '</span>' +
+           '<span class="tit larga">' + esc(d.unidad) + ' · ' + esc(d.etiqueta) + '</span></a>';
+  }).join("");
+}
+
+/* =================================================================== tooltip */
+var TIP = null;
+function tipOn(e){
+  var t = (e.target && e.target.closest) ? e.target.closest("[data-tip]") : null;
+  if (!t){ tipOff(); return; }
+  TIP.textContent = t.getAttribute("data-tip");
+  TIP.style.opacity = "1";
+  var r = TIP.getBoundingClientRect();
+  var x = Math.min(window.innerWidth - r.width - 8, Math.max(8, e.clientX + 12));
+  var y = e.clientY - r.height - 12;
+  TIP.style.left = x + "px";
+  TIP.style.top = (y < 8 ? e.clientY + 16 : y) + "px";
+}
+function tipOff(){ if (TIP) TIP.style.opacity = "0"; }
+
+/* ================================================================== arranque */
+var INFORME = "informe.html";
+function dibujar(){ tendencia(); skills(); }
+
+function arrancar(){
+  TIP = $("#tip");
+  if (DATOS.alcance && DATOS.alcance !== "proyecto"){
+    INFORME = "informe-" + String(DATOS.alcance).replace(/[\\\/]/g, "-") + ".html";
+  }
+  $("#m-alcance").textContent = DATOS.alcance || "proyecto";
+  $("#m-rama").textContent = DATOS.rama || "sin datos";
+  $("#m-fecha").textContent = DATOS.fecha || "sin datos";
+  $("#m-commit").textContent = DATOS.commit || "sin datos";
+  $("#b-informe").setAttribute("href", INFORME);
+
+  var ss = DATOS.sondas || [];
+  var n = { "OK":0, "HALLAZGO":0, "SIN DATOS":0 }, pasos = 0;
+  ss.forEach(function(s){
+    if (n[s.estado] === undefined) n[s.estado] = 0;
+    n[s.estado]++;
+    pasos += (s.acciones || 0);
+  });
+  var total = ss.length;
+  tile("#t-ok", n["OK"], "Sondas en orden", "OK",
+       total ? Math.round(n["OK"] / total * 100) + " % de las " + total + " que corrieron" : "");
+  tile("#t-hal", n["HALLAZGO"], "Con hallazgo", "HALLAZGO",
+       n["HALLAZGO"] ? "hay algo para arreglar" : "ninguna, por ahora");
+  tile("#t-sd", n["SIN DATOS"], "Sin datos", "SIN DATOS",
+       n["SIN DATOS"] ? "no midieron, y eso no es un aprobado" : "todas pudieron medir");
+  tile("#t-pasos", pasos, "Pasos propuestos", null,
+       pasos ? "en el informe, con el comando de cada uno" : "nada pendiente");
+
+  if (DATOS.parcial){
+    /* Que el lector sepa que esta mirando media foto. El informe ya lo dice; el
+       tablero, que se mira de reojo, tiene MAS obligacion de decirlo. */
+    $("#tend-ayuda").innerHTML = "Esta corrida fue parcial: midó solo algunas sondas, " +
+      "así que <b>no entra en la tendencia</b>. Los números de arriba son de esta corrida; " +
+      "las columnas, de la última completa.";
+  }
+  semaforo();
+  duros();
+  ponerTema(TEMA);
+
+  $("#b-tema").addEventListener("click", function(){
+    ponerTema(TEMA === "oscuro" ? "claro" : "oscuro");
+  });
+  document.addEventListener("mousemove", tipOn);
+  document.addEventListener("mouseleave", tipOff);
+  window.addEventListener("resize", function(){
+    clearTimeout(window.__redibujo);
+    window.__redibujo = setTimeout(dibujar, 120);
+  });
+
+  var c = DATOS.corridas || (DATOS.serie || []).length;
+  $("#pie").innerHTML = "El tablero resume la misma corrida que el informe: si dicen cosas " +
+    "distintas, es un error del Doctor. Hay " + c + (c === 1 ? " corrida guardada" : " corridas guardadas") +
+    ' en el histórico. <a href="' + esc(INFORME) + '">Ver el informe completo</a>, que es donde ' +
+    "están el porqué y los pasos de cada hallazgo.";
+}
+arrancar();
+</script>
+</body>
+</html>

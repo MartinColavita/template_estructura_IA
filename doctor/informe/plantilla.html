@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doctor de {{PROYECTO}} — informe de diagnóstico</title>
+<style>
+/* ===========================================================================
+   Doctor de {{PROYECTO}} — informe de diagnóstico.
+   Un solo archivo: CSS y JavaScript adentro, gráficos en SVG escrito a mano.
+   Cero recursos externos, cero librerías, cero llamadas de red: el informe
+   lleva rutas y nombres internos y no sale de la máquina.
+   =========================================================================== */
+:root{
+  /* azul institucional */
+  --az:#1226aa; --az-cl:#3d55d6; --az-luz:#eef1fe; --az-bor:#c9d2f6;
+  /* tri-estado: el tono de marca para el punto, el oscurecido para el texto */
+  --ok:#35a339;  --ok-txt:#1c6b20;  --ok-fon:#e2f5e3;  --ok-bor:#b2dfb4;
+  --hal:#f97316; --hal-txt:#8a4b00; --hal-fon:#ffeeda; --hal-bor:#f3ce9d;
+  --sd:#8390a2;  --sd-txt:#3f4856;  --sd-fon:#eceef1;  --sd-bor:#c3cad4;
+  /* texto: #6b7480 en vez del #8390a2 de la paleta para el secundario — es el
+     único gris con el que todos los estilos de texto llegan a contraste real */
+  --txt:#374151; --txt2:#4b5563; --tenue:#6b7480;
+  --fondo:#eef0f3; --papel:#ffffff; --linea:#e2e5ea; --linea2:#eef0f3;
+  --osc:#1A1D26; --osc-txt:#c9d0db; --osc-tenue:#98a3b3;
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --fs:Georgia,'Iowan Old Style','Times New Roman',serif;
+  --fm:'Cascadia Mono',Consolas,'SF Mono','DejaVu Sans Mono',monospace;
+  --lat:240px; --barra:52px; --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--f);font-size:13px;line-height:1.5;color:var(--txt);
+  background:var(--fondo);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+a{color:var(--az)}
+code{font-family:var(--fm);font-size:.94em}
+.num{font-variant-numeric:tabular-nums lining-nums}
+:focus-visible{outline:2px solid var(--az);outline-offset:2px;border-radius:3px}
+.lateral :focus-visible{outline:2px solid #9fb0ff;outline-offset:-2px}
+.solo-lectores{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.saltar{position:absolute;left:8px;top:-48px;z-index:90;background:var(--az);color:#fff;
+  padding:8px 14px;border-radius:0 0 var(--r) var(--r);text-decoration:none;font-weight:600}
+.saltar:focus{top:0}
+
+/* ------------------------------------------------------------ barra lateral */
+.lateral{position:fixed;inset:0 auto 0 0;width:var(--lat);z-index:60;background:var(--osc);
+  color:var(--osc-txt);display:flex;flex-direction:column;border-right:1px solid #000}
+.lateral[hidden]{display:none}
+.marca{padding:15px 16px 13px;border-bottom:1px solid #2e333d;display:flex;
+  align-items:flex-start;gap:8px}
+.marca .ident{min-width:0;flex:1}
+.marca h1{font-family:var(--fs);font-size:17px;font-weight:700;color:#fff;
+  letter-spacing:.1px;line-height:1.2}
+.marca .bajada{font-size:11px;color:var(--osc-tenue);margin-top:4px;line-height:1.4}
+.cerrar-lat{display:none;border:1px solid #3a404c;background:none;color:var(--osc-txt);
+  width:28px;height:28px;border-radius:4px;cursor:pointer;flex:none;line-height:1;font-size:16px}
+.cerrar-lat:hover{background:#2b3140;color:#fff}
+.meta-repo{padding:11px 16px;border-bottom:1px solid #2e333d;display:grid;gap:6px}
+.meta-repo div{display:flex;justify-content:space-between;gap:10px;font-size:11px;align-items:baseline}
+.meta-repo .et{color:var(--osc-tenue)}
+.meta-repo .va{font-family:var(--fm);color:#eef1f5;font-size:11px;font-variant-numeric:tabular-nums;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:132px;text-align:right}
+.lateral .rotulo{font-size:10px;letter-spacing:.9px;text-transform:uppercase;color:var(--osc-tenue);
+  padding:13px 16px 6px;font-weight:700}
+.indice{list-style:none;overflow-y:auto;flex:1;padding-bottom:8px}
+.indice a{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:10px;
+  padding:6px 14px 6px 13px;text-decoration:none;color:var(--osc-txt);font-size:12px;
+  border-left:3px solid transparent}
+.indice a:hover{background:#262b34;color:#fff}
+.indice a[aria-current="true"]{background:#2b3140;color:#fff;border-left-color:#9fb0ff}
+.indice .tit{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.indice .cta{font-family:var(--fm);font-size:10px;color:var(--osc-tenue);font-variant-numeric:tabular-nums}
+.indice a:hover .cta,.indice a[aria-current="true"] .cta{color:#b9c3d1}
+.indice a.apagado{opacity:.42}
+/* El punto: color para OK y HALLAZGO; ANILLADO para SIN DATOS, así el tercer
+   estado se distingue por forma y sobrevive al blanco y negro y al daltonismo. */
+.punto{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block}
+.punto.ok{background:var(--ok)}
+.punto.hallazgo{background:var(--hal)}
+.punto.sin-datos{background:transparent;box-shadow:inset 0 0 0 2.5px var(--sd)}
+.pie-lateral{border-top:1px solid #2e333d;padding:11px 16px;font-size:10.5px;
+  color:var(--osc-tenue);line-height:1.5}
+.velo[hidden]{display:none}
+
+/* ---------------------------------------------------------------- cabecera */
+.lienzo{margin-left:var(--lat);min-width:0}
+.barra-sup{position:sticky;top:0;z-index:40;background:var(--papel);
+  border-bottom:1px solid var(--linea)}
+.fila-barra{height:var(--barra);display:flex;align-items:center;gap:10px;padding:0 16px}
+.hamb{display:none;align-items:center;justify-content:center;width:34px;height:34px;flex:none;
+  background:var(--papel);border:1px solid var(--linea);border-radius:var(--r);cursor:pointer}
+.hamb:hover{background:var(--fondo)}
+.hamb svg{display:block}
+.titulo-barra{font-size:13px;font-weight:600;color:var(--osc);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;min-width:0}
+.titulo-barra .fino{color:var(--tenue);font-weight:400}
+.esp{flex:1 1 auto;min-width:6px}
+.fila-herr{display:flex;align-items:center;gap:10px;padding:0 16px 10px;flex-wrap:wrap}
+.grupo{display:flex;align-items:center;border:1px solid var(--linea);border-radius:var(--r);
+  overflow:hidden;background:var(--papel);flex:none}
+.grupo button{background:var(--papel);border:0;border-left:1px solid var(--linea);
+  padding:6px 11px;font-size:12px;cursor:pointer;color:var(--txt2);white-space:nowrap;
+  display:flex;align-items:center;gap:6px}
+.grupo button:first-child{border-left:0}
+.grupo button:hover{background:var(--fondo)}
+.grupo button[aria-pressed="true"]{background:var(--osc);color:#fff}
+.grupo button[aria-pressed="true"] .cnt{background:rgba(255,255,255,.2);color:#fff}
+.grupo .cnt{font-family:var(--fm);font-size:10px;background:var(--fondo);color:var(--tenue);
+  border-radius:999px;padding:1px 6px;min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
+.buscador{position:relative;flex:1 1 260px;max-width:340px}
+.buscador input{width:100%;font:inherit;font-size:12px;padding:6px 26px 6px 28px;color:var(--txt);
+  border:1px solid var(--linea);border-radius:var(--r);background:var(--papel)}
+.buscador input::placeholder{color:#8a93a1}
+.buscador svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);pointer-events:none}
+.limpiar{position:absolute;right:3px;top:50%;transform:translateY(-50%);border:0;background:none;
+  cursor:pointer;color:var(--tenue);padding:3px 5px;line-height:1;border-radius:4px;font-size:14px}
+.limpiar:hover{background:var(--fondo);color:var(--txt)}
+.boton{background:var(--papel);border:1px solid var(--linea);border-radius:var(--r);
+  padding:6px 11px;font-size:12px;cursor:pointer;color:var(--txt2);white-space:nowrap;flex:none}
+.boton:hover{background:var(--fondo)}
+.boton[aria-pressed="true"]{background:var(--osc);color:#fff;border-color:var(--osc)}
+#herr-toggle{display:none}
+
+/* ---------------------------------------------------------------- contenido */
+.cuerpo{padding:16px 16px 48px;max-width:1720px}
+.aviso{display:flex;gap:10px;align-items:flex-start;background:var(--az-luz);
+  border:1px solid var(--az-bor);border-left:3px solid var(--az);border-radius:var(--r);
+  padding:10px 13px;margin-bottom:16px;font-size:12px;color:#1f2c58;line-height:1.5}
+.aviso b{color:#14204a}
+.aviso svg{flex:none;margin-top:2px}
+
+/* panorama: distribución de estados + lo que pide atención */
+.panorama{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:14px;margin-bottom:20px}
+.caja{background:var(--papel);border:1px solid var(--linea);border-radius:var(--r);
+  padding:13px 15px 14px;min-width:0;box-shadow:0 1px 1px rgba(16,18,24,.03)}
+.caja > .cab{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+.caja h2{font-size:12.5px;font-weight:700;color:var(--osc);letter-spacing:.1px}
+.caja .sub{font-size:11.5px;color:var(--tenue)}
+.cobertura{font-family:var(--fm);font-size:12px;color:var(--txt2);margin-top:10px;
+  font-variant-numeric:tabular-nums}
+.cobertura b{color:var(--osc);font-size:14px}
+.leyenda{display:grid;gap:6px;margin-top:10px;font-size:11.5px;color:var(--txt2)}
+.leyenda .ley{display:grid;grid-template-columns:12px minmax(0,auto) minmax(0,1fr);
+  gap:10px;align-items:center}
+.leyenda b{color:var(--osc);font-size:11px;letter-spacing:.4px;white-space:nowrap}
+.leyenda .d{color:var(--tenue);min-width:0}
+@media (max-width:480px){
+  .leyenda .ley{grid-template-columns:12px minmax(0,1fr)}
+  .leyenda .d{grid-column:2}
+}
+
+.atencion ol{list-style:none;display:grid;gap:2px}
+.atencion li{border-top:1px solid var(--linea2)}
+.atencion li:first-child{border-top:0}
+/* La fila es un BOTÓN cuando la sonda trae explicación (se abre acá mismo) y un
+   enlace cuando no la trae (lleva al panel). Misma grilla en los dos casos: lo
+   único que cambia es el icono de la última columna, que es el que anuncia qué
+   va a pasar al tocarla. */
+.ate-cab{width:100%;display:grid;grid-template-columns:12px minmax(0,1fr) auto 13px;gap:10px;
+  align-items:baseline;padding:8px 4px;text-decoration:none;color:inherit;border-radius:4px;
+  background:none;border:0;text-align:left;cursor:pointer;font:inherit}
+.ate-cab:hover{background:var(--az-luz)}
+.atencion .q{grid-column:2;grid-row:1;font-size:12.5px;font-weight:600;color:var(--osc)}
+.atencion .d{grid-column:2;grid-row:2;font-size:11.5px;color:var(--tenue);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* Abierta, el resumen deja de estar recortado: si alguien lo despliega es porque
+   quiere leerlo entero. */
+.ate-cab[aria-expanded="true"] .d{display:block;overflow:visible}
+.atencion .cifra{grid-column:3;grid-row:1/span 2;font-family:var(--fm);font-size:16px;
+  font-weight:700;text-align:right;font-variant-numeric:tabular-nums;align-self:center;
+  white-space:nowrap}
+.atencion .cifra small{display:block;font-size:9.5px;font-weight:400;color:var(--tenue);
+  letter-spacing:.3px;text-transform:uppercase;font-family:var(--f)}
+.atencion .hallazgo .cifra{color:var(--hal-txt)}
+.atencion .sin-datos .cifra{color:var(--sd-txt)}
+.atencion .punto{grid-column:1;grid-row:1/span 2;align-self:center}
+.ate-icono{grid-column:4;grid-row:1/span 2;align-self:center;color:var(--tenue);flex:none}
+.ate-cab:hover .ate-icono{color:var(--az)}
+.ate-cab .ate-icono{transition:transform .15s ease}
+.ate-cab[aria-expanded="true"] .ate-icono{transform:rotate(180deg)}
+.ate-cuerpo{padding:2px 4px 12px 22px;display:grid;gap:10px}
+.ate-cuerpo[hidden]{display:none}
+.ate-cuerpo .explica{border-left:0;padding-left:0}
+.ate-ir{font-size:11.5px}
+.ate-ir a{text-decoration:none;font-weight:600}
+.ate-ir a:hover{text-decoration:underline}
+.atencion .nada{font-size:12px;color:var(--txt2);line-height:1.5}
+@media (max-width:480px){.ate-cab{gap:8px}.ate-cuerpo{padding-left:14px}}
+
+/* ------------------------------------------- qué significa / por qué importa
+   Los tres campos explicativos son OPCIONALES: si la sonda no los trae no se
+   dibuja nada y el panel queda exactamente como antes. Van en prosa corta, con
+   la etiqueta adentro del párrafo, para que se lean de corrido y no como una
+   ficha de metadatos más. */
+.explica{display:grid;gap:7px;padding-left:12px;border-left:2px solid var(--az-bor)}
+.explica p{font-size:12.5px;line-height:1.55;color:var(--txt2)}
+.explica b{color:var(--osc);font-weight:700}
+
+/* "Cómo se arregla": el color lo pone el ESTADO de la sonda, igual que el resto
+   del informe. En HALLAZGO es naranja porque hay algo que hacer; en SIN DATOS,
+   gris; y en OK queda apagado a propósito — una sonda sana no tiene que gritar
+   una lista de tareas. */
+.arreglo{border:1px solid var(--hal-bor);border-left:3px solid var(--hal);
+  border-radius:var(--r);background:var(--hal-fon);padding:11px 13px 12px}
+.arreglo.sin-datos{border-color:var(--sd-bor);border-left-color:var(--sd);background:var(--sd-fon)}
+.arreglo.apagado{border-color:var(--linea);border-left-color:var(--sd-bor);background:var(--fondo)}
+.arreglo-tit{font-size:10px;letter-spacing:.7px;text-transform:uppercase;font-weight:700;
+  color:var(--hal-txt);margin-bottom:9px}
+.arreglo.sin-datos .arreglo-tit,.arreglo.apagado .arreglo-tit{color:var(--sd-txt)}
+.arreglo-nota{font-size:11.5px;color:var(--tenue);line-height:1.5;margin-top:9px}
+/* Pedido a la IA: texto listo para copiar. Va DENTRO del panel del hallazgo, no en
+   una seccion aparte, para no obligar a correlacionar cual pedido es de cual problema. */
+.pedido{border:1px solid var(--linea);border-radius:7px;background:var(--fondo);margin-top:11px;
+  overflow:hidden}
+.pedido-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 11px;border-bottom:1px solid var(--linea);background:#fff}
+.pedido-tit{font-size:10px;letter-spacing:.7px;text-transform:uppercase;font-weight:700;
+  color:var(--azul)}
+.pedido-copiar{font:inherit;font-size:11.5px;cursor:pointer;border:1px solid var(--bs);
+  background:var(--azul-fon);color:var(--azul);padding:3px 11px;border-radius:999px;
+  white-space:nowrap}
+.pedido-copiar:hover{background:#e0e7ff}
+.pedido-copiar:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+.pedido-copiar.listo{background:var(--ok-fon);border-color:var(--ok-bor);color:var(--ok-txt)}
+.pedido pre{margin:0;padding:11px;font-family:var(--mono);font-size:11.5px;line-height:1.6;
+  color:var(--oscuro);white-space:pre-wrap;word-break:break-word;max-height:230px;overflow:auto}
+.pedido-pie{font-size:11px;color:var(--tenue);padding:0 11px 10px;line-height:1.5}
+@media print{.pedido-copiar{display:none}.pedido pre{max-height:none;overflow:visible}}
+.pasos{list-style:none;counter-reset:paso;display:grid;gap:9px}
+.pasos li{counter-increment:paso;display:grid;grid-template-columns:18px minmax(0,1fr);
+  gap:9px;font-size:12.5px;line-height:1.5;color:var(--txt)}
+.pasos li::before{content:counter(paso);font-family:var(--fm);font-size:10px;font-weight:700;
+  color:#fff;background:var(--hal-txt);border-radius:50%;width:18px;height:18px;
+  display:flex;align-items:center;justify-content:center;margin-top:1px;
+  font-variant-numeric:tabular-nums}
+.arreglo.sin-datos .pasos li::before,.arreglo.apagado .pasos li::before{background:var(--sd-txt)}
+/* El comando no se parte ni se reacomoda: se copia tal cual. Si no entra, la
+   caja scrollea sola en vez de ensanchar el panel. */
+.cmd{display:block;margin-top:6px;font-family:var(--fm);font-size:11.5px;color:#1f2937;
+  background:var(--papel);border:1px solid var(--linea);border-radius:4px;padding:6px 9px;
+  white-space:pre;overflow-x:auto;max-width:100%}
+
+/* -------------------------------------------------------------------- paneles */
+/* El aire entre paneles es lo que los hace leer como unidades cerradas y no como
+   un continuo: 16 px de separación, un borde y una sombra mínima. */
+.grilla{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start}
+.panel{grid-column:span var(--sp,4);background:var(--papel);border:1px solid var(--linea);
+  border-radius:var(--r);min-width:0;display:flex;flex-direction:column;
+  scroll-margin-top:112px;box-shadow:0 1px 1px rgba(16,18,24,.03)}
+.panel[hidden]{display:none}
+.panel.destacado{box-shadow:0 0 0 2px var(--az-bor);border-color:var(--az-cl)}
+.panel > .cab{display:flex;align-items:center;gap:9px;padding:9px 10px 9px 12px;
+  border-bottom:1px solid var(--linea);min-height:42px;background:#fbfcfd;
+  border-radius:var(--r) var(--r) 0 0}
+.panel > .cab .ident{min-width:0;flex:1}
+.panel .ord{font-family:var(--fm);font-size:10px;color:var(--tenue);letter-spacing:.5px}
+.panel h3{font-size:13px;font-weight:700;color:var(--osc);line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel .subcab{display:flex;align-items:center;gap:8px;margin-top:3px}
+.panel .subcab .t{font-family:var(--fm);font-size:10.5px;color:var(--tenue);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.mini{display:block;flex:none}
+.plegar{border:1px solid transparent;background:none;cursor:pointer;color:var(--tenue);
+  width:26px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex:none}
+.plegar:hover{background:var(--fondo);color:var(--txt)}
+.plegar svg{transition:transform .15s ease}
+.panel[data-plegado="1"] .plegar svg{transform:rotate(-90deg)}
+.panel .interior{padding:13px 14px 15px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.panel .interior[hidden]{display:none}
+/* El resumen que devuelve la sonda es el veredicto: va en serif, no en gris chico. */
+.resumen{font-family:var(--fs);font-size:14px;line-height:1.5;color:var(--txt2)}
+/* Dos gráficos al lado del otro sólo cuando entran: el min() evita que la pista
+   de 440 px sea más ancha que el panel y desborde la página en pantalla chica. */
+.dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));
+  gap:14px;align-items:start}
+@media (max-width:960px){.dos{grid-template-columns:minmax(0,1fr)}}
+.dona-fila{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:14px;align-items:center}
+@media (max-width:620px){.dona-fila{grid-template-columns:minmax(0,1fr)}}
+
+.pastilla{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:3px;
+  white-space:nowrap;flex:none}
+.pastilla .punto{width:8px;height:8px}
+.pastilla.ok{background:var(--ok-fon);color:var(--ok-txt);border:1px solid var(--ok-bor)}
+.pastilla.hallazgo{background:var(--hal-fon);color:var(--hal-txt);border:1px solid var(--hal-bor)}
+.pastilla.sin-datos{background:var(--sd-fon);color:var(--sd-txt);border:1px solid var(--sd-bor)}
+.pastilla.sin-datos .punto{box-shadow:inset 0 0 0 2px var(--sd-txt)}
+
+/* ------------------------------------------------------------------- tablas */
+.tabla-env{overflow:auto;max-height:420px;border:1px solid var(--linea);border-radius:5px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
+/* La leyenda de la tabla existe para el lector de pantalla: en la pantalla el
+   encabezado del panel ya dice lo mismo y repetirlo sería ruido. */
+caption{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap}
+/* El encabezado va sobre un gris muy claro: el texto se oscurece a #5b6472 para
+   que a 10 px siga pasando el contraste real (el --tenue apenas no llega). */
+thead th{position:sticky;top:0;z-index:1;background:#f6f7f9;text-align:left;font-size:10px;
+  font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#5b6472;padding:7px 9px;
+  border-bottom:1px solid var(--linea);white-space:nowrap}
+tbody td{padding:5px 9px;border-bottom:1px solid var(--linea2);vertical-align:top;color:var(--txt)}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#f6f9ff}
+tbody tr[hidden]{display:none}
+td.mono,th.mono{font-family:var(--fm);font-size:11.5px}
+td.num,th.num{text-align:right;font-family:var(--fm);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.centro,th.centro{text-align:center}
+td.est{width:1%;white-space:nowrap}
+.si{color:var(--ok-txt);font-weight:600}
+.no{color:var(--sd-txt)}
+/* Las rutas cortan por la barra, no por carácter: un tipógrafo corta por "/". */
+.ruta{font-family:var(--fm);font-size:11px;color:var(--txt2);word-break:normal;overflow-wrap:break-word}
+.vacio{font-size:11.5px;color:var(--tenue);font-style:italic;padding:8px 2px}
+.nulo{color:#8a93a1}
+body.compacto tbody td{padding:3px 9px;font-size:11.5px}
+body.compacto thead th{padding:4px 9px}
+body.compacto .resumen{font-size:13px}
+
+/* ----------------------------------------------------------------- gráficos */
+.graf-tit{font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:var(--tenue);
+  font-weight:700;margin-bottom:6px}
+.graf-caja svg{display:block;max-width:100%;height:auto;overflow:visible}
+.graf-caja svg text{font-family:var(--f)}
+.graf-caja svg text.mono{font-family:var(--fm)}
+.graf-nota{font-size:11.5px;color:var(--txt2);line-height:1.5;margin-top:8px}
+.dona-leyenda{list-style:none;font-size:11.5px;display:grid;gap:4px;min-width:0}
+.dona-leyenda li{display:grid;grid-template-columns:11px minmax(0,1fr) auto auto;gap:9px;align-items:center}
+.dona-leyenda i{width:11px;height:11px;border-radius:2px;flex:none}
+.dona-leyenda .n{font-family:var(--fm);font-variant-numeric:tabular-nums;color:var(--osc);font-weight:700}
+.dona-leyenda .p{font-family:var(--fm);color:var(--tenue);font-size:10.5px;min-width:44px;text-align:right;
+  font-variant-numeric:tabular-nums}
+.dona-leyenda .acl{color:var(--tenue)}
+
+.pie{padding:14px 2px 0;font-size:11.5px;color:var(--tenue);display:flex;gap:12px;flex-wrap:wrap;
+  justify-content:space-between;border-top:1px solid var(--linea);margin-top:14px}
+.sin-resultados{background:var(--papel);border:1px dashed var(--sd-bor);border-radius:var(--r);
+  padding:24px;text-align:center;color:var(--txt2);font-size:12.5px}
+.sin-resultados[hidden]{display:none}
+
+/* --------------------------------------------------------------- responsive */
+@media (max-width:1500px){
+  .panel{grid-column:span 6}
+  .panel[data-ancho="1"]{grid-column:span 12}
+}
+@media (max-width:1120px){
+  :root{--lat:0px}
+  .hamb{display:flex}
+  .cerrar-lat{display:block}
+  .lateral{width:288px;box-shadow:2px 0 18px rgba(10,12,18,.35)}
+  .velo{position:fixed;inset:0;background:rgba(16,18,24,.5);z-index:50}
+  .lienzo{margin-left:0}
+  .panorama{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:900px){
+  #herr-toggle{display:block}
+  .fila-herr{display:none}
+  body.herr-abierta .fila-herr{display:flex}
+  .buscador{flex:1 1 100%;max-width:none}
+  .grupo{width:100%}
+  .grupo button{flex:1;justify-content:center}
+}
+@media (max-width:860px){
+  .panel,.panel[data-ancho="1"]{grid-column:span 12}
+  .cuerpo{padding:12px 12px 36px}
+  .tabla-env{max-height:none}
+}
+@media (max-width:560px){
+  .titulo-barra .fino{display:none}
+  .fila-barra{padding:0 12px}
+  .fila-herr{padding:0 12px 10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ------------------------------------------------------------------ impreso */
+.solo-impresion{display:none}
+@page{margin:15mm 13mm}
+@media print{
+  :root{--lat:0px;--fondo:#fff}
+  body{background:#fff;font-size:10pt;color:#1a1d26}
+  .lateral,.velo,.barra-sup,.plegar,.saltar,.sin-resultados{display:none!important}
+  .lienzo{margin-left:0}
+  .cuerpo{padding:0;max-width:none}
+  .solo-impresion{display:block}
+  /* Nada depende de que la impresora dibuje fondos: el encabezado oscuro pasa a
+     negro sobre blanco en vez de arriesgar blanco sobre blanco. */
+  .cab-impresion{border-bottom:2px solid #1a1d26;padding-bottom:8px;margin-bottom:12px}
+  .cab-impresion h1{font-family:var(--fs);font-size:19pt;color:#1a1d26;line-height:1.15}
+  .cab-impresion p{font-size:9pt;color:#4b5563;margin-top:4px}
+  .cab-impresion .met{font-family:var(--fm);font-size:9pt;color:#1a1d26;margin-top:5px}
+  .grilla{display:block}
+  .panorama{display:block}
+  .caja{border:1px solid #b9bfc9;margin-bottom:8px;break-inside:avoid;box-shadow:none}
+  .panel{break-inside:auto;page-break-inside:auto;border:1px solid #b9bfc9;margin-bottom:12px;
+    grid-column:auto!important;box-shadow:none}
+  .panel > .cab{break-inside:avoid;break-after:avoid;background:none}
+  .resumen{break-inside:avoid}
+  /* La explicación y los pasos son justamente lo que alguien se lleva impreso:
+     se abren siempre, aunque en pantalla estuvieran plegados. */
+  .ate-cuerpo[hidden]{display:grid!important}
+  .ate-icono,.ate-ir{display:none!important}
+  .explica,.arreglo{break-inside:avoid;page-break-inside:avoid}
+  .explica{border-left:2px solid #b9bfc9}
+  .arreglo{border:1px solid #b9bfc9;border-left:3px solid #6b7480;background:none}
+  /* El número del paso no depende de que la impresora dibuje fondos: círculo
+     dibujado con borde y número en negro. */
+  .pasos li::before{background:none!important;color:#1a1d26;border:1px solid #1a1d26}
+  .cmd{background:none;border:1px solid #b9bfc9;white-space:pre-wrap;overflow:visible}
+  .graf-caja,.dona-fila{break-inside:avoid;page-break-inside:avoid}
+  .dos{grid-template-columns:minmax(0,1fr)}
+  /* Un filtro, una búsqueda o un panel plegado NUNCA producen un PDF parcial:
+     la impresión revierte todo lo que la pantalla escondió. */
+  .panel[hidden]{display:flex!important}
+  .panel .interior[hidden]{display:flex!important}
+  tbody tr[hidden]{display:table-row!important}
+  .vacio[data-sin-coincidencias]{display:none!important}
+  .tabla-env{overflow:visible;max-height:none;border-color:#b9bfc9}
+  thead{display:table-header-group}
+  thead th{background:#eceef1;color:#3b4250;position:static}
+  tr{break-inside:avoid}
+  tbody tr:hover td{background:none}
+  td{border-bottom:1px solid #dfe2e7}
+  .pastilla,.punto,.leyenda i,.dona-leyenda i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  a{color:inherit;text-decoration:none}
+  .pie{border-top:1px solid #b9bfc9}
+}
+</style>
+</head>
+<body>
+
+<a class="saltar" href="#contenido">Ir al contenido del informe</a>
+
+<!-- ===================================================== barra lateral / cajón -->
+<aside class="lateral" id="lateral" role="navigation" aria-label="Índice de sondas">
+  <div class="marca">
+    <div class="ident">
+      <h1>Doctor de {{PROYECTO}}</h1>
+      <div class="bajada">Diagnóstico del proyecto. Solo lectura: no modifica nada.</div>
+    </div>
+    <button type="button" class="cerrar-lat" id="cerrar-lat" aria-label="Cerrar el índice de sondas">&times;</button>
+  </div>
+  <dl class="meta-repo">
+    <div><dt class="et">Rama</dt><dd class="va" id="m-rama">—</dd></div>
+    <div><dt class="et">Último commit</dt><dd class="va" id="m-fecha">—</dd></div>
+    <div><dt class="et">Sondas con datos</dt><dd class="va" id="m-datos">—</dd></div>
+  </dl>
+  <div class="rotulo" id="rot-sondas">Sondas</div>
+  <ul class="indice" id="indice" aria-labelledby="rot-sondas"></ul>
+  <div class="pie-lateral">
+    Generado en esta máquina. Sin red y sin librerías externas: el informe no sale de acá.
+  </div>
+</aside>
+<div class="velo" id="velo" hidden></div>
+
+<div class="lienzo">
+  <header class="barra-sup">
+    <div class="fila-barra">
+      <button type="button" class="hamb" id="hamb" aria-label="Abrir el índice de sondas"
+              aria-expanded="false" aria-controls="lateral">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M1.5 3.5h13M1.5 8h13M1.5 12.5h13" stroke="#374151" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <p class="titulo-barra">Informe de diagnóstico
+        <span class="fino" id="tit-alcance" aria-live="polite"></span></p>
+      <div class="esp"></div>
+      <button type="button" class="boton" id="herr-toggle" aria-expanded="false" aria-controls="fila-herr">Herramientas</button>
+      <button type="button" class="boton" id="imprimir">Imprimir</button>
+    </div>
+    <div class="fila-herr" id="fila-herr">
+      <div class="buscador">
+        <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.6" fill="none" stroke="#6b7480" stroke-width="1.5"/>
+          <path d="M10.6 10.6 14 14" stroke="#6b7480" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <label class="solo-lectores" for="busca">Buscar en las filas de todas las tablas del informe</label>
+        <input id="busca" type="search" placeholder="Buscar en todas las filas: skill, ruta, marca…"
+               autocomplete="off" spellcheck="false">
+        <button type="button" class="limpiar" id="limpiar" hidden aria-label="Limpiar la búsqueda">&times;</button>
+      </div>
+      <div class="grupo" role="group" aria-label="Filtrar las sondas por estado" id="filtros">
+        <button type="button" data-f="todo" aria-pressed="true">Todas <span class="cnt" id="c-todo">0</span></button>
+        <button type="button" data-f="hallazgo" aria-pressed="false">Hallazgo <span class="cnt" id="c-hallazgo">0</span></button>
+        <button type="button" data-f="ok" aria-pressed="false">OK <span class="cnt" id="c-ok">0</span></button>
+        <button type="button" data-f="sin-datos" aria-pressed="false">Sin datos <span class="cnt" id="c-sin-datos">0</span></button>
+      </div>
+      <button type="button" class="boton" id="densidad" aria-pressed="false">Compacto</button>
+      <button type="button" class="boton" id="plegar-todo" aria-pressed="false">Contraer todo</button>
+    </div>
+  </header>
+
+  <main class="cuerpo" id="contenido" tabindex="-1">
+
+    <div class="cab-impresion solo-impresion">
+      <h1>Doctor de {{PROYECTO}} — informe de diagnóstico</h1>
+      <p>Diagnóstico de salud del proyecto. Solo lectura: no modifica nada.
+         Se imprime el informe completo, con todas las sondas y todas sus filas.</p>
+      <p class="met" id="imp-meta"></p>
+    </div>
+
+    <div class="aviso">
+      <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">
+        <circle cx="8" cy="8" r="7" fill="none" stroke="#1226aa" stroke-width="1.4"/>
+        <path d="M8 7.1v4.3M8 4.5v1.2" stroke="#1226aa" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+      <div><b>Cómo se lee.</b> Cada sonda devuelve <b>OK</b>, <b>HALLAZGO</b> o <b>SIN DATOS</b>.
+      No hay puntaje único a propósito: un número resume de más, da falsa objetividad y esconde
+      justo lo que hay que arreglar. <b>SIN DATOS no es aprobado</b> — normalmente significa que
+      todavía no hay código que mirar, y un repositorio vacío no es un repositorio sano.</div>
+    </div>
+
+    <section class="panorama">
+      <div class="caja" aria-labelledby="pan-tit">
+        <div class="cab">
+          <h2 id="pan-tit">Estado de las sondas</h2>
+          <span class="sub">conteos, no un porcentaje de salud</span>
+        </div>
+        <div class="graf-caja" id="franja-graf"></div>
+        <div class="leyenda" id="franja-leyenda"></div>
+        <p class="cobertura" id="cobertura"></p>
+      </div>
+      <div class="caja atencion" aria-labelledby="ate-tit">
+        <div class="cab">
+          <h2 id="ate-tit">Lo que pide atención</h2>
+          <span class="sub">hallazgos primero, después lo que no se midió — abrí cada
+            línea para ver qué significa y cómo se arregla</span>
+        </div>
+        <div id="atencion-cuerpo"></div>
+      </div>
+    </section>
+
+    <div class="grilla" id="grilla"></div>
+    <p class="sin-resultados" id="sin-resultados" hidden role="status">
+      Ninguna sonda coincide con lo que estás filtrando. Probá con <b>Todas</b> o limpiá la búsqueda.
+    </p>
+
+    <div class="pie">
+      <span>Generado por <code>doctor/doctor.py</code> — no se envió nada fuera de esta máquina.</span>
+      <span id="pie-corrida"></span>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===========================================================================
+   DATOS DE LA CORRIDA
+   Esto es lo único que cambia entre corridas. plantilla.py lo emite con
+   json.dumps(resultados): cada sonda de doctor.py devuelve
+   (titulo, estado, resumen, (cols, filas)) y, opcionalmente, un quinto
+   elemento con los datos del gráfico. El resto del archivo no se toca.
+   Los textos de "resumen" van tal cual los devuelve el motor.
+
+   Cada sonda puede traer además tres campos OPCIONALES, que son los que hacen
+   que el informe no solo mida sino que se entienda y se pueda accionar:
+
+     significa: "qué quiere decir, en criollo, esto que se midió"
+     importa:   "qué se rompe o qué riesgo hay si no se arregla"
+     acciones:  [ { paso:"…", comando:"…" }, { paso:"…" } ]   (comando opcional)
+
+   Los tres pueden faltar —una sonda sin nada que hacer no trae "acciones", y una
+   sonda vieja no trae ninguno— y el informe se dibuja igual: lo que no viene, no
+   se muestra. Nunca se inventa texto acá: si no está en los datos, no existe.
+   =========================================================================== */
+var INFORME = /*__DATOS__*/null/*__FIN__*/;
+
+/* ============================================================== utilidades */
+function $(s,c){ return (c||document).querySelector(s); }
+function $$(s,c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); }
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function clave(e){ return String(e).toLowerCase().replace(/\s+/g,"-"); }
+function miles(n){
+  var s = String(n), r = "", c = 0, i;
+  for (i = s.length - 1; i >= 0; i--){ r = s[i] + r; if (++c % 3 === 0 && i > 0) r = "." + r; }
+  return r;
+}
+function entero(v){
+  var m = String(v).match(/-?\d[\d.]*/);
+  return m ? parseInt(m[0].replace(/\./g,""), 10) : 0;
+}
+function recorte(s, max){ return s.length > max ? s.slice(0, Math.max(1,max-1)) + "…" : s; }
+/* La ruta corta por la barra (y por el guion de los nombres kebab-case),
+   no por carácter: "cerebro-digital/configuracion-ia/agentes.md" nunca queda "age / ntes". */
+function rutaHtml(v){ return esc(v).replace(/([\/\-])/g, "$1<wbr>"); }
+/* En file:// el acceso a localStorage puede tirar excepción: se ignora y sigue. */
+function memoria(k, v){
+  try{
+    if (v === undefined) return window.localStorage.getItem("doctor:" + k);
+    window.localStorage.setItem("doctor:" + k, v);
+  }catch(e){}
+  return null;
+}
+
+/* ===================================== explicación de la sonda (campos opcionales)
+   Todo lo de acá tolera que el campo no venga, venga vacío o venga con otra forma
+   de la esperada: devuelve "" y el bloque no se dibuja. Un informe que se rompe
+   porque una sonda no trae "acciones" sería peor que un informe sin acciones. */
+function limpio(v){ return (v == null ? "" : String(v)).trim(); }
+
+function accionesDe(s){
+  var a = s && s.acciones;
+  if (!a || typeof a.length !== "number") return [];
+  return Array.prototype.slice.call(a).map(function(x){
+    if (typeof x === "string") return { paso:limpio(x), comando:"" };
+    return { paso:limpio(x && x.paso), comando:limpio(x && x.comando) };
+  }).filter(function(x){ return x.paso || x.comando; });
+}
+function tieneDetalle(s){
+  return !!(limpio(s.significa) || limpio(s.importa) || accionesDe(s).length);
+}
+/* Lo que la sonda explica también se busca: quien escribe "wikilink" en el
+   buscador espera encontrar el panel que habla de wikilinks, esté esa palabra en
+   el título o en la explicación. */
+function textoDeDetalle(s){
+  return [limpio(s.significa), limpio(s.importa)].concat(
+    accionesDe(s).map(function(a){ return a.paso + " " + a.comando; })).join(" ");
+}
+function bloqueExplica(s){
+  var sig = limpio(s.significa), imp = limpio(s.importa);
+  if (!sig && !imp) return "";
+  return '<div class="explica">' +
+    (sig ? "<p><b>Qué significa.</b> " + esc(sig) + "</p>" : "") +
+    (imp ? "<p><b>Por qué importa.</b> " + esc(imp) + "</p>" : "") +
+    "</div>";
+}
+/* "Cómo se arregla": el tono lo fija el estado. En OK queda apagado y con una
+   aclaración, porque una sonda sana no tiene que parecer una urgencia. */
+function bloqueAcciones(s){
+  var ac = accionesDe(s);
+  if (!ac.length) return "";
+  var cl = s.estado === "OK" ? " apagado" : (s.estado === "SIN DATOS" ? " sin-datos" : "");
+  return '<div class="arreglo' + cl + '">' +
+    '<div class="arreglo-tit">Cómo se arregla</div>' +
+    '<ol class="pasos">' + ac.map(function(a){
+      return "<li><div>" + esc(a.paso) +
+        (a.comando ? '<code class="cmd">' + esc(a.comando) + "</code>" : "") + "</div></li>";
+    }).join("") + "</ol>" +
+    (s.estado === "OK"
+      ? '<p class="arreglo-nota">Esta sonda dio OK: son pasos para que siga así, no algo ' +
+        "que haya que correr hoy.</p>"
+      : "") +
+    "</div>";
+}
+
+/* El pedido viene ARMADO desde la sonda, con los datos del hallazgo adentro: quien lo
+   pega no tiene que explicarle nada al asistente. Y siempre termina pidiendo que muestre
+   antes de tocar — un informe que genera texto para pegarle a una IA es tambien una forma
+   comoda de romper cosas rapido. */
+function bloquePedido(s){
+  var p = limpio(s.pedido);
+  if (!p) return "";
+  return '<div class="pedido">' +
+    '<div class="pedido-cab"><span class="pedido-tit">Pedíselo a la inteligencia artificial</span>' +
+    '<button type="button" class="pedido-copiar" data-copiar>Copiar el pedido</button></div>' +
+    "<pre>" + esc(p) + "</pre>" +
+    '<p class="pedido-pie">Copialo y pegáselo al asistente con el repositorio abierto. ' +
+    "Ya trae los datos de este hallazgo: no hace falta explicarle nada más.</p>" +
+    "</div>";
+}
+var CHEVRON = '<svg class="ate-icono" width="11" height="11" viewBox="0 0 12 12" aria-hidden="true">' +
+  '<path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+  'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var FLECHA  = '<svg class="ate-icono" width="11" height="11" viewBox="0 0 12 12" aria-hidden="true">' +
+  '<path d="M4 2.5 7.5 6 4 9.5" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+  'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+var ESTADOS = ["OK","HALLAZGO","SIN DATOS"];
+var COLOR   = { "OK":"#35a339", "HALLAZGO":"#f97316", "SIN DATOS":"#8390a2" };
+var TEXTO   = { "OK":"#1c6b20", "HALLAZGO":"#8a4b00", "SIN DATOS":"#3f4856" };
+var AZUL    = "#1226aa";
+var TENUE   = "#6b7480";
+var OSCURO  = "#1A1D26";
+var SERIE   = ["#1226aa","#4a5bd0","#8b96e2","#c6ccf2","#dfe3f7"];
+var ANCHO_IMPRESION = 648;   /* ancho útil aproximado de una hoja A4 con márgenes */
+
+/* ================================================ inferencia de tipo de columna
+   Así plantilla.py no tiene que tipar nada: emite las tuplas crudas de doctor.py
+   y el tipo de cada columna sale de sus propios valores. */
+function inferirTipos(cols, filas){
+  return cols.map(function(nombre, i){
+    var vals = filas.map(function(f){ return String(f[i] == null ? "" : f[i]); })
+                    .filter(function(v){ return v !== ""; });
+    if (!vals.length) return { t:nombre, tipo:"texto" };
+    var todos = function(fn){ return vals.every(fn); };
+    if (todos(function(v){ return ESTADOS.indexOf(v) >= 0; })) return { t:nombre, tipo:"estado" };
+    if (todos(function(v){ return v === "si" || v === "no"; }))  return { t:nombre, tipo:"sino" };
+    if (todos(function(v){ return /^\d[\d.,]*(\s*\/\s*\d+)?(\s+[a-záéíóúñ]+)?$/i.test(v); }))
+      return { t:nombre, tipo:"num" };
+    if (vals.filter(function(v){ return v.indexOf("/") >= 0 && !/\s/.test(v); }).length >= vals.length*0.5)
+      return { t:nombre, tipo:"ruta" };
+    if (vals.filter(function(v){ return !/\s/.test(v); }).length >= vals.length*0.6)
+      return { t:nombre, tipo:"mono" };
+    return { t:nombre, tipo:"texto" };
+  });
+}
+
+/* ================================================================ SVG a mano
+   Regla única de todos los gráficos: se mide el ancho REAL del contenedor y se
+   dibuja a escala 1:1 (width y height del <svg> iguales al viewBox). Nunca se
+   estira un viewBox fijo, porque eso deforma la tipografía del gráfico y la deja
+   fuera de escala respecto de la página. */
+function medir(cont, forzado){
+  if (forzado) return forzado;
+  var w = cont ? cont.clientWidth : 0;
+  if (!w){ w = Math.min(760, (document.body.clientWidth || 760) - 48); }
+  return Math.max(240, Math.round(w));
+}
+function svgTag(w, h, etiqueta, cuerpo){
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" ' +
+         'preserveAspectRatio="xMinYMin meet" role="img" aria-label="' + esc(etiqueta) + '" ' +
+         'xmlns="http://www.w3.org/2000/svg">' + cuerpo + '</svg>';
+}
+function txt(x, y, s, o){
+  o = o || {};
+  return '<text x="' + x + '" y="' + y + '"' +
+         (o.mono ? ' class="mono"' : '') +
+         ' fill="' + (o.color || "#4b5563") + '"' +
+         ' font-size="' + (o.tam || 12) + '"' +
+         (o.peso ? ' font-weight="' + o.peso + '"' : '') +
+         (o.anclaje ? ' text-anchor="' + o.anclaje + '"' : '') +
+         '>' + esc(s) + '</text>';
+}
+
+/* Barras horizontales. Cada barra va envuelta en su <g> con el <title> ADENTRO,
+   que es la única forma de que el tooltip pertenezca a esa barra y no al SVG. */
+function barras(cont, datos, opc, forzado){
+  if (!cont) return;
+  opc = opc || {};
+  var W = medir(cont, forzado);
+  var angosto = W < 420;
+  var padDer  = 56;
+  var padIzq  = angosto ? 0 : Math.min(opc.padIzq || 190, Math.round(W * 0.44));
+  var util    = Math.max(40, W - padIzq - padDer);
+  var altoFila = angosto ? 42 : 26;
+  var tope = 0, i;
+  for (i = 0; i < datos.length; i++) tope = Math.max(tope, datos[i].val);
+  if (opc.umbral) tope = Math.max(tope, opc.umbral);
+  if (!tope) tope = 1;
+  var arriba = opc.umbral ? 20 : 4;
+  var alto = arriba + datos.length * altoFila + 6;
+  var s = [];
+
+  if (opc.umbral){
+    var xu = padIzq + util * opc.umbral / tope;
+    s.push('<line x1="' + xu.toFixed(1) + '" y1="' + (arriba - 7) + '" x2="' + xu.toFixed(1) +
+           '" y2="' + (alto - 6) + '" stroke="' + TENUE + '" stroke-width="1" stroke-dasharray="3 3"></line>');
+    s.push(txt(xu + (angosto ? 4 : 0), arriba - 11, "umbral " + opc.umbral + " " + (opc.unidad || ""),
+               { tam:10.5, color:TENUE, anclaje: angosto ? "start" : "middle" }));
+  }
+
+  var maxCar = Math.floor((padIzq - 12) / 6.9);
+  for (i = 0; i < datos.length; i++){
+    var d = datos[i];
+    var w = Math.max(d.val > 0 ? 3 : 0, util * d.val / tope);
+    var y = arriba + i * altoFila;
+    var color = d.color || AZUL;
+    var titulo = d.etq + ": " + miles(d.val) + (opc.unidad ? " " + opc.unidad : "") +
+                 (d.nota ? " · " + d.nota : "");
+    var g = '<g><title>' + esc(titulo) + '</title>';
+    if (angosto){
+      g += txt(0, y + 12, recorte(d.etq, Math.floor(W / 6.9)), { tam:12, mono:true, color:OSCURO });
+      g += txt(W, y + 12, miles(d.val), { tam:12, mono:true, anclaje:"end", color:"#4b5563" });
+      g += '<rect x="0" y="' + (y + 19) + '" width="' + util + '" height="10" rx="3" fill="#eef0f3"></rect>';
+      g += '<rect x="0" y="' + (y + 19) + '" width="' + (util * d.val / tope).toFixed(1) +
+           '" height="10" rx="3" fill="' + color + '"></rect>';
+    }else{
+      g += txt(padIzq - 12, y + 14, recorte(d.etq, Math.max(6, maxCar)),
+               { tam:12, mono:true, anclaje:"end", color:OSCURO });
+      g += '<rect x="' + padIzq + '" y="' + (y + 5) + '" width="' + util +
+           '" height="12" rx="3" fill="#eef0f3"></rect>';
+      g += '<rect x="' + padIzq + '" y="' + (y + 5) + '" width="' + w.toFixed(1) +
+           '" height="12" rx="3" fill="' + color + '"></rect>';
+      g += txt(padIzq + util + 8, y + 14, miles(d.val), { tam:12, mono:true, color:"#4b5563" });
+    }
+    s.push(g + '</g>');
+  }
+  cont.innerHTML = svgTag(W, alto, opc.alt || "Gráfico de barras", s.join(""));
+}
+
+/* Franja de estados: tres segmentos separados y rotulados con su CONTEO.
+   No es un porcentaje de salud ni un medidor: son cuántas sondas hay de cada cosa. */
+function franja(cont, cuentas, total, forzado){
+  if (!cont) return;
+  var W = medir(cont, forzado), alto = 30, hueco = 4, s = [];
+  var presentes = ESTADOS.filter(function(e){ return (cuentas[e] || 0) > 0; });
+  var util = W - hueco * Math.max(0, presentes.length - 1);
+  var x = 0;
+  presentes.forEach(function(e){
+    var n = cuentas[e], w = util * n / total;
+    s.push('<g><title>' + esc(e + ": " + n + " de " + total + " sondas") + '</title>' +
+      '<rect x="' + x.toFixed(1) + '" y="0" width="' + w.toFixed(1) + '" height="' + alto +
+      '" rx="4" fill="' + COLOR[e] + '"></rect>' +
+      (w > 26 ? txt(x + 10, 20, String(n), { tam:13, peso:700, color:"#ffffff" }) : "") +
+      '</g>');
+    x += w + hueco;
+  });
+  var alt = ESTADOS.map(function(e){ return (cuentas[e] || 0) + " " + e; }).join(", ") +
+            ", sobre " + total + " sondas";
+  cont.innerHTML = svgTag(W, alto, "Distribución de estados: " + alt, s.join(""));
+}
+
+/* Dona de composición. Escala azul a propósito: es un reparto, no un semáforo —
+   ninguna porción de deuda es "OK". */
+function dona(cont, segs, centro, alt, forzado){
+  if (!cont) return;
+  var lado = Math.min(208, medir(cont, forzado));
+  var total = segs.reduce(function(a, s){ return a + s.val; }, 0) || 1;
+  var cx = lado/2, cy = lado/2, r = lado*0.34, grosor = lado*0.13, ini = 0, s = [], i;
+  function arco(a0, a1){
+    var r0 = (a0-90)*Math.PI/180, r1 = (a1-90)*Math.PI/180;
+    var x0 = cx + r*Math.cos(r0), y0 = cy + r*Math.sin(r0);
+    var x1 = cx + r*Math.cos(r1), y1 = cy + r*Math.sin(r1);
+    return "M" + x0.toFixed(2) + " " + y0.toFixed(2) + " A" + r.toFixed(2) + " " + r.toFixed(2) +
+           " 0 " + ((a1-a0) > 180 ? 1 : 0) + " 1 " + x1.toFixed(2) + " " + y1.toFixed(2);
+  }
+  for (i = 0; i < segs.length; i++){
+    var ang = 360 * segs[i].val / total;
+    s.push('<g><title>' + esc(segs[i].etq + ": " + miles(segs[i].val)) + '</title>' +
+           '<path d="' + arco(ini, ini + Math.max(ang - 1.6, 0.8)) + '" fill="none" stroke="' +
+           (segs[i].color || SERIE[i % SERIE.length]) + '" stroke-width="' + grosor.toFixed(1) + '"></path></g>');
+    ini += ang;
+  }
+  s.push(txt(cx, cy + 4, miles(total), { anclaje:"middle", tam:Math.round(lado*0.15), peso:700, color:OSCURO }));
+  s.push(txt(cx, cy + Math.round(lado*0.12), centro, { anclaje:"middle", tam:11, color:TENUE }));
+  cont.innerHTML = svgTag(lado, lado, alt, s.join(""));
+}
+
+/* Mini barra apilada del panel: el reparto de las filas de ESA sonda, para leer
+   las distribuciones sin abrir nada. Tamaño fijo y chico: no se estira nunca.
+   Se dibuja SOLO cuando las filas realmente se reparten entre dos estados o más.
+   Si todas las filas dicen lo mismo —o la tabla no tiene columna de estado— no
+   hay nada que repartir y no se dibuja: una barra maciza verde debajo de una
+   sonda en HALLAZGO sería decoración que además contradice el encabezado. */
+function miniBarra(rep, total){
+  var presentes = ESTADOS.filter(function(e){ return rep[e]; });
+  if (presentes.length < 2 || !total) return "";
+  var W = 74, H = 8, x = 0, s = [];
+  presentes.forEach(function(e){
+    var w = W * rep[e] / total;
+    s.push('<rect x="' + x.toFixed(1) + '" y="0" width="' + Math.max(1.5, w - 1).toFixed(1) +
+           '" height="' + H + '" rx="2" fill="' + COLOR[e] + '"></rect>');
+    x += w;
+  });
+  var alt = "Reparto de las " + total + " filas: " +
+    presentes.map(function(e){ return rep[e] + " " + e; }).join(", ");
+  return '<svg class="mini" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H +
+         '" role="img" aria-label="' + esc(alt) + '">' + s.join("") + '</svg>';
+}
+
+/* ======================================================= preparación de datos */
+var S = INFORME.sondas.slice();
+S.forEach(function(s, i){
+  s.orden = (i + 1 < 10 ? "0" : "") + (i + 1);
+  s.sp    = s.sp || 4;
+  s.filas = s.filas || [];          /* una sonda sin tabla (doctor.py devuelve None) */
+  var cols = s.cols || [];
+  /* Una columna vacía en TODAS las filas no dice nada: una hilera de guiones es
+     peor que no mostrarla. Se saca antes de tipar, así los índices ya quedan bien. */
+  var utiles = cols.map(function(c, j){
+    return s.filas.some(function(f){ return String(f[j] == null ? "" : f[j]).trim() !== ""; });
+  });
+  if (s.filas.length && utiles.indexOf(false) >= 0){
+    cols = cols.filter(function(c, j){ return utiles[j]; });
+    s.filas = s.filas.map(function(f){ return f.filter(function(v, j){ return utiles[j]; }); });
+  }
+  s.cols  = inferirTipos(cols, s.filas);
+  s.iEstado = -1; s.iNum = -1;
+  s.cols.forEach(function(c, j){
+    if (c.tipo === "estado" && s.iEstado < 0) s.iEstado = j;
+    if (c.tipo === "num" && s.iNum < 0) s.iNum = j;
+  });
+  /* reparto de filas: SOLO si la tabla tiene una columna de estado de verdad.
+     Si no la tiene, no se inventa nada — se muestra la cantidad de filas y listo. */
+  s.reparto = {};
+  if (s.iEstado >= 0){
+    s.filas.forEach(function(f){
+      var e = String(f[s.iEstado]);
+      if (ESTADOS.indexOf(e) >= 0) s.reparto[e] = (s.reparto[e] || 0) + 1;
+    });
+  }
+  s.conHallazgo = s.reparto["HALLAZGO"] || 0;
+  s.suma = s.iNum >= 0 ? s.filas.reduce(function(a, f){ return a + entero(f[s.iNum]); }, 0) : 0;
+});
+
+var cuentas = { "OK":0, "HALLAZGO":0, "SIN DATOS":0 };
+S.forEach(function(s){ cuentas[s.estado] = (cuentas[s.estado] || 0) + 1; });
+var TOTAL = S.length, CON_DATOS = TOTAL - cuentas["SIN DATOS"];
+
+/* ======================================================= encabezado e índice */
+$("#m-rama").textContent  = INFORME.rama;
+$("#m-rama").title        = INFORME.rama;
+$("#m-fecha").textContent = INFORME.fecha;
+$("#m-datos").textContent = CON_DATOS + " de " + TOTAL;
+$("#pie-corrida").textContent = "Rama " + INFORME.rama + " · último commit " + INFORME.fecha;
+$("#imp-meta").textContent = "Rama " + INFORME.rama + "  ·  último commit " + INFORME.fecha +
+  "  ·  " + CON_DATOS + " de " + TOTAL + " sondas con datos.";
+
+$("#cobertura").innerHTML = "<b>" + CON_DATOS + " de " + TOTAL + "</b> sondas con datos. " +
+  "Las que dicen SIN DATOS no midieron: no cuentan como aprobadas.";
+
+$("#franja-leyenda").innerHTML = ESTADOS.map(function(e){
+  var d = { "OK":"se midió y no hay nada que corregir",
+            "HALLAZGO":"se midió y hay algo que arreglar o decidir",
+            "SIN DATOS":"todavía no se pudo medir" };
+  return '<div class="ley"><i class="punto ' + clave(e) + '" aria-hidden="true"></i>' +
+         '<b>' + esc(e) + " · " + (cuentas[e] || 0) + "</b>" +
+         '<span class="d">' + esc(d[e]) + "</span></div>";
+}).join("");
+
+ESTADOS.concat(["todo"]).forEach(function(e){
+  var f = e === "todo" ? "todo" : clave(e);
+  var n = e === "todo" ? TOTAL : (cuentas[e] || 0);
+  var el = $("#c-" + f); if (el) el.textContent = n;
+});
+
+$("#indice").innerHTML = S.map(function(s){
+  return '<li><a href="#p-' + s.id + '" data-ir="' + s.id + '" data-estado="' + clave(s.estado) + '">' +
+    '<span class="punto ' + clave(s.estado) + '" aria-hidden="true"></span>' +
+    '<span class="tit">' + esc(s.titulo) + "</span>" +
+    '<span class="cta" aria-hidden="true">' + s.filas.length + "</span>" +
+    '<span class="solo-lectores">, estado ' + esc(s.estado) + ", " + s.filas.length + " filas</span>" +
+    "</a></li>";
+}).join("");
+
+/* =========================================== "Lo que pide atención" (generado)
+   Sale de las propias sondas: las que están en HALLAZGO y las que están en SIN
+   DATOS — porque sin datos tampoco es aprobado. Ninguna prosa escrita a mano. */
+(function(){
+  /* Primero lo que se midió y dio hallazgo, después lo que no se pudo medir.
+     Dentro de cada grupo, el orden en que corrieron las sondas: ordenar 223
+     marcas de deuda contra 3 skills grandes sería comparar cosas distintas y
+     fabricar una prioridad que el Doctor no tiene cómo saber. */
+  var lista = S.filter(function(s){ return s.estado !== "OK"; }).sort(function(a, b){
+    if (a.estado === b.estado) return 0;
+    return a.estado === "HALLAZGO" ? -1 : 1;
+  });
+  if (!lista.length){
+    $("#atencion-cuerpo").innerHTML = '<p class="nada">Ninguna sonda pide atención en esta corrida: ' +
+      'las ' + TOTAL + ' midieron y no hay hallazgos. Igual conviene mirar la cobertura: ' +
+      'una sonda que no mide no es una sonda que aprueba.</p>';
+    return;
+  }
+  $("#atencion-cuerpo").innerHTML = "<ol>" + lista.map(function(s){
+    var cifra, unidad;
+    if (s.estado === "SIN DATOS"){ cifra = "—"; unidad = "sin medir"; }
+    else if (s.conHallazgo){ cifra = miles(s.conHallazgo); unidad = "de " + s.filas.length + " filas"; }
+    else if (s.suma){ cifra = miles(s.suma); unidad = "en total"; }
+    else { cifra = miles(s.filas.length); unidad = "filas"; }
+    var linea =
+      '<span class="punto ' + clave(s.estado) + '" aria-hidden="true"></span>' +
+      '<span class="q">' + esc(s.titulo) + "</span>" +
+      '<span class="cifra">' + esc(cifra) + "<small>" + esc(unidad) + "</small></span>" +
+      '<span class="d">' + esc(s.resumen) + "</span>";
+    /* Sin explicación no hay nada que desplegar: la línea sigue siendo el enlace
+       de siempre al panel, con una flecha en vez del chevron. Nadie abre una
+       fila para encontrarla vacía. */
+    if (!tieneDetalle(s)){
+      return '<li class="' + clave(s.estado) + '">' +
+        '<a class="ate-cab" href="#p-' + s.id + '" data-ir="' + s.id + '">' +
+        linea + FLECHA + "</a></li>";
+    }
+    /* Con explicación, la línea se abre ACÁ MISMO: quien está leyendo el
+       panorama no pierde el lugar para enterarse de qué hay que hacer. */
+    return '<li class="' + clave(s.estado) + '">' +
+      '<button type="button" class="ate-cab" aria-expanded="false" aria-controls="ate-' + s.id + '">' +
+      linea + CHEVRON + "</button>" +
+      '<div class="ate-cuerpo" id="ate-' + s.id + '" hidden>' +
+        bloqueExplica(s) + bloqueAcciones(s) +
+        '<p class="ate-ir"><a href="#p-' + s.id + '" data-ir="' + s.id + '">' +
+        "Ver la sonda completa, con su tabla</a></p>" +
+      "</div></li>";
+  }).join("") + "</ol>";
+})();
+
+/* ===================================================================== tablas */
+function celda(v, col){
+  var t = col.tipo, s = String(v == null ? "" : v);
+  if (t === "estado" && ESTADOS.indexOf(s) >= 0)
+    return '<td class="est"><span class="pastilla ' + clave(s) + '">' +
+           '<span class="punto ' + clave(s) + '" aria-hidden="true"></span>' + esc(s) + "</span></td>";
+  if (t === "sino")  return '<td class="centro ' + (s === "si" ? "si" : "no") + '">' + esc(s) + "</td>";
+  if (t === "num")   return '<td class="num">' + esc(s) + "</td>";
+  if (t === "ruta")  return '<td class="ruta">' + rutaHtml(s) + "</td>";
+  if (t === "mono")  return '<td class="mono">' + esc(s) + "</td>";
+  return "<td>" + (s === "" ? '<span class="nulo">—</span>' : esc(s)) + "</td>";
+}
+function tabla(s, titulo){
+  if (!s.filas.length) return '<p class="vacio">Esta sonda no devolvió filas.</p>';
+  var th = s.cols.map(function(c){
+    var cl = c.tipo === "num" ? ' class="num"' : (c.tipo === "sino" ? ' class="centro"' : "");
+    return '<th scope="col"' + cl + ">" + esc(c.t) + "</th>";
+  }).join("");
+  var tb = s.filas.map(function(f){
+    return '<tr data-buscar="' + esc(f.join(" ").toLowerCase()) + '">' +
+      f.map(function(v, i){ return celda(v, s.cols[i] || { tipo:"texto" }); }).join("") + "</tr>";
+  }).join("");
+  return '<div class="tabla-env"><table><caption>' + esc(titulo) + "</caption>" +
+         "<thead><tr>" + th + "</tr></thead><tbody>" + tb + "</tbody></table></div>";
+}
+
+/* ======================================== gráficos propios de cada sonda
+   Las reglas son genéricas y salen de la forma de la tabla, no de un texto
+   escrito a mano: si la sonda trae líneas por skill, barras con umbral más el
+   histograma; si tiene una columna numérica, barras; si no la tiene, se cuentan
+   las filas por su primera columna. Si algo no aplica, no se dibuja nada. */
+var GRAFICOS = [];   /* {cont, dibujar(forzado)} — se redibujan al cambiar el ancho */
+
+function registrar(cont, fn){ if (cont){ GRAFICOS.push({ cont:cont, fn:fn }); fn(); } }
+
+function graficosDe(s, raiz){
+  var cajas = $$(".graf-caja", raiz);
+  if (s.id === "tamano" && s.iNum >= 0){
+    var datos = s.filas.slice(0, 15).map(function(f){
+      var v = entero(f[s.iNum]);
+      return { etq:f[0], val:v, color: v > (s.umbral || Infinity) ? COLOR.HALLAZGO : AZUL };
+    });
+    registrar(cajas[0], function(fz){
+      barras(cajas[0], datos, { umbral:s.umbral, unidad:"líneas", padIzq:200,
+        alt:"Líneas de cada una de las quince skills más grandes, con el umbral de " +
+            s.umbral + " líneas marcado" }, fz);
+    });
+    var cortes = [
+      { etq:"más de " + s.umbral, min:s.umbral + 1, max:Infinity },
+      { etq:"201 a " + s.umbral, min:201, max:s.umbral },
+      { etq:"101 a 200", min:101, max:200 },
+      { etq:"51 a 100", min:51, max:100 },
+      { etq:"hasta 50", min:0, max:50 }
+    ];
+    var todos = s.filas.map(function(f){ return entero(f[s.iNum]); });
+    var cubos = cortes.map(function(c){
+      return { etq:c.etq + " líneas",
+               val:todos.filter(function(v){ return v >= c.min && v <= c.max; }).length,
+               color:c.min > s.umbral ? COLOR.HALLAZGO : "#8390a2" };
+    });
+    registrar(cajas[1], function(fz){
+      barras(cajas[1], cubos, { padIzq:150, unidad:"skills",
+        alt:"Cantidad de skills por rango de líneas" }, fz);
+    });
+    var top3 = todos.slice(0, 3).reduce(function(a, b){ return a + b; }, 0);
+    var suma = todos.reduce(function(a, b){ return a + b; }, 0);
+    var nota = $(".graf-nota", raiz);
+    if (nota && suma){
+      nota.textContent = "Las tres más grandes concentran " + miles(top3) + " de las " + miles(suma) +
+        " líneas: el " + Math.round(top3 / suma * 100) + " % del costo de contexto vive en el " +
+        Math.round(3 / todos.length * 100) + " % de las skills.";
+    }
+    return;
+  }
+  if (s.id === "deuda" && s.iNum >= 0){
+    var segs = s.filas.map(function(f, i){
+      return { etq: f[0] === "⚠" ? "⚠ (símbolo de advertencia en el texto)" : f[0],
+               val: entero(f[s.iNum]), color:SERIE[i % SERIE.length] };
+    });
+    var total = segs.reduce(function(a, x){ return a + x.val; }, 0) || 1;
+    registrar(cajas[0], function(fz){ dona(cajas[0], segs, "marcas",
+      "Reparto de las " + total + " marcas de pendiente por tipo", fz); });
+    var ley = $(".dona-leyenda", raiz);
+    if (ley){
+      ley.innerHTML = segs.map(function(x){
+        return '<li><i style="background:' + x.color + '" aria-hidden="true"></i>' +
+          "<span>" + esc(x.etq) + "</span>" +
+          '<span class="n">' + miles(x.val) + "</span>" +
+          '<span class="p">' + (100*x.val/total).toFixed(1).replace(".", ",") + " %</span></li>";
+      }).join("");
+    }
+    return;
+  }
+  if (!cajas.length) return;
+  if (s.iNum >= 0){
+    var it = s.filas.map(function(f){
+      var e = s.iEstado >= 0 ? String(f[s.iEstado]) : "";
+      return { etq:f[0], val:entero(f[s.iNum]),
+               color: e === "SIN DATOS" ? COLOR["SIN DATOS"] : (e === "HALLAZGO" ? COLOR.HALLAZGO : AZUL),
+               nota: e || "" };
+    });
+    registrar(cajas[0], function(fz){
+      barras(cajas[0], it, { padIzq:215, unidad:s.cols[s.iNum].t.toLowerCase(),
+        alt:s.cols[s.iNum].t + " por " + s.cols[0].t.toLowerCase() }, fz);
+    });
+    return;
+  }
+  /* sin columna numérica: se cuentan las filas por la primera columna */
+  var por = {}, orden = [];
+  s.filas.forEach(function(f){
+    if (por[f[0]] === undefined){ por[f[0]] = 0; orden.push(f[0]); }
+    por[f[0]]++;
+  });
+  if (orden.length === s.filas.length) return;   /* no agrupa nada: no aporta */
+  var it2 = orden.map(function(k){
+    var p = k.split("/");
+    return { etq:p[p.length - 1], val:por[k], color:COLOR.HALLAZGO, nota:k };
+  }).sort(function(a, b){ return b.val - a.val; });
+  registrar(cajas[0], function(fz){
+    barras(cajas[0], it2, { padIzq:250, unidad:"filas",
+      alt:"Filas agrupadas por " + s.cols[0].t.toLowerCase() }, fz);
+  });
+}
+
+/* ==================================================================== paneles */
+function esqueletoGraficos(s){
+  if (s.id === "tamano")
+    return '<div class="dos">' +
+      '<div><div class="graf-tit">Líneas por skill — las 15 más grandes</div>' +
+        '<div class="graf-caja"></div></div>' +
+      '<div><div class="graf-tit">Cómo se reparten las skills</div>' +
+        '<div class="graf-caja"></div><p class="graf-nota"></p></div></div>';
+  if (s.id === "deuda")
+    return '<div class="dona-fila"><div class="graf-caja"></div><ul class="dona-leyenda"></ul></div>';
+  if (s.id === "estructura")
+    return '<div><div class="graf-tit">Archivos versionados por carpeta</div>' +
+      '<div class="graf-caja"></div></div>';
+  if (s.id === "wikilinks")
+    return '<div><div class="graf-tit">Enlaces rotos por documento</div>' +
+      '<div class="graf-caja"></div></div>';
+  /* Sondas de código. No hace falta lógica nueva: las tres tienen la forma que el
+     dispatcher genérico ya sabe dibujar — una columna numérica, o filas que se
+     agrupan por la primera. Sólo hay que pedirle el lugar donde dibujar. */
+  if (s.id === "limites")
+    return '<div><div class="graf-tit">Límites rotos por archivo</div>' +
+      '<div class="graf-caja"></div></div>';
+  if (s.id === "trazabilidad")
+    return '<div><div class="graf-tit">Tests por archivo</div>' +
+      '<div class="graf-caja"></div></div>';
+  if (s.id === "practicas")
+    return '<div><div class="graf-tit">Casos por práctica</div>' +
+      '<div class="graf-caja"></div></div>';
+  if (s.id === "costura")
+    return '<div><div class="graf-tit">Operaciones por lado de la costura</div>' +
+      '<div class="graf-caja"></div></div>';
+  if (s.id === "tendencia")
+    return '<div><div class="graf-tit">Filas por sonda — cómo quedó esta corrida</div>' +
+      '<div class="graf-caja"></div></div>';
+  return "";
+}
+
+$("#grilla").innerHTML = S.map(function(s){
+  var subt = s.filas.length + (s.filas.length === 1 ? " fila" : " filas") +
+             (s.conHallazgo ? " · " + s.conHallazgo + " con hallazgo" : "");
+  return '<section class="panel" id="p-' + s.id + '" data-id="' + s.id +
+    '" data-estado="' + clave(s.estado) + '" data-ancho="' + (s.sp >= 8 ? "1" : "0") +
+    '" data-titulo="' + esc((s.titulo + " " + s.resumen + " " + textoDeDetalle(s)).toLowerCase()) +
+    '" style="--sp:' + s.sp + '" aria-labelledby="h-' + s.id + '">' +
+    '<div class="cab">' +
+      '<button type="button" class="plegar" aria-expanded="true" aria-controls="i-' + s.id + '" ' +
+        'aria-label="Contraer el panel ' + esc(s.titulo) + '">' +
+        '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">' +
+        '<path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+        'stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+      '<div class="ident">' +
+        '<div class="ord">Sonda ' + s.orden + "</div>" +
+        '<h3 id="h-' + s.id + '">' + esc(s.titulo) + "</h3>" +
+        '<div class="subcab"><span class="t">' + esc(subt) + "</span>" +
+          miniBarra(s.reparto, s.filas.length || 1) + "</div>" +
+      "</div>" +
+      '<span class="pastilla ' + clave(s.estado) + '">' +
+        '<span class="punto ' + clave(s.estado) + '" aria-hidden="true"></span>' +
+        esc(s.estado) + "</span>" +
+    "</div>" +
+    '<div class="interior" id="i-' + s.id + '">' +
+      '<p class="resumen">' + esc(s.resumen) + "</p>" +
+      /* Orden de lectura del panel: veredicto, qué significa, por qué importa,
+         la evidencia (gráfico y tabla) y recién al final qué hacer. Los pasos
+         cierran el panel porque son la conclusión, no el encabezado. */
+      bloqueExplica(s) +
+      esqueletoGraficos(s) +
+      tabla(s, "Sonda " + s.orden + " — " + s.titulo + ": " + s.filas.length +
+               " filas, estado " + s.estado + ".") +
+      '<p class="vacio" data-sin-coincidencias hidden>Ninguna fila de esta sonda coincide con la búsqueda.</p>' +
+      bloqueAcciones(s) + bloquePedido(s) +
+    "</div></section>";
+}).join("");
+
+S.forEach(function(s){ graficosDe(s, $("#p-" + s.id)); });
+
+/* ==================================================================== filtros */
+var estadoFiltro = "todo";   /* a propósito NO se recuerda entre aperturas: un
+                                informe no debe abrirse mostrando 3 de 8 sondas */
+var textoBusca = "";
+
+function aplicar(){
+  var visibles = 0, t = textoBusca.trim().toLowerCase();
+  $$(".panel").forEach(function(p){
+    var s = p.dataset.estado;
+    var porEstado = estadoFiltro === "todo" || s === estadoFiltro;
+    var filas = p.querySelectorAll("tbody tr"), coincide = 0;
+    Array.prototype.forEach.call(filas, function(tr){
+      var m = !t || tr.dataset.buscar.indexOf(t) >= 0;
+      tr.hidden = !m; if (m) coincide++;
+    });
+    var enTitulo = !t || p.dataset.titulo.indexOf(t) >= 0;
+    p.hidden = !(porEstado && (!t || coincide > 0 || enTitulo));
+    var aviso = p.querySelector("[data-sin-coincidencias]");
+    if (aviso) aviso.hidden = !(t && coincide === 0 && filas.length > 0);
+    if (!p.hidden) visibles++;
+  });
+  $("#sin-resultados").hidden = visibles > 0;
+  $("#tit-alcance").textContent = visibles === TOTAL
+    ? "— las " + TOTAL + " sondas"
+    : "— mostrando " + visibles + " de " + TOTAL;
+  $$("#indice a").forEach(function(a){
+    var p = document.getElementById("p-" + a.dataset.ir);
+    a.classList.toggle("apagado", !!(p && p.hidden));
+  });
+  $("#limpiar").hidden = !t;
+  redibujar(true);
+}
+
+$$("#filtros button").forEach(function(b){
+  b.addEventListener("click", function(){
+    estadoFiltro = b.dataset.f;
+    $$("#filtros button").forEach(function(o){ o.setAttribute("aria-pressed", String(o === b)); });
+    aplicar();
+  });
+});
+
+var caja = $("#busca");
+caja.addEventListener("input", function(){ textoBusca = caja.value; aplicar(); });
+caja.addEventListener("keydown", function(e){
+  if (e.key === "Escape" && caja.value){ caja.value = ""; textoBusca = ""; aplicar(); }
+});
+$("#limpiar").addEventListener("click", function(){
+  caja.value = ""; textoBusca = ""; aplicar(); caja.focus();
+});
+
+/* ============================================================ plegar / densidad */
+function plegar(p, cerrar){
+  var i = p.querySelector(".interior"), b = p.querySelector(".plegar");
+  i.hidden = cerrar;
+  p.dataset.plegado = cerrar ? "1" : "0";
+  b.setAttribute("aria-expanded", String(!cerrar));
+  b.setAttribute("aria-label", (cerrar ? "Expandir" : "Contraer") + " el panel " +
+                 p.querySelector("h3").textContent);
+  if (!cerrar) redibujar(true);
+}
+document.addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest(".plegar") : null;
+  if (!b) return;
+  var p = b.closest(".panel");
+  plegar(p, p.dataset.plegado !== "1");
+});
+/* Las líneas de "Lo que pide atención" abren y cierran su detalle en el lugar.
+   Es un <button> de verdad: anda con Enter y con la barra espaciadora sin que
+   haya que programar nada, y el aria-expanded le dice al lector de pantalla si
+   está abierto o cerrado. */
+document.addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest(".ate-cab[aria-expanded]") : null;
+  if (!b) return;
+  var estabaAbierto = b.getAttribute("aria-expanded") === "true";
+  b.setAttribute("aria-expanded", String(!estabaAbierto));
+  var cuerpo = document.getElementById(b.getAttribute("aria-controls"));
+  if (cuerpo) cuerpo.hidden = estabaAbierto;
+});
+
+var btnPlegar = $("#plegar-todo");
+btnPlegar.addEventListener("click", function(){
+  var cerrar = btnPlegar.getAttribute("aria-pressed") !== "true";
+  $$(".panel").forEach(function(p){ plegar(p, cerrar); });
+  btnPlegar.setAttribute("aria-pressed", String(cerrar));
+  btnPlegar.textContent = cerrar ? "Expandir todo" : "Contraer todo";
+});
+
+var btnDens = $("#densidad");
+function densidad(on){
+  document.body.classList.toggle("compacto", on);
+  btnDens.setAttribute("aria-pressed", String(on));
+  btnDens.textContent = on ? "Cómodo" : "Compacto";
+  memoria("densidad", on ? "1" : "0");
+}
+btnDens.addEventListener("click", function(){ densidad(btnDens.getAttribute("aria-pressed") !== "true"); });
+if (memoria("densidad") === "1") densidad(true);
+
+var btnHerr = $("#herr-toggle");
+btnHerr.addEventListener("click", function(){
+  var abierta = !document.body.classList.contains("herr-abierta");
+  document.body.classList.toggle("herr-abierta", abierta);
+  btnHerr.setAttribute("aria-expanded", String(abierta));
+  if (abierta) caja.focus();
+  redibujar(true);
+});
+
+/* =================================================================== imprimir
+   Antes de imprimir se abre y se muestra TODO: paneles plegados, filas que la
+   búsqueda escondió y sondas que el filtro sacó. Un PDF nunca sale a medias sin
+   avisar. Después de imprimir queda la pantalla como estaba. */
+var estadoPrevio = null;
+function prepararImpresion(){
+  estadoPrevio = { filtro:estadoFiltro, texto:textoBusca,
+                   plegados:$$(".panel").filter(function(p){ return p.dataset.plegado === "1"; }) };
+  $$(".panel").forEach(function(p){ if (p.dataset.plegado === "1") plegar(p, false); });
+  redibujar(true, ANCHO_IMPRESION);
+}
+function restaurarImpresion(){
+  if (!estadoPrevio) return;
+  estadoPrevio.plegados.forEach(function(p){ plegar(p, true); });
+  estadoPrevio = null;
+  redibujar(true);
+}
+window.addEventListener("beforeprint", prepararImpresion);
+window.addEventListener("afterprint", restaurarImpresion);
+$("#imprimir").addEventListener("click", function(){ window.print(); });
+
+/* ====================================================== cajón / menú hamburguesa
+   Cerrado usa el atributo hidden: no queda tabulable detrás del velo. Abierto es
+   un diálogo con foco atrapado, Escape y devolución del foco al botón. */
+var lateral = $("#lateral"), velo = $("#velo"), hamb = $("#hamb"), cerrarBtn = $("#cerrar-lat");
+var mqAngosto = window.matchMedia("(max-width:1120px)");
+var abierto = false, focoPrevio = null;
+
+function esAngosto(){ return mqAngosto.matches; }
+function sincronizar(){
+  if (!esAngosto()){
+    lateral.hidden = false;
+    lateral.setAttribute("role", "navigation");
+    lateral.removeAttribute("aria-modal");
+    velo.hidden = true;
+    hamb.setAttribute("aria-expanded", "false");
+    abierto = false;
+  }else{
+    lateral.hidden = !abierto;
+    velo.hidden = !abierto;
+    lateral.setAttribute("role", abierto ? "dialog" : "navigation");
+    if (abierto) lateral.setAttribute("aria-modal", "true");
+    else lateral.removeAttribute("aria-modal");
+    hamb.setAttribute("aria-expanded", String(abierto));
+  }
+  hamb.setAttribute("aria-label", (abierto ? "Cerrar" : "Abrir") + " el índice de sondas");
+}
+function menu(abrir){
+  if (!esAngosto()) return;
+  if (abrir && !abierto) focoPrevio = document.activeElement;
+  abierto = abrir;
+  sincronizar();
+  if (abrir){
+    var a = lateral.querySelector("#indice a") || cerrarBtn;
+    if (a) a.focus();
+  }else{
+    var destino = (focoPrevio && focoPrevio.focus && focoPrevio !== document.body) ? focoPrevio : hamb;
+    if (destino && destino.focus) destino.focus();
+    focoPrevio = null;
+  }
+}
+hamb.addEventListener("click", function(){ menu(!abierto); });
+cerrarBtn.addEventListener("click", function(){ menu(false); });
+velo.addEventListener("click", function(){ menu(false); });
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape" && abierto){ menu(false); return; }
+  if (e.key !== "Tab" || !abierto || !esAngosto()) return;
+  var f = $$("a[href],button:not([disabled]),input,[tabindex]:not([tabindex='-1'])", lateral)
+            .filter(function(el){ return el.offsetParent !== null; });
+  if (!f.length) return;
+  var primero = f[0], ultimo = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === primero){ e.preventDefault(); ultimo.focus(); }
+  else if (!e.shiftKey && document.activeElement === ultimo){ e.preventDefault(); primero.focus(); }
+});
+if (mqAngosto.addEventListener) mqAngosto.addEventListener("change", function(){ abierto = false; sincronizar(); });
+else if (mqAngosto.addListener) mqAngosto.addListener(function(){ abierto = false; sincronizar(); });
+sincronizar();
+
+/* ====================================================== navegación por el índice
+   Si se elige una sonda que el filtro o la búsqueda tenían escondida, se limpia
+   lo que la escondía, se despliega el panel y se lo resalta: nunca se cae en un
+   ancla vacía. */
+function irA(id){
+  var p = document.getElementById("p-" + id);
+  if (!p) return;
+  if (p.hidden){
+    estadoFiltro = "todo";
+    textoBusca = ""; caja.value = "";
+    $$("#filtros button").forEach(function(o){
+      o.setAttribute("aria-pressed", String(o.dataset.f === "todo"));
+    });
+    aplicar();
+  }
+  if (p.dataset.plegado === "1") plegar(p, false);
+  p.classList.add("destacado");
+  window.setTimeout(function(){ p.classList.remove("destacado"); }, 1300);
+  if (esAngosto() && abierto) menu(false);
+}
+document.addEventListener("click", function(e){
+  var a = e.target.closest ? e.target.closest("a[data-ir]") : null;
+  if (!a) return;
+  irA(a.dataset.ir);
+});
+
+/* ============================================ qué panel se está mirando (índice) */
+if ("IntersectionObserver" in window){
+  var vistos = {};
+  var obs = new IntersectionObserver(function(ent){
+    ent.forEach(function(en){ vistos[en.target.id] = en.isIntersecting ? en.intersectionRatio : 0; });
+    var mejor = null, r = 0;
+    Object.keys(vistos).forEach(function(k){ if (vistos[k] > r){ r = vistos[k]; mejor = k; } });
+    $$("#indice a").forEach(function(a){
+      if (mejor && "p-" + a.dataset.ir === mejor) a.setAttribute("aria-current", "true");
+      else a.removeAttribute("aria-current");
+    });
+  }, { rootMargin:"-62px 0px -55% 0px", threshold:[0, .25, .5, 1] });
+  $$(".panel").forEach(function(p){ obs.observe(p); });
+}
+
+/* ================================================= redibujo al cambiar el ancho
+   Los SVG se vuelven a dibujar con el ancho real del contenedor. Es lo único que
+   mantiene la tipografía de los gráficos en la misma escala que la de la página. */
+var temporizador, anchos = {};
+function redibujar(forzar, forzado){
+  GRAFICOS.forEach(function(g, i){
+    if (!g.cont.offsetParent && !forzado) return;    /* está oculto: se redibuja al abrirse */
+    var w = forzado || g.cont.clientWidth;
+    if (!forzar && Math.abs(w - (anchos[i] || 0)) < 8) return;
+    anchos[i] = w;
+    g.fn(forzado);
+  });
+}
+function alCambiarTamano(){
+  window.clearTimeout(temporizador);
+  temporizador = window.setTimeout(function(){ redibujar(false); }, 140);
+}
+/* Copiar el pedido. Delegado en document para que funcione con los paneles que se
+   arman despues. Dos caminos a proposito: navigator.clipboard es el moderno, pero en
+   un archivo abierto con file:// muchos navegadores lo consideran contexto inseguro y
+   lo rechazan — y este informe se abre justamente asi, con doble clic. El respaldo con
+   execCommand es viejo pero anda ahi, que es donde tiene que andar. */
+document.addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest("[data-copiar]") : null;
+  if (!b) return;
+  var caja = b.closest(".pedido");
+  var texto = caja ? (caja.querySelector("pre") || {}).textContent : "";
+  if (!texto) return;
+
+  function avisar(ok){
+    var antes = b.textContent;
+    b.textContent = ok ? "Copiado" : "No se pudo copiar";
+    b.classList.toggle("listo", ok);
+    setTimeout(function(){ b.textContent = antes; b.classList.remove("listo"); }, 2200);
+  }
+  function respaldo(){
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = texto;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:-1000px;opacity:0";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (ok) { avisar(true); } else { seleccionar(); }
+    }catch(err){ seleccionar(); }
+  }
+  /* Ultimo recurso: dejar el texto seleccionado. El navegador puede negarse a copiar
+     por politica -pasa en archivos locales-, pero seleccionar siempre se puede, y
+     desde ahi Ctrl+C es del usuario. Un boton que dice "no se pudo" sin ofrecer
+     salida es peor que no tener boton. */
+  function seleccionar(){
+    try{
+      var pre = caja.querySelector("pre");
+      var r = document.createRange();
+      r.selectNodeContents(pre);
+      var sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(r);
+      pre.scrollIntoView({block:"nearest"});
+      var antes = b.textContent;
+      b.textContent = "Seleccionado: copiá con Ctrl+C";
+      setTimeout(function(){ b.textContent = antes; }, 3200);
+    }catch(err){ avisar(false); }
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(function(){ avisar(true); }, respaldo);
+  } else {
+    respaldo();
+  }
+});
+
+window.addEventListener("resize", alCambiarTamano);
+if ("ResizeObserver" in window){
+  var ro = new ResizeObserver(alCambiarTamano);
+  ro.observe($("#grilla"));
+  ro.observe($(".panorama"));
+}
+
+/* ======================================================================= arranque */
+registrar($("#franja-graf"), function(fz){ franja($("#franja-graf"), cuentas, TOTAL, fz); });
+aplicar();
+
+/* El primer dibujo puede caer antes de que el navegador termine de acomodar la
+   página (abierto con doble clic, el ancho todavía puede ser cero). Se vuelve a
+   dibujar cuando ya hay medidas reales, sin depender de ResizeObserver. */
+if (window.requestAnimationFrame){
+  window.requestAnimationFrame(function(){
+    window.requestAnimationFrame(function(){ redibujar(true); });
+  });
+}
+window.addEventListener("load", function(){ redibujar(true); });
+
+/* Si el archivo se abrió con un ancla, se va a esa sonda sin romperse con un
+   hash mal formado. */
+try{
+  if (location.hash && location.hash.indexOf("#p-") === 0) irA(location.hash.slice(3));
+}catch(e){}
+
+})();
+</script>
+</body>
+</html>

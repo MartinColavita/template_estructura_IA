@@ -1,0 +1,21 @@
+# EOL determinista (LF) en las skills para que el espejo y la fuente queden
+# byte-idénticos (blobs iguales) sin depender del core.autocrlf de cada mantenedor.
+# El hook pre-commit igual compara insensible a CRLF/LF, pero esto mantiene los
+# blobs limpios. Se limita a las skills (las 3 copias) y a los scripts shell.
+cerebro-digital/configuracion-ia/skills/** text=auto eol=lf
+.agents/skills/** text=auto eol=lf
+.claude/skills/** text=auto eol=lf
+
+# Scripts shell siempre LF (el shebang no funciona con CRLF en Linux/CI).
+*.sh text eol=lf
+
+# Los hooks NO tienen extension .sh, asi que la regla de arriba no los alcanzaba y
+# quedaban en CRLF: en Linux/CI eso rompe el shebang y el hook no corre (falla ABIERTO,
+# que es lo peor: nadie se entera de que dejo de proteger).
+.githooks/** text eol=lf
+
+# Repos de codigo (back/front): mismo criterio que las skills de la raiz. Sus espejos
+# .claude/skills <-> .agents/skills tienen que quedar byte-identicos, y el hook los
+# compara con check_pair. Sin esto, el EOL depende del core.autocrlf de cada maquina.
+back/** text=auto eol=lf
+front/** text=auto eol=lf

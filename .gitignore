@@ -1,0 +1,97 @@
+# Config local de herramientas (no versionar)
+# opencode.json: se VERSIONA (config de carga de skills, SIN secretos; lo sensible va en .mcp.json/secrets.env)
+.engram
+.opencode/
+
+# .claude/: config/estado local de Claude Code, EXCEPTO el espejo de skills, que SÍ se versiona
+# (settings.local.json, sesiones, cache -> quedan afuera; .claude/skills/ es el que viaja con el repo).
+/.claude/*
+!/.claude/skills/
+# los hooks de sesion (registrar-sesion.py al terminar, tendencia.py al empezar) viajan con el repo: sin secretos
+!/.claude/settings.json
+# IDEs de JetBrains (IntelliJ / WebStorm / DataGrip): estado local por maquina.
+# El .idea/.gitignore que genera el propio IDE solo saca workspace.xml, asi que la
+# carpeta igual aparecia como cambio sin commitear en cada `git status`. Va entera.
+.idea/
+
+
+# Binarios locales (no versionar ejecutables)
+bin/*.exe
+
+# Presentaciones: se mantienen solo en local, NO se versionan
+entregables/presentaciones/
+
+# .agents/: config de IA per-host, EXCEPTO el espejo de skills, que SÍ se versiona.
+# Las skills viven en cerebro-digital/configuracion-ia/skills/ (fuente canónica);
+# (sin numero a proposito: este archivo no lo vigila ningun control; el numero vive en
+#  AGENTS.md, que si tiene guarda en el hook pre-commit.)
+# .agents/skills/ es su espejo versionado que Antigravity lee (el hook pre-commit
+# de .githooks/ lo mantiene == fuente; ver también el espejo /.claude/skills/ arriba).
+/.agents/*
+!/.agents/skills/
+
+# Integración Azure DevOps: secretos/config per-host (NO versionar, en cualquier carpeta)
+.mcp.json
+secrets.env
+# Borradores / WIP del paquete: no versionar (son especulativos, no parte del toolkit)
+
+# Transcripciones en bruto de reuniones (no versionar en git)
+*.docx
+
+# Doc del paquete Azure: los PDF se regeneran del HTML (no versionar)
+tablero/*.pdf
+
+
+# Espacio de borrador del equipo (mockups, docs, presentaciones en curso) — nunca se versiona,
+# salvo el README que explica cómo funciona
+borrador/*
+!borrador/README.md
+
+# Node / artefactos de build
+node_modules/
+dist/
+
+# Estado local de Claude Code dentro de los repos de codigo. Las reglas de arriba estan
+# ANCLADAS a la raiz (/.claude/*), asi que no cubren back/.claude ni front/.claude.
+**/.claude/settings.local.json
+
+# Volcados de crash de herramientas (Git Bash en Windows)
+*.stackdump
+
+# Informes del Doctor: artefacto derivado, se regenera
+doctor/salida/
+
+# Cache de Python
+__pycache__/
+*.pyc
+
+# ── Repos de codigo clonados dentro de back/ y front/ ──────────────────────────
+# El backend y cada front viven en su PROPIO repositorio de git. Los devs los clonan
+# adentro de estas carpetas para que las herramientas de IA lean todo localmente y de
+# una sola vez, sin saltar entre proyectos (ver doctor/README.md §4).
+#
+# Ese contenido NO se versiona aca: ya tiene su repositorio. Lo unico que este
+# repositorio aporta a esas carpetas -y que por eso se re-incluye- es el README que
+# explica la carpeta y el espejo de skills scoped que gobierna como se desarrolla.
+# Sin estas reglas, el primer `git status` despues de clonar muestra miles de archivos
+# ajenos y alguien termina commiteando un target/ o un node_modules entero.
+back/*
+!back/README.md
+!back/.claude/
+!back/.agents/
+front/*
+!front/README.md
+!front/.claude/
+!front/.agents/
+# Idem para el repositorio de pruebas de aceptacion, si esta aparte (ver qa/README.md).
+qa/*
+!qa/README.md
+
+# Config local de Gemini CLI: por maquina, puede llevar credenciales
+.gemini/*
+!.gemini/.env.example
+
+# Transcripciones de reunion que produce bin/extraer-reunion.ps1. Son insumo crudo y
+# pueden traer nombres y datos de personas: NUNCA se versionan. La regla 3.1 manda los
+# borradores a borrador/, pero ese script escribe aca por defecto.
+scratch/

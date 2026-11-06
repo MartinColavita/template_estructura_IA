@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía funcional — Tickets de Azure con IA</title>
+<style>
+  :root{
+    --ink:#191C28; --muted:#616676; --line:#E7E9F2; --bg:#F5F6FB; --card:#fff;
+    --brand:#4338CA; --brand2:#6D5EF6; --brand-soft:#EEEEFE; --brand-ink:#3730A3;
+    --ok:#0E9F6E; --ok-bg:#E7F7F0; --ok-ink:#065F46;
+    --warn:#B45309; --warn-bg:#FEF3E2; --warn-ink:#7C3A08;
+    --bad:#DC2626; --bad-bg:#FDECEC;
+    --shadow:0 10px 34px rgba(25,28,40,.09); --shadow2:0 3px 12px rgba(25,28,40,.06);
+    --r:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:840px;margin:0 auto;padding:28px 18px 96px}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:26px;padding:38px 34px 34px;text-align:center;box-shadow:var(--shadow)}
+  .hero .ico{width:58px;height:58px;margin:0 auto 14px;background:rgba(255,255,255,.18);border-radius:18px;display:flex;align-items:center;justify-content:center}
+  .hero h1{font-size:29px;letter-spacing:-.02em;line-height:1.2}
+  .hero p{opacity:.95;margin:10px auto 0;font-size:15.5px;max-width:560px}
+
+  /* MODELO MENTAL — 3 pasos */
+  .flow3{display:flex;gap:12px;margin:18px 0 6px}
+  .f3{flex:1;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 15px;box-shadow:var(--shadow2);position:relative}
+  .f3 .n{width:30px;height:30px;border-radius:10px;background:var(--brand-soft);color:var(--brand-ink);font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;margin-bottom:9px}
+  .f3 h3{font-size:15px} .f3 p{color:var(--muted);font-size:13px;margin-top:4px}
+  .f3:not(:last-child)::after{content:"→";position:absolute;right:-11px;top:50%;transform:translateY(-50%);color:var(--brand2);font-weight:800;font-size:16px;z-index:2}
+
+  /* SECCIONES */
+  .paso{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow2);padding:24px;margin:18px 0;border:1px solid var(--line)}
+  .head{display:flex;align-items:center;gap:13px;margin-bottom:6px}
+  .chip{flex:none;width:42px;height:42px;border-radius:13px;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:21px}
+  .head h2{font-size:20px;letter-spacing:-.01em} .head .sub{color:var(--muted);font-size:13.5px;margin-top:1px}
+
+  /* TABS */
+  .tabs{display:flex;gap:10px;margin:16px 0 6px}
+  .tab{flex:1;cursor:pointer;border:2px solid var(--line);background:var(--card);border-radius:15px;padding:14px;text-align:left;transition:.15s;font:inherit}
+  .tab:hover{border-color:var(--brand2)} .tab.on{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 3px rgba(67,56,202,.09)}
+  .tab .t{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px} .tab .d{color:var(--muted);font-size:12.5px;margin-top:4px}
+  .pill{font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.02em}
+  .pill.rec{background:var(--ok-bg);color:var(--ok)} .pill.alt{background:#EBEDF6;color:var(--muted)}
+  .panel{display:none;padding-top:8px} .panel.on{display:block;animation:fade .2s}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .only-print{display:none}
+
+  /* PASOS NUMERADOS */
+  .mini{list-style:none;counter-reset:m}
+  .mini>li{counter-increment:m;position:relative;padding:12px 0 12px 40px;border-bottom:1px dashed var(--line)}
+  .mini>li:last-child{border-bottom:none}
+  .mini>li::before{content:counter(m);position:absolute;left:0;top:11px;width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand-ink);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .apunte{color:var(--muted);font-size:13px;margin-top:3px}
+
+  /* COMANDO */
+  .cmd{position:relative;background:#12152A;color:#EAECFB;border-radius:13px;padding:14px 46px 14px 15px;margin:10px 0;overflow-x:auto}
+  .cmd code{font-family:'Cascadia Code',Consolas,monospace;font-size:12.5px;line-height:1.6;white-space:pre;display:block}
+  .cmd .ln{color:#8f96c9} /* placeholders */
+  .copy{position:absolute;top:9px;right:9px;background:rgba(255,255,255,.14);border:none;color:#fff;border-radius:9px;padding:6px 10px;font:inherit;font-size:11px;cursor:pointer}
+  .copy:hover{background:rgba(255,255,255,.26)} .copy.ok{background:var(--ok)}
+
+  .nota{background:var(--warn-bg);border-left:4px solid var(--warn);border-radius:11px;padding:11px 15px;margin:12px 0;font-size:13px;color:var(--warn-ink)}
+  .ok-box{background:var(--ok-bg);border-left:4px solid var(--ok);border-radius:11px;padding:11px 15px;margin:12px 0;font-size:13.5px;color:var(--ok-ink)}
+
+  /* EJEMPLOS — estilo chat */
+  .ej{border:1px solid var(--line);border-radius:16px;margin:14px 0;overflow:hidden;box-shadow:var(--shadow2);background:var(--card)}
+  .ej>summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;align-items:center;gap:13px}
+  .ej>summary::-webkit-details-marker{display:none}
+  .ej>summary .cid{flex:none;width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .ej>summary .ttl{font-weight:700;font-size:15.5px} .ej>summary .cap{display:block;color:var(--muted);font-size:12.5px;font-weight:400;margin-top:2px}
+  .ej>summary .chev{margin-left:auto;color:var(--brand);font-weight:800;transition:.2s}
+  .ej[open]>summary .chev{transform:rotate(180deg)}
+  .ej[open]>summary{border-bottom:1px solid var(--line)}
+  .ej .body{padding:16px 18px;background:#FBFCFF}
+  .step-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 6px}
+  .step-lbl:first-child{margin-top:0}
+
+  .chat{display:flex;flex-direction:column;gap:9px}
+  .msg{display:flex;gap:9px;max-width:94%}
+  .msg .av{flex:none;width:29px;height:29px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;font-weight:800}
+  .msg .bub{border-radius:15px;padding:9px 13px;font-size:13.5px}
+  .msg.vos{align-self:flex-end;flex-direction:row-reverse}
+  .msg.vos .av{background:var(--brand);color:#fff}
+  .msg.vos .bub{background:var(--brand);color:#fff;border-bottom-right-radius:5px}
+  .msg.ia .av{background:var(--ok-bg)}
+  .msg.ia .bub{background:#fff;border:1px solid var(--line);border-bottom-left-radius:5px}
+  .msg.in .av{background:#EEF0F4}
+  .msg.in .bub{background:#F7F3EF;border:1px dashed #E2CDBE;color:#7c4a2e;font-style:italic}
+
+  .ticket{background:#fff;border:1px solid var(--line);border-radius:13px;padding:6px 15px 13px;font-size:13px;margin:4px 0}
+  .ticket .th{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--brand-ink);margin:11px 0 8px;display:flex;align-items:center;gap:6px}
+  .ticket .f{margin:8px 0} .ticket .k{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--brand-ink);display:block}
+  .ticket .v{color:var(--ink)} .ticket code{background:var(--brand-soft);border-radius:5px;padding:.06em .35em;font-size:.9em}
+  .gherkin{font-family:'Cascadia Code',Consolas,monospace;font-size:12px;white-space:pre-wrap;background:#12152A;color:#EAECFB;border-radius:9px;padding:11px 13px;margin-top:5px}
+  .warn-i{color:var(--warn);font-weight:700}
+
+  /* PROGRESO / TABLAS */
+  .check{display:flex;align-items:flex-start;gap:11px;padding:8px 0;cursor:pointer;font-size:14px}
+  .check input{width:20px;height:20px;accent-color:var(--brand);margin-top:1px;flex:none;cursor:pointer}
+  .check.done span{color:var(--muted);text-decoration:line-through}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top} th{background:var(--brand-soft);color:var(--brand-ink);font-weight:700}
+  .pie{text-align:center;color:var(--muted);font-size:12.5px;margin-top:28px}
+  .reglas{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+  .reglas span{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:7px 14px;font-size:12px;font-weight:600}
+
+  @media (max-width:640px){.flow3{flex-direction:column}.f3:not(:last-child)::after{content:"↓";right:50%;top:auto;bottom:-13px;transform:translateX(50%)}.tabs{flex-direction:column}.msg{max-width:100%}}
+
+  /* IMPRESIÓN — PDF completo y prolijo */
+  @media print{
+    body{background:#fff}
+    .wrap{max-width:none;padding:0}
+    .copy{display:none!important}
+    .hero{box-shadow:none;border-radius:0}
+    .paso,.ej,.f3,.ticket,.nota,.ok-box{break-inside:avoid}
+    .tabs{display:none!important}
+    .panel{display:block!important;border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+    .only-print{display:block;font-weight:800;color:var(--brand-ink);font-size:13.5px;margin-bottom:4px}
+    .ej{break-inside:avoid}
+    .ej .body,.ej:not([open]) .body{display:block!important}
+    .ej .chev{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg></div>
+    <h1>Tickets de Azure, hablando en tu idioma</h1>
+    <p>Le contás en palabras lo que necesitás y la IA arma la historia, el bug o toda una épica, lista para el board. Vos revisás; con tu "dale", ella la escribe.</p>
+  </div>
+
+  <div class="flow3">
+    <div class="f3"><div class="n">1</div><h3>Conectás una vez</h3><p>Un solo comando y tu Claude Code queda hablando con Azure.</p></div>
+    <div class="f3"><div class="n">2</div><h3>Le pedís en palabras</h3><p>«Armá un bug con esto», «bajá la ficha de Reserva de salas al board».</p></div>
+    <div class="f3"><div class="n">3</div><h3>Revisás y confirmás</h3><p>Te muestra qué va a crear; con tu "dale", lo hace y te pasa el link.</p></div>
+  </div>
+
+  <!-- 1 -->
+  <div class="paso" id="c1">
+    <div class="head"><div class="chip">🔌</div><div><h2>Conectá tu PC con Azure</h2><div class="sub">Se hace una sola vez. Elegí una opción.</div></div></div>
+    <div class="tabs">
+      <button class="tab on" data-tab="token"><div class="t">Con un token <span class="pill alt">1 comando</span></div><div class="d">Pegás un código que copiás de Azure. No instalás nada.</div></button>
+      <button class="tab" data-tab="cuenta"><div class="t">Con tu cuenta <span class="pill rec">sin token</span></div><div class="d">Entrás con tu usuario de {{ORGANIZACION}} desde el navegador.</div></button>
+    </div>
+
+    <div class="panel on" data-panel="token">
+      <div class="only-print">Opción A — con token</div>
+      <ol class="mini">
+        <li><b>Conseguí tu token en Azure.</b><div class="apunte">Azure DevOps → tu foto (arriba a la derecha) → <b>Personal Access Tokens</b> → <b>New Token</b>. Nombre a gusto, vencimiento <b>90 días</b>, permiso <b>Work Items</b> (elegí <i>Read &amp; Write</i> si vas a crear/editar). <b>Create</b> → copiá el token (se muestra una sola vez).</div></li>
+        <li><b>Abrí la terminal</b> <span class="apunte">(Windows: buscá "Terminal" o "PowerShell").</span></li>
+        <li><b>Pegá este comando</b> en una sola línea, reemplazando las <b>2 partes</b> en <code>&lt;...&gt;</code>, y Enter:
+          <div class="cmd"><code id="k1">claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<span class="ln">&lt;tu-organizacion&gt;</span> --env AZURE_DEVOPS_AUTH_METHOD=pat --env AZURE_DEVOPS_PAT=<span class="ln">&lt;pega-tu-token&gt;</span> -- npx -y @tiberriver256/mcp-server-azure-devops</code><button class="copy" data-copy="k1">Copiar</button></div>
+        </li>
+      </ol>
+      <div class="ok-box"><b>Las 2 partes a reemplazar:</b> <code>&lt;tu-organizacion&gt;</code> = el nombre de tu organización en Azure · <code>&lt;pega-tu-token&gt;</code> = el token del paso 1. Nada más: te conectás directo a Azure en la nube. <b>No necesitás instalar ningún certificado</b> (Azure en la nube ya tiene uno público válido).</div>
+      <div class="nota"><b>Seguridad:</b> este comando <b>guarda tu token</b> en la configuración de tu PC. Es lo más simple. Si preferís no guardar ningún token, usá la pestaña <b>"Con tu cuenta"</b>. El token es como una contraseña: si se filtra, revocalo en Azure y creá uno nuevo.</div>
+    </div>
+
+    <div class="panel" data-panel="cuenta">
+      <div class="only-print">Opción B — con tu cuenta</div>
+      <ol class="mini">
+        <li><b>Instalá Azure CLI</b> una vez <span class="apunte">(pedíselo a Infraestructura, o de la página de Microsoft). Azure CLI es la herramienta de línea de comandos de Azure.)</span></li>
+        <li><b>Entrá con tu cuenta:</b> se abre el navegador y entrás con tu usuario de {{ORGANIZACION}}.
+          <div class="cmd"><code id="k2">az login</code><button class="copy" data-copy="k2">Copiar</button></div></li>
+        <li><b>Pegá este comando</b> en una sola línea, reemplazando <code>&lt;tu-organizacion&gt;</code>:
+          <div class="cmd"><code id="k3">claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<span class="ln">&lt;tu-organizacion&gt;</span> --env AZURE_DEVOPS_AUTH_METHOD=azure-cli -- npx -y @tiberriver256/mcp-server-azure-devops</code><button class="copy" data-copy="k3">Copiar</button></div></li>
+      </ol>
+      <div class="ok-box"><b>Ventaja:</b> no hay token que guardar ni renovar. Cuando expira la sesión, volvés a hacer <code>az login</code> y listo.</div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="paso" id="c2">
+    <div class="head"><div class="chip">✅</div><div><h2>Probá que quedó conectado</h2><div class="sub">Abrí Claude Code y escribile:</div></div></div>
+    <div class="cmd"><code id="k4">listá los proyectos de Azure</code><button class="copy" data-copy="k4">Copiar</button></div>
+    <div class="ok-box">Si te devuelve una lista de proyectos, ¡listo! Con <code>/mcp</code> ves el estado de la conexión en cualquier momento.</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="paso" id="c3">
+    <div class="head"><div class="chip">💬</div><div><h2>El día a día</h2><div class="sub">Le hablás como a un compañero. Tocá cada tarjeta para ver la charla completa.</div></div></div>
+
+    <!-- A -->
+    <details class="ej" open>
+      <summary><span class="cid">A</span><span class="ttl">Crear una historia de usuario<span class="cap">De una frase suelta a una historia con criterios y estimación.</span></span><span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="chat">
+          <div class="msg in"><div class="av">📩</div><div class="bub">"El operador de asignación quiere ver los recursos más cercanos para asignar más rápido."</div></div>
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Convertí esto en una historia para el board &lt;tu-proyecto&gt;.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Antes de redactar: 1) ¿desde qué pantalla? 2) ¿qué define «cercano» (distancia, zona)? 3) ¿la distancia sale de un servicio que ya existe?</div></div>
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Desde la pantalla de asignación; cercano = distancia en km; ya hay un servicio de geo.</div></div>
+        </div>
+        <div class="ticket">
+          <div class="th">📋 Historia propuesta</div>
+          <div class="f"><span class="k">Título</span><span class="v">Asignación — Ver recursos ordenados por cercanía al domicilio</span></div>
+          <div class="f"><span class="k">Descripción</span><span class="v">Como <b>operador de asignación</b> quiero <b>ver los recursos ordenados por cercanía</b> al domicilio de la <code>&lt;persona&gt;</code> para <b>asignar más rápido y reducir el tiempo de llegada</b>.</span></div>
+          <div class="f"><span class="k">Criterios de aceptación</span>
+            <div class="gherkin">Escenario: hay recursos disponibles
+  Dado que el operador abrió una solicitud con domicilio cargado
+  Cuando pide asignar un recurso
+  Entonces ve la lista ordenada del más cercano al más lejano
+  Y cada recurso muestra su distancia estimada
+
+Escenario: no hay recursos cercanos
+  Dado que ninguno cumple la distancia máxima
+  Entonces el sistema muestra "Sin recursos en la zona"
+  Y no ofrece asignar</div></div>
+          <div class="f"><span class="k">Reglas de negocio (ref. al OKF)</span><span class="v"><b>[RN-MOD-01]</b> "cercano" = distancia en km al domicilio de la <code>&lt;persona&gt;</code> <i>(OKF: cerebro-digital/…/rn-asignacion.md#cercania)</i></span></div>
+          <div class="f"><span class="k">Casos de uso (alcance de pruebas)</span><span class="v"><b>CU-01</b> hay recursos → lista ordenada por cercanía · <b>CU-02</b> ninguno en la zona → "Sin recursos" · <b>CU-03</b> sin domicilio cargado → pide cargarlo <i>(ligados a [RN-MOD-01])</i></span></div>
+          <div class="f"><span class="k">Puntos de historia</span><span class="v">8 &nbsp;<span class="warn-i">propuesto por la IA (ajustable)</span></span></div>
+          <div class="f"><span class="k">Etiqueta temática</span><span class="v">asignacion</span></div>
+          <div class="f"><span class="k">Documento fuente</span><span class="v"><code>cerebro-digital/…/asignacion.md</code> (por referencia)</span></div>
+        </div>
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Perfecto, creala.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Creada: <b>#5012</b> → https://dev.azure.com/&lt;org&gt;/…/_workitems/edit/5012</div></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- B -->
+    <details class="ej">
+      <summary><span class="cid">B</span><span class="ttl">Cargar un bug bien hecho<span class="cap">Ordena el "no anda + ver adjunto" y separa un solo ambiente.</span></span><span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="chat">
+          <div class="msg in"><div class="av">📩</div><div class="bub">"no anda el botón de enviar cuando no hay dirección, ver adjunto. lo vi en test y creo q tambien en prod"</div></div>
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Armá un bug con esto.</div></div>
+        </div>
+        <div class="ticket">
+          <div class="th">🐞 Bug propuesto</div>
+          <div class="f"><span class="k">Título</span><span class="v">Formulario de la solicitud — El botón "Enviar" queda deshabilitado sin dirección</span></div>
+          <div class="f"><span class="k">Pasos para reproducir</span><span class="v">
+            <b>Ambiente:</b> TEST (uno solo) &nbsp;·&nbsp; <b>Versión:</b> <span class="warn-i">⚠ pendiente</span> &nbsp;·&nbsp; <b>Fecha:</b> <span class="warn-i">⚠ pendiente</span><br>
+            1. Abrir una solicitud sin dirección cargada.<br>
+            2. Completar los demás datos.<br>
+            3. Intentar "Enviar".</span></div>
+          <div class="f"><span class="k">Resultado esperado</span><span class="v">Se puede enviar, o el sistema avisa qué falta.</span></div>
+          <div class="f"><span class="k">Resultado obtenido</span><span class="v">El botón queda deshabilitado, sin mensaje. No se puede continuar.</span></div>
+          <div class="f"><span class="k">Por qué es un error</span><span class="v">Frena un flujo operativo sin explicar la causa; el operador no sabe cómo destrabarlo.</span></div>
+          <div class="f"><span class="k">Gravedad</span><span class="v">3 - Medium (media)</span></div>
+        </div>
+        <div class="nota">Detectó que mezclabas <b>TEST y PROD</b> → dejó un solo ambiente y preguntó por el otro. Reemplazó cualquier dato real por marcadores (sin datos reales de personas).</div>
+        <div class="chat">
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Con los ⚠ confirmados, lo creo: <b>#5013</b> → https://dev.azure.com/&lt;org&gt;/…/edit/5013</div></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- C -->
+    <details class="ej">
+      <summary><span class="cid">C</span><span class="ttl">Mejorar una tarjeta que ya existe<span class="cap">La lee de verdad, dice qué le falta y la completa con tu OK.</span></span><span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Traé la <b>#4821</b>, decime qué le falta para estar lista, y pasá los criterios a Gherkin español.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">La #4821 no tiene Criterios de aceptación, ni Puntos, ni etiqueta temática. Te propongo esto: [criterios en Gherkin…] + estimación 5 ⚠. ¿La actualizo?</div></div>
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Sí, guardá los cambios.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Actualizada la #4821: + Criterios, + Puntos (5), + etiqueta. Nada más se tocó.</div></div>
+        </div>
+        <div class="ok-box">Antes de guardar siempre te muestra <b>qué campos cambia</b>. Sin tu "dale", no toca nada.</div>
+      </div>
+    </details>
+
+    <!-- D -->
+    <details class="ej">
+      <summary><span class="cid">D</span><span class="ttl">Buscar tarjetas y traer los links<span class="cap">Listás, filtrás y ordenás; buscar y leer nunca cambia nada.</span></span><span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Listá los bugs abiertos del sprint actual ordenados por gravedad, con el link de cada uno.</div></div>
+        </div>
+        <div class="ticket">
+          <div class="th">🔎 Resultado (solo lectura)</div>
+          <div class="f"><span class="v">
+            • <b>#5013</b> Botón "Enviar" deshabilitado — 3-Medium — <code>…/edit/5013</code><br>
+            • <b>#4990</b> Listado de personas error 500 — 2-High — <code>…/edit/4990</code><br>
+            • <b>#4975</b> Toaster no cierra — 4-Low — <code>…/edit/4975</code></span></div>
+        </div>
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Traeme la #4990 completa con sus comentarios.</div></div>
+        </div>
+        <div class="ok-box">Buscar y leer es <b>libre</b>: la IA nunca cambia nada al consultar.</div>
+      </div>
+    </details>
+
+    <!-- E -->
+    <details class="ej">
+      <summary><span class="cid">E</span><span class="ttl">Pedir una estimación (Puntos de historia)<span class="cap">La IA calcula el puntaje por complejidad + tokens; vos podés ajustarlo.</span></span><span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">¿Cuántos puntos le pondrías a la historia de cercanía (#5012)?</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Propongo <b>8 puntos</b>: complejidad media (cálculo de distancia), 1 integración (un servicio externo de padrón/geo), 2 reglas de negocio, y 3 fichas relacionadas para leer. Sugiero partirla en «endpoint de cercanía» + «UI del filtro». <span class="warn-i">⚠</span> si la distancia hay que crearla de cero, sube a 13. Lo calculé por complejidad + tokens; ajustalo si querés.</div></div>
+        </div>
+        <div class="nota">El puntaje lo <b>calcula la IA</b> por complejidad a nivel sistema + cuánto cuesta (en tokens) resolver e investigar lo relacionado. <b>No hay Planning Poker</b> (desarrolla la IA); vos podés ajustar el número.</div>
+      </div>
+    </details>
+
+    <!-- F -->
+    <details class="ej">
+      <summary><span class="cid">F</span><span class="ttl">Bajar una ficha entera al backlog<span class="cap">De una ficha del Cerebro Digital a un árbol de tickets dentro de su vertical slice.</span></span><span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="step-lbl">Si la ficha todavía no está lista</div>
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Bajá al board la ficha de Reserva de salas del Cerebro Digital.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub"><span class="warn-i">⚠</span> Esta ficha todavía no tiene cerrada su estructura (qué slices, capacidades y flujos la componen), así que no puedo bajar un número exacto de tickets sin inventarlo. Hay que cerrarla primero en el Cerebro Digital — es un paso del equipo de curación, no algo que yo decida.</div></div>
+        </div>
+        <div class="nota">Es a propósito: así el mismo pedido da <b>siempre el mismo árbol</b>, sea cual sea el asistente que lo haga. No "cuenta a ojo" sobre el texto.</div>
+        <div class="step-lbl">Una vez que la ficha ya está cerrada</div>
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Bajá al board la ficha de Reserva de salas del Cerebro Digital.</div></div>
+        </div>
+        <div class="ticket">
+          <div class="th">🌳 Árbol propuesto (sin tocar Azure todavía)</div>
+          <div class="f"><span class="v">
+            <b>Épica:</b> Gestión de salas &nbsp;<i>(vertical slice / dominio = la Épica)</i><br>
+            &nbsp;&nbsp;├─ <b>Feature:</b> Reserva de salas de reunión<br>
+            &nbsp;&nbsp;│&nbsp;&nbsp;├─ Historia: Solicitar la reserva de una sala<br>
+            &nbsp;&nbsp;│&nbsp;&nbsp;└─ Historia: Cancelar una reserva periódica completa<br>
+            &nbsp;&nbsp;└─ <b>Feature:</b> Catálogo de motivos<br>
+            Todas con etiqueta <code>reserva-salas</code> y documento fuente a la ficha (el slice es la Épica; no lleva tag de slice).</span></div>
+        </div>
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Dale, creá todo.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Bajo la Épica <b>Gestión de salas</b> (slice): creadas 2 features + 2 historias, enlazadas. Te paso los #IDs y links.</div></div>
+        </div>
+        <div class="ok-box">Es la parte más potente: de la documentación al backlog en una tanda. <b>Siempre</b> te muestra el árbol y espera tu "dale".</div>
+      </div>
+    </details>
+
+    <!-- G -->
+    <details class="ej">
+      <summary><span class="cid">G</span><span class="ttl">Tomar una tarea sin pisar a un compañero<span class="cap">Chequea quién la tiene antes de asignártela.</span></span><span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Tomo la #1234, la empiezo yo.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub"><span class="warn-i">⚠</span> La #1234 ya figura <b>asignada a otra persona</b> y en estado <b>Active</b>. Si la tomás vos, la pisás. ¿Querés reasignártela igual, o preferís avisar en un comentario y elegir otra?</div></div>
+        </div>
+        <div class="nota">Así se evita la desincronización clásica: dos personas agarran la misma historia sin enterarse.</div>
+        <div class="step-lbl">Si estaba libre, en cambio</div>
+        <div class="chat">
+          <div class="msg ia"><div class="av">✨</div><div class="bub">La #1234 está <b>sin asignar</b> y en <b>New</b>. La asigno a vos y la paso a <b>Active</b>. ¿Confirmás?</div></div>
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Dale.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Listo: #1234 asignada a vos y en Active. Te paso el link.</div></div>
+        </div>
+        <div class="ok-box">Leer quién la tiene es libre; <b>asignar y cambiar el estado</b> se hace solo con tu "dale".</div>
+      </div>
+    </details>
+
+    <!-- H -->
+    <details class="ej">
+      <summary><span class="cid">H</span><span class="ttl">Dejar (o leer) un comentario en una tarjeta<span class="cap">Consultás el hilo o dejás una nota, siempre revisada antes.</span></span><span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="step-lbl">Para leer lo que ya se dijo</div>
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">¿Qué comentarios tiene la #1234?</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Tiene 3 comentarios. El último, de ayer: «Falta confirmar el ambiente con Infra». Te los resumo o te paso el hilo completo.</div></div>
+        </div>
+        <div class="step-lbl">Para dejar uno</div>
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Comentá en la #1234 que quedó a la espera de que Infra confirme el ambiente.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Voy a agregar este comentario en la #1234: «En espera: pendiente de que Infra confirme el ambiente antes de continuar.» ¿Lo publico?</div></div>
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Sí.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Comentario publicado en la #1234.</div></div>
+        </div>
+        <div class="ok-box">Leer el hilo es libre; <b>publicar un comentario</b> te lo muestra y espera tu confirmación. Nunca datos personales reales en el comentario.</div>
+      </div>
+    </details>
+
+    <!-- I -->
+    <details class="ej">
+      <summary><span class="cid">I</span><span class="ttl">Auditar el board / preguntarle qué falta<span class="cap">Consultá cobertura y desfases; leer y auditar nunca cambia nada.</span></span><span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="chat">
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">¿La ficha de Reserva de salas ya está en el board y al día?</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Sí: la Feature <b>Reserva de salas de reunión</b> (#4801), bajo la Épica <b>Gestión de salas</b>, con 3 historias, todas referenciando la ficha. <span class="warn-i">⚠</span> Detecté un <b>desfase</b>: la ficha sumó una regla que no está en los criterios de la <b>#4803</b>. ¿La actualizo?</div></div>
+          <div class="msg vos"><div class="av">🧑</div><div class="bub">Dale, actualizala y avisá al que la tenga asignada.</div></div>
+          <div class="msg ia"><div class="av">✨</div><div class="bub">Te muestro el cambio, lo aplico con tu OK, y dejo un comentario con @mención + la etiqueta <b>cambio-pendiente-lectura</b> para que no siga sobre lo viejo.</div></div>
+        </div>
+        <div class="nota">Consultar y auditar es <b>solo lectura</b> (no cambia nada). Si algo quedó desfasado, te lo propone y recién con tu "dale" lo actualiza y avisa.</div>
+        <div class="ok-box">Tip de equipo: guardá en Azure el query <b>"cambios pendientes de lectura"</b> y revisalo al empezar el día — es el "git pull" del board: te muestra tus tarjetas que cambiaron y todavía no leíste.</div>
+      </div>
+    </details>
+
+    <div class="nota" style="margin-top:14px">Cada ticket queda anotado en un <b>índice liviano</b> del historial que ata la ficha (documento fuente) con el <b>#ID</b> de Azure y un resumen de una línea — para no perder el rastro, sin duplicar contenido.</div>
+    <div class="ok-box" style="margin-top:12px"><b>La regla que te deja tranquilo:</b> leer y buscar es libre; para crear o editar, la IA te muestra qué va a hacer y espera tu "dale". Nunca toca el tablero sola.</div>
+  </div>
+
+  <!-- PROGRESO -->
+  <div class="paso">
+    <div class="head"><div class="chip">🏁</div><div><h2>Tu progreso</h2><div class="sub">Se guarda en tu navegador.</div></div></div>
+    <label class="check"><input type="checkbox" data-k="a"><span>Conecté mi PC con Azure</span></label>
+    <label class="check"><input type="checkbox" data-k="b"><span>Probé con "listá los proyectos"</span></label>
+    <label class="check"><input type="checkbox" data-k="c"><span>Creé mi primera historia</span></label>
+    <label class="check"><input type="checkbox" data-k="d"><span>Cargué mi primer bug</span></label>
+    <label class="check"><input type="checkbox" data-k="e"><span>Tomé una tarea (asignar + Active)</span></label>
+    <label class="check"><input type="checkbox" data-k="f"><span>Dejé un comentario en una tarjeta</span></label>
+    <label class="check"><input type="checkbox" data-k="g"><span>Consulté o audité el board (solo lectura)</span></label>
+  </div>
+
+  <!-- REGLAS -->
+  <div class="paso" id="c4">
+    <div class="head"><div class="chip">🛡️</div><div><h2>Reglas que la IA respeta siempre</h2></div></div>
+    <table>
+      <tr><th>Regla</th><th>Qué significa</th></tr>
+      <tr><td>Español total</td><td>Todo en español, criterios en Gherkin (Dado / Cuando / Entonces).</td></tr>
+      <tr><td>Sin datos reales de personas</td><td>Nunca datos reales: usa marcadores <code>&lt;persona&gt;</code>, <code>&lt;identificador&gt;</code>, <code>&lt;dato-sensible&gt;</code>.</td></tr>
+      <tr><td>No inventa</td><td>Lo que no sabe lo marca <code>⚠</code> y te lo pregunta.</td></tr>
+      <tr><td>Escribir = con tu "dale"</td><td>Leer es libre; crear o editar, solo con tu confirmación (te muestra la propuesta y recién con tu "dale" escribe).</td></tr>
+      <tr><td>Solo el tablero autorizado</td><td>Crea/edita únicamente en <b>{{AZURE_PROYECTO}}</b>; cualquier otro tablero lo rechaza y te avisa.</td></tr>
+      <tr><td>No duplica</td><td>Antes de crear, busca si ya existe una tarjeta equivalente; si la hay, te la muestra (con el link) en vez de crear otra.</td></tr>
+      <tr><td>Funcional hasta Historia</td><td>Propone Épica / Feature / Historia; las Tareas técnicas las arma Desarrollo en una instancia posterior (planning).</td></tr>
+      <tr><td>Mismo resultado, sin importar la herramienta</td><td>Cuántas Épicas/Features/Historias arma al bajar una ficha <b>no depende</b> de si usás Claude Code, opencode o Antigravity: sale de lo que ya está definido en el documento, no del criterio de cada asistente.</td></tr>
+    </table>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div class="paso" id="c5">
+    <div class="head"><div class="chip">🔧</div><div><h2>Si algo no funciona</h2></div></div>
+    <table>
+      <tr><th>Síntoma</th><th>Solución</th></tr>
+      <tr><td>"No autorizado"</td><td>El token venció (creá uno nuevo) o, con tu cuenta, volvé a hacer <code>az login</code>.</td></tr>
+      <tr><td>No deja crear o editar</td><td>Tu token es de solo lectura. Creá uno con <b>Work Items (Read &amp; Write)</b>.</td></tr>
+      <tr><td>No encuentra el proyecto</td><td>Revisá que <code>&lt;tu-organizacion&gt;</code> esté bien escrito.</td></tr>
+      <tr><td>No aparece el server</td><td>Escribí <code>/mcp</code> en Claude Code: <code>azure-devops</code> debe figurar conectado. Si no, repetí el comando del paso 1.</td></tr>
+      <tr><td>"No puedo bajar la ficha, falta cerrar su estructura"</td><td>Es normal: la ficha aún no declara sus slices/capacidades/flujos. Avisale al equipo de curación (Cerebro Digital) para que la cierre; recién ahí se puede derivar.</td></tr>
+      <tr><td>Cambié de PC, o probé desde otra terminal</td><td>El token guardado con el comando del paso 1 es <b>por PC</b>. Si abrís una terminal <i>nueva</i> justo después de conectarte, puede tardar en verlo: cerrá y volvé a abrir la herramienta de IA.</td></tr>
+    </table>
+  </div>
+
+  <div class="pie">
+    <div class="reglas"><span>Español</span><span>Sin datos reales de personas</span><span>No inventa: pregunta</span><span>Escribir = con tu "dale"</span></div>
+    Guía funcional · paquete redaccion-tickets-azure (tablero)
+  </div>
+</div>
+
+<script>
+  const tabs=document.querySelectorAll('.tab');
+  tabs.forEach(function(tab){tab.addEventListener('click',function(){const n=tab.getAttribute('data-tab');tabs.forEach(function(t){t.classList.toggle('on',t===tab)});document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.getAttribute('data-panel')===n)})})});
+  document.querySelectorAll('.copy').forEach(function(b){b.addEventListener('click',function(){const el=document.getElementById(b.getAttribute('data-copy'));const t=(el.textContent||'').trim();const ok=function(){b.textContent='Copiado';b.classList.add('ok');setTimeout(function(){b.textContent='Copiar';b.classList.remove('ok')},1500)};try{navigator.clipboard.writeText(t).then(ok).catch(function(){fb(t);ok()})}catch(e){fb(t);ok()}})});
+  function fb(t){try{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a)}catch(e){}}
+  document.querySelectorAll('.check input').forEach(function(cb){const k='gf-'+cb.getAttribute('data-k');try{if(localStorage.getItem(k)==='1'){cb.checked=true;cb.closest('.check').classList.add('done')}}catch(e){}cb.addEventListener('change',function(){cb.closest('.check').classList.toggle('done',cb.checked);try{localStorage.setItem(k,cb.checked?'1':'0')}catch(e){}})});
+</script>
+</body>
+</html>

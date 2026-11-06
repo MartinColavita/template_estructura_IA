@@ -1,0 +1,4 @@
+# Reglas de Spectral para validar el openapi.yaml de cada repo de codigo.
+# Las mismas que usa el back hoy (docs/ARCHITECTURE.md): las estandar de OpenAPI.
+# Se pasan con --ruleset porque el verificador no puede escribir archivos.
+extends: ["spectral:oas"]

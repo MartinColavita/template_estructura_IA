@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentación técnica — Integración Azure DevOps</title>
+<style>
+  :root{
+    --ink:#191C28; --muted:#5B6070; --line:#E7E9F2; --bg:#F5F6FB; --card:#fff;
+    --brand:#4338CA; --brand2:#6D5EF6; --brand-soft:#EEEEFE; --brand-ink:#3730A3;
+    --ok:#0E9F6E; --ok-bg:#E7F7F0; --ok-ink:#065F46;
+    --warn:#B45309; --warn-bg:#FEF3E2; --warn-ink:#7C3A08;
+    --code-bg:#12152A; --code-fg:#EAECFB;
+    --shadow:0 10px 34px rgba(25,28,40,.09); --shadow2:0 3px 12px rgba(25,28,40,.06); --r:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:15px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc{max-width:900px;margin:0 auto;padding:30px 20px 80px}
+
+  .hero{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:24px;padding:34px 32px;box-shadow:var(--shadow)}
+  .hero .tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  .hero h1{font-size:27px;letter-spacing:-.02em;margin:8px 0 6px}
+  .hero p{opacity:.95;font-size:15px;max-width:640px}
+  .hero .meta{margin-top:14px;font-size:12.5px;opacity:.82}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow2);padding:24px;margin:18px 0}
+  .head{display:flex;align-items:center;gap:13px;margin-bottom:10px}
+  .chip{flex:none;width:42px;height:42px;border-radius:13px;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:21px}
+  .head h2{font-size:20px;letter-spacing:-.01em} .head .n{color:var(--brand);font-weight:800;margin-right:.35em}
+  h3{font-size:15px;margin:18px 0 6px;color:var(--brand-ink)}
+  p{margin:.5em 0} a{color:var(--brand-ink)}
+  code{background:var(--brand-soft);border-radius:5px;padding:.06em .36em;font-family:'Cascadia Code',Consolas,monospace;font-size:.87em}
+  .codeblock{background:var(--code-bg);color:var(--code-fg);border-radius:12px;padding:14px 16px;overflow:auto;font-family:'Cascadia Code',Consolas,monospace;font-size:12.5px;line-height:1.6;white-space:pre;margin:12px 0}
+  .codeblock .c{color:#8f96c9}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top} th{background:var(--brand-soft);color:var(--brand-ink);font-weight:700}
+  .callout{border-radius:12px;padding:12px 16px;margin:14px 0;border-left:4px solid;font-size:13.5px} .callout .t{font-weight:700;display:block;margin-bottom:2px}
+  .regla{background:var(--brand-soft);border-color:var(--brand)} .ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok-ink)} .warn{background:var(--warn-bg);border-color:var(--warn);color:var(--warn-ink)}
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 22px;margin:18px 0}
+  .toc b{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .toc ol{margin:.5em 0 0;padding-left:1.3em;columns:2;font-size:14px} .toc a{text-decoration:none}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  .sk{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:#FBFCFF}
+  .sk .nm{font-family:'Cascadia Code',Consolas,monospace;font-weight:700;color:var(--brand-ink);font-size:13.5px}
+  .sk .ds{font-size:12.8px;color:var(--muted);margin-top:4px}
+  .sk .wr{display:inline-block;margin-top:8px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:2px 8px;border-radius:99px}
+  .wr.no{background:#EEF0F6;color:var(--muted)} .wr.si{background:var(--warn-bg);color:var(--warn-ink)}
+  .tree{background:#FBFCFF;border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto;font-family:'Cascadia Code',Consolas,monospace;font-size:12.7px;line-height:1.75;white-space:pre}
+  .tree .d{color:var(--brand-ink);font-weight:700} .tree .cm{color:var(--muted)}
+  .glo{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 18px}
+  .glo dt{font-weight:700;color:var(--brand-ink);margin-top:12px;font-size:13.5px} .glo dt:first-child{margin-top:4px}
+  .glo dd{margin:.15em 0 0;color:var(--muted);font-size:13.5px}
+  .pie{text-align:center;color:var(--muted);font-size:12.5px;margin-top:26px}
+  @media (max-width:640px){.grid,.toc ol{grid-template-columns:1fr;columns:1}}
+  @media print{
+    body{background:#fff}.doc{max-width:none;padding:0}
+    .hero{box-shadow:none;border-radius:0}.card{box-shadow:none;break-inside:avoid}
+    .sk,.callout,table,.tree,.glo,.codeblock{break-inside:avoid}
+    .head h2{break-after:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="doc">
+
+<div class="hero">
+  <div class="tag">{{PRODUCTO}} · tablero</div>
+  <h1>Documentación técnica</h1>
+  <p>Qué es, cómo funciona por dentro y qué se puede hacer: el paquete que convierte el conocimiento del proyecto en tickets de Azure DevOps, con la IA redactando y —con tu confirmación— escribiendo en el tablero.</p>
+  <div class="meta">Audiencia técnica · Complementa la GUIA-FUNCIONAL.html (día a día del usuario).</div>
+</div>
+
+<div class="toc">
+  <b>Contenido</b>
+  <ol>
+    <li><a href="#que">Qué es y para qué</a></li>
+    <li><a href="#flujo">El flujo técnico</a></li>
+    <li><a href="#skills">Funcionalidades y skills</a></li>
+    <li><a href="#azure">La conexión con Azure</a></li>
+    <li><a href="#estructura">Estructura de carpetas</a></li>
+    <li><a href="#carga">Carga en las 4 herramientas + hook anti-drift</a></li>
+    <li><a href="#estimacion">Backlog por vertical slice, estimación e historial</a></li>
+    <li><a href="#glosario">Glosario</a></li>
+  </ol>
+</div>
+
+<!-- 1 -->
+<div class="card" id="que">
+  <div class="head"><div class="chip">🎯</div><h2><span class="n">1.</span>Qué es y para qué</h2></div>
+  <p>Una <b>sección integrada</b> del repo que toma un pedido pobre (un título suelto, un link, un "ver adjunto") o una ficha de documentación y devuelve un <b>work item profesional de Azure DevOps</b> (Épica, Feature, Historia, Tarea o Bug), completo y trazable. El método es <b>agnóstico de dominio</b>: el dominio concreto lo aporta el <b>Cerebro Digital</b> del proyecto (<code>cerebro-digital/</code>), que es la fuente de solo lectura.</p>
+  <p><b>Qué se puede hacer con él:</b> redactar un ticket suelto, mejorar una tarjeta existente, bajar una ficha entera al backlog como un árbol Épica→Feature→Historia, estimar puntos, tomar una tarea (asignar + estado) sin pisar a otro, y comentar tarjetas — todo por lenguaje natural, y lo que escribe en el tablero, siempre con tu confirmación.</p>
+  <div class="callout regla"><span class="t">Cómo entra al repositorio</span> Es herramienta/código → sube por rama <code>feat/*</code> + Merge Request a <code>main</code>. Los archivos propios de cada PC (la conexión de Azure, los secretos) no se versionan.</div>
+</div>
+
+<!-- 2 -->
+<div class="card" id="flujo">
+  <div class="head"><div class="chip">🔀</div><h2><span class="n">2.</span>El flujo técnico</h2></div>
+  <p>Es un <b>pipeline de tres etapas</b>. La regla que lo sostiene es <b>enlazar, no copiar</b>: entre etapas se pasan <b>referencias</b> (rutas y números de tarjeta), nunca el contenido duplicado.</p>
+  <div class="codeblock"><span class="c">[1] CEREBRO DIGITAL            [2] TICKETS EN AZURE            [3] HISTORIAL</span>
+    cerebro-digital/            creados desde la IA            log resumido e indexable
+Fichas .md (funcional/técnica)  Épica/Feature/Historia/Tarea/  Una fila por ticket:
+= fuente única del dominio.     Bug derivados de la doc,       tema + #ID + ruta del doc
+Reglas de negocio, estados.     con tu confirmación.           + resumen de una línea.
+        └────── deriva ───────────────▲          registra (referencia) ──────┘</div>
+  <table>
+    <tr><th>Etapa</th><th>Qué pasa</th><th>Escritura</th></tr>
+    <tr><td><b>1. Cerebro Digital</b></td><td>La documentación del proyecto en fichas <code>.md</code>. La IA la <b>lee</b> como fuente del dominio; no se toca al crear tickets.</td><td>Solo lectura</td></tr>
+    <tr><td><b>2. Tickets en Azure</b></td><td>La IA deriva y redacta el work item y, vía la conexión con Azure (§4), lo <b>crea o actualiza</b> en el tablero.</td><td>Con confirmación humana</td></tr>
+    <tr><td><b>3. Historial</b></td><td>Queda <b>una fila</b> que ata el documento con los tickets (por referencia). Ver §6.</td><td>Log local</td></tr>
+  </table>
+</div>
+
+<!-- 3 -->
+<div class="card" id="skills">
+  <div class="head"><div class="chip">🧩</div><h2><span class="n">3.</span>Funcionalidades y skills</h2></div>
+  <p>Cada <b>skill</b> es un instructivo que el asistente sigue para una tarea concreta. Son <b>10</b> del pipeline Azure; <b>cuatro escriben</b> en el tablero (siempre con confirmación) y seis no lo tocan —entre ellas los <b>tres segundos chequeos</b>: <code>analizar-tareas</code>, <code>auditar-historia</code> y <code>auditar-tarea</code>. Viven junto a las <b>11 skills del Cerebro</b> en una única fuente — <code>cerebro-digital/configuracion-ia/skills/</code>, <b>28 en total</b> — para que las 4 herramientas de IA las carguen del mismo lugar (cómo llega cada una sin correr nada: §6).</p>
+  <div class="grid">
+    <div class="sk"><div class="nm">redactar-tarea</div><div class="ds">Convierte un pedido pobre en un work item listo para pegar (primero decide el tipo).</div><span class="wr no">No escribe en el board</span></div>
+    <div class="sk"><div class="nm">estimar-story-points</div><div class="ds">Calcula los Puntos de historia por complejidad a nivel sistema + consumo de tokens (ver §6).</div><span class="wr no">No escribe en el board</span></div>
+    <div class="sk"><div class="nm">consultar-backlog</div><div class="ds">Consulta y audita el board (cobertura, localización) y detecta desfases doc↔tarjeta. Solo lectura.</div><span class="wr no">No escribe en el board</span></div>
+    <div class="sk"><div class="nm">sincronizar-backlog</div><div class="ds">Baja una ficha entera al tablero: Épica → Feature → Historia en una tanda (las Tareas quedan para el momento dev/planning).</div><span class="wr si">Escribe (confirmación)</span></div>
+    <div class="sk"><div class="nm">cargar-a-azure</div><div class="ds">Crea o actualiza un work item ya redactado, mostrándote antes qué cambia.</div><span class="wr si">Escribe (confirmación)</span></div>
+    <div class="sk"><div class="nm">tomar-tarea</div><div class="ds">Asigna una tarjeta y la pasa a Active, avisando si ya la tomó otro (evita la desincronización). Usa los campos <code>AssignedTo</code> y <code>State</code>.</div><span class="wr si">Escribe (confirmación)</span></div>
+    <div class="sk"><div class="nm">comentar-tarea</div><div class="ds">Deja o lee comentarios en la tarjeta (sobre el campo <code>System.History</code>).</div><span class="wr si">Escribe (confirmación)</span></div>
+  </div>
+  <div class="codeblock" style="margin-top:14px"><span class="c">// Cómo se encadenan</span>
+Ficha entera → backlog:   (Cerebro 02) → sincronizar-backlog → (Azure) → historial
+Pedido suelto → 1 ticket: redactar-tarea → (confirmación) → cargar-a-azure → (Azure) → historial
+Estimación:               estimar-story-points   (propone puntos; no toca el tablero)
+Consulta/auditoría:       consultar-backlog      (cobertura + desfases; solo lectura)
+Coordinación:             tomar-tarea · comentar-tarea</div>
+  <div class="callout ok"><span class="t">Los criterios como contrato (modelo asistido por IA)</span> Como la IA programa la funcionalidad, los criterios de aceptación en Gherkin son el <b>contrato</b>: la IA los usa para construir y auto-verificar su código, y el desarrollador revisa <b>regla por regla</b> (<code>[RN-…]</code>). Por eso se redactan <b>verificables por máquina</b> (verbos verificables, estados/datos explícitos, condiciones medibles). Detalle: <code>conocimiento/criterios-aceptacion-gherkin.md</code> §8.</div>
+</div>
+
+<!-- 4 -->
+<div class="card" id="azure">
+  <div class="head"><div class="chip">🔌</div><h2><span class="n">4.</span>La conexión con Azure</h2></div>
+  <p>El canal es el <b>MCP</b> (Model Context Protocol: el protocolo estándar que conecta un asistente de IA con una herramienta externa). Se usa el servidor <code>@tiberriver256/mcp-server-azure-devops</code> con <code>npx -y</code> (ejecuta el paquete de Node sin instalarlo). Se registra con <b>un comando</b> o con un archivo <code>.mcp.json</code>. Las reglas de redacción (<code>AGENTS.md</code>) siguen valiendo enteras: el MCP es solo el transporte.</p>
+  <h3>Variables de entorno</h3>
+  <table>
+    <tr><th>Variable</th><th>Valor</th><th>Para qué</th></tr>
+    <tr><td><code>AZURE_DEVOPS_ORG_URL</code></td><td><code>https://dev.azure.com/&lt;org&gt;</code></td><td>La organización de Azure</td></tr>
+    <tr><td><code>AZURE_DEVOPS_AUTH_METHOD</code></td><td><code>pat</code> | <code>azure-cli</code></td><td>Autenticación con token, o con tu cuenta (Azure CLI)</td></tr>
+    <tr><td><code>AZURE_DEVOPS_PAT</code></td><td><code>${AZDO_PAT}</code> (solo método <code>pat</code>)</td><td>El token (PAT = Personal Access Token). Su valor vive en una variable de entorno, nunca en un archivo</td></tr>
+  </table>
+  <div class="callout ok"><span class="t">No hace falta certificado</span> La conexión es a Azure DevOps en la nube (<code>dev.azure.com</code>), con certificado público válido: alcanza con esas variables. Solo si tu red corporativa intercepta el tráfico seguro se agrega <code>NODE_EXTRA_CA_CERTS</code>; en el caso normal no se usa.</div>
+  <h3>Herramientas por nivel</h3>
+  <table>
+    <tr><th>Nivel</th><th>Herramientas</th></tr>
+    <tr><td><b>Lectura</b> (libre)</td><td><code>list_projects</code>, <code>get_work_item</code>, <code>search_work_items</code>, <code>list_work_items</code>, <code>get_work_item_comments</code></td></tr>
+    <tr><td><b>Escritura</b> (con confirmación)</td><td><code>create_work_item</code>, <code>update_work_item</code> (también asignación/estado de <code>tomar-tarea</code> y el comentario de <code>comentar-tarea</code> sobre <code>System.History</code>), <code>manage_work_item_link</code></td></tr>
+  </table>
+  <div class="callout warn"><span class="t">Seguridad</span> Token personal, mínimo de permisos, con caducidad, se rota si se expone; su valor solo en la variable de entorno. Leer es libre; escribir, con tu confirmación del contenido ya mostrado — <b>una escritura por confirmación</b> y <b>exactamente lo pedido</b> (sin árboles no pedidos). Nunca datos personales reales en el tablero.</div>
+  <div class="callout regla"><span class="t">Permisos del PAT</span> Para la integración completa: <b>Work Items → Read, write &amp; manage</b> (<code>vso.work_full</code>) + <b>Project and Team → Read</b> (<code>vso.project</code>). Con esos dos alcanza (crear/enlazar/etiquetar/comentar/administrar). No hacen falta Code/Build/Release/Wiki. Detalle: <code>cerebro-digital/configuracion-ia/integracion-azure-mcp/01-crear-pat-azure.md</code>.</div>
+  <div class="callout warn"><span class="t">Barreras al escribir (4, no negociables)</span> Antes de crear/editar, el asistente verifica: <b>(1) Tablero autorizado</b> — solo se escribe en <code>{{AZURE_ORG}} · {{AZURE_PROYECTO}} · {{AZURE_TEAM}}</code>; cualquier otro se rechaza (el PAT ve toda la organización — incluye otros proyectos de la organización — por eso el guard vive en el skill, no en el token). <b>(2) Deduplicación</b> — busca en <b>todo el tablero</b> (no solo una Épica) por tag / título-objetivo / documento fuente si ya existe algo equivalente; si existe, no duplica: avisa con el link y propone reutilizar/relacionar. <b>(3) Confirmación</b> — propone y crea en <b>turnos distintos</b>; nada se escribe sin tu "sí" sobre lo ya mostrado. <b>(4) Nivel + cardinalidad</b> — por default llega hasta <b>Historia</b> (las Tareas técnicas solo en contexto <b>dev/planning</b> explícito) y la <b>cantidad</b> de Épicas/Features/Historias sale 1:1 del bloque enumerado de la ficha, nunca a criterio del modelo (detalle: §7 «Regla de cardinalidad»). Fuente: <code>conocimiento/tablero-autorizado.md</code>, <code>conocimiento/deduplicacion-antes-de-crear.md</code>, <code>AGENTS.md</code>.</div>
+  <div class="callout regla"><span class="t">Un tag, muchas Épicas posibles</span> El <b>tag temático</b> (p. ej. <code>reserva-salas</code>) es <b>un único string, siempre igual</b> — pero <b>no</b> identifica el slice: un mismo tema puede tocar <b>más de una Épica</b> (más de un vertical slice). Por eso la deduplicación busca el tag en <b>todo el board</b>, no dentro de una sola Épica.</div>
+</div>
+
+<!-- 5 -->
+<div class="card" id="estructura">
+  <div class="head"><div class="chip">📁</div><h2><span class="n">5.</span>Estructura de carpetas</h2></div>
+  <p>Resumen de qué hay en cada carpeta (el detalle vive en el <code>00-index.md</code> de cada una).</p>
+  <div class="tree"><span class="d">tablero/</span>
+├─ <span class="cm">(las reglas del redactor + las 4 barreras viven en el AGENTS.md de la RAÍZ, sección «Redacción y carga de tickets en Azure DevOps»)</span>
+├─ <span class="d">conocimiento/</span>                               <span class="cm">El método: historias, Gherkin, estimación, bugs, antipatrones, trazabilidad, contexto + el puente doc→tickets</span>
+├─ <span class="d">plantillas/</span>                                 <span class="cm">Moldes de salida por tipo (historia, tarea, bug, habilitador, feature, épica)</span>
+├─ <span class="d">checklists/</span>                                 <span class="cm">Control de calidad por tipo + el mapa de campos de Azure</span>
+├─ <span class="d">ejemplos/</span>                                   <span class="cm">Casos "antes → después" y el pipeline de punta a punta</span>
+├─ <span class="d">historial/</span>                                  <span class="cm">Log resumido e indexable: una fila por ticket (§6)</span>
+└─ GUIA-FUNCIONAL.html · DOCUMENTACION-TECNICA.html   <span class="cm">Guía del usuario · este documento</span>
+
+<span class="cm">En el Cerebro (cerebro-digital/configuracion-ia/): las 14 skills del pipeline (skills/ — §3, junto a las 11 del Cerebro y las 3 de desarrollo y evolución; fuente única, 28 en total) y el setup del MCP (integracion-azure-mcp/: token, config, seguridad, troubleshooting + .mcp.json.example).</span>
+
+<span class="cm">Además, en la RAÍZ: .agents/skills/ (espejo para Antigravity/opencode) y .claude/skills/ (espejo para Claude Code, project-scoped), ambos versionados; .githooks/ (hook anti-drift), bin/sync-skills.* y bin/actualizar.*, opencode.json — detalle completo en §6.</span></div>
+  <div class="callout regla"><span class="t">Reglas del redactor (fuente única)</span> <code>AGENTS.md</code> tiene 9 reglas de oro (español y Gherkin, datos personales sensibles prohibidos, no inventar, decidir el tipo primero, criterios verificables, respetar la intención del autor, esperar confirmación, entregar sin relato, dejar el backlog trazable). Viven en el <code>AGENTS.md</code> de la <b>raíz</b> (sección «Redacción y carga de tickets en Azure DevOps»): opencode/Antigravity lo leen nativo y Claude Code lo carga vía el <code>CLAUDE.md</code> de la raíz — un único AGENTS con el núcleo + Azure.</div>
+</div>
+
+<!-- 6 -->
+<div class="card" id="carga">
+  <div class="head"><div class="chip">🧷</div><h2><span class="n">6.</span>Carga en las 4 herramientas + hook anti-drift</h2></div>
+  <p>Objetivo: alguien clona el repo y <b>Claude Code, opencode, Antigravity y Gemini CLI</b> ya tienen las reglas y las <b>28 skills</b> unificadas en <code>cerebro-digital/configuracion-ia/skills/</code> — <b>sin correr ningún script</b>.</p>
+  <table>
+    <tr><th>Herramienta</th><th>Reglas</th><th>Skills</th></tr>
+    <tr><td><b>Claude Code</b></td><td>No lee <code>AGENTS.md</code> nativo: <code>CLAUDE.md</code> (raíz) lo importa con <code>@AGENTS.md</code></td><td><b>Auto-descubre</b> el espejo versionado <code>.claude/skills/</code> — skills <b>project-scoped nativas</b>, invocables con <code>/nombre-de-la-skill</code> (p. ej. <code>/cerebro-orquestador</code>) apenas se clona el repo</td></tr>
+    <tr><td><b>opencode</b></td><td>Lee <code>AGENTS.md</code> nativo + <code>opencode.json</code> (<code>instructions</code>, versionado, sin secretos)</td><td><b>Auto-descubre</b> el espejo versionado <code>.agents/skills/</code> (ubicación por defecto de opencode); <code>opencode.json</code> no necesita configurar skills</td></tr>
+    <tr><td><b>Antigravity</b></td><td>Lee <code>AGENTS.md</code> nativo</td><td>Skills nativas <b>solo</b> desde <code>.agents/skills/</code> — ruta <b>fija, no configurable</b> (confirmado contra su documentación oficial: sin setting para redirigirla)</td></tr>
+  </table>
+  <div class="callout warn"><span class="t">Por qué existen DOS espejos</span> Ni Antigravity ni Claude Code permiten apuntar su carpeta de skills a otro lado: <b>tienen</b> que ser, respectivamente, <code>.agents/skills/</code> y <code>.claude/skills/</code> en la raíz (confirmado contra la documentación oficial de cada una — Claude Code las llama <i>project-scoped skills</i>, y su sola presencia alcanza, sin flags ni settings). En vez de mantenerlos a mano, ambos se <b>versionan</b> como copia exacta de la fuente — viajan con el <code>clone</code>/<code>pull</code>, no son config per-host.</div>
+  <h3>El hook anti-drift (<code>.githooks/pre-commit</code>)</h3>
+  <p>Con tres copias (fuente + 2 espejos) existe el riesgo de que se editen y alguna quede vieja (<i>drift</i>). Se evaluó un pipeline de CI y se descartó — los runners los administra la organización — y en su lugar hay un <b>hook de git versionado</b> que corre <b>solo en la máquina de quien edita skills</b>, antes de cada commit, y verifica <b>los dos espejos</b>.</p>
+  <div class="codeblock"><span class="c">// Qué verifica el hook, para CADA espejo, antes de dejar commitear</span>
+1) Existe el espejo? (si se borro .agents/skills/ o .claude/skills/ entero, BLOQUEA)
+2) Espejo == fuente? (comparacion insensible a CRLF/LF -> misma verificacion en Windows/Linux/mac)
+3) Lo que hay en disco quedo STAGED? (evita "sincronice el espejo pero me olvide el git add")
+-&gt; si algo falla en CUALQUIER espejo: BLOQUEA el commit y dice que correr (bin/sync-skills.*)</div>
+  <table>
+    <tr><th>Cómo se activa</th><th>Detalle</th></tr>
+    <tr><td>Una vez por dev</td><td><code>git config core.hooksPath .githooks</code></td></tr>
+    <tr><td>¿Quién lo necesita?</td><td>Solo quien <b>edita</b> skills. Quien solo clona/usa <b>no necesita nada</b>: los hooks no vienen activados en el clone (por seguridad de git), por eso el paso es manual y por-dev.</td></tr>
+    <tr><td>Límite conocido</td><td>Es <i>client-side</i>: se puede saltear con <code>git commit --no-verify</code>. Es un guardarraíl, no una imposición dura — eso requeriría infra de servidor, descartada a propósito.</td></tr>
+  </table>
+  <div class="callout ok"><span class="t">Un solo comando para ponerse al día</span> <code>bin/actualizar.sh</code> (o <code>.ps1</code> en Windows) hace <code>git pull</code> + activa el hook (<code>core.hooksPath</code>) + verifica que <b>los dos espejos</b> estén sincronizados, en un solo paso. Para regenerarlos tras editar una skill: <code>bin/sync-skills.sh</code> / <code>.ps1</code> (herramienta del mantenedor, no del que solo usa el repo).</div>
+</div>
+
+<!-- 7 -->
+<div class="card" id="estimacion">
+  <div class="head"><div class="chip">📊</div><h2><span class="n">7.</span>Backlog por vertical slice, estimación e historial</h2></div>
+
+  <h3>Estructura del backlog: monolito modular por vertical slices</h3>
+  <p>La arquitectura del módulo es un <b>monolito modular por vertical slices</b>, y el backlog se arma para reflejarla. <b>Por qué:</b> en un monolito <i>en capas</i> todos los dominios comparten una capa de Service y una de Repository, así que dos tickets en paralelo (p. ej. de dos slices distintos) terminan editando el <b>mismo</b> archivo → conflictos de fusión. En un monolito por <b>vertical slices</b> cada dominio es un paquete propio con sus <b>4 capas internas</b> (<code>api</code> · <code>application</code> · <code>domain</code> · <code>infra</code>); dos tickets de slices distintos editan archivos distintos → <b>sin conflicto</b>, aun desarrollándose al mismo tiempo. Un slice no importa clases internas de otro (solo su <code>api</code> pública); únicamente el slice de integración toca la conexión con el sistema externo.</p>
+  <p>Por eso <b>cada ticket vive en UN slice</b> y el backlog mapea <b>Épica = slice/dominio</b>:</p>
+  <div class="codeblock">Épica: Gestión de salas                           <span class="c">← vertical slice (dominio); sin tag</span>
+ └─ Feature: Cancelación de reservas periódicas   <span class="c">[tag: reserva-salas]</span>
+     └─ Historia: Cancelar una reserva periódica <span class="c">[RN-MOD-001]</span>     <span class="c">[tag: reserva-salas]</span>
+         ├─ Tarea <span class="c">(capa: domain)</span> test de invariante RN-MOD-001 (TDD)  <span class="c">[tag: reserva-salas]</span>
+         ├─ Tarea <span class="c">(capa: api)</span>    endpoint de cancelación               <span class="c">[tag: reserva-salas]</span>
+         └─ Tarea <span class="c">(capa: infra)</span>  persistir el cambio                   <span class="c">[tag: reserva-salas]</span>
+Épica: &lt;slice-2&gt; · Épica: &lt;slice-n&gt; · Épica: Integración-&lt;sistema-externo&gt;   <span class="c">← los otros slices</span></div>
+  <table>
+    <tr><th>Nivel en Azure</th><th>= en la arquitectura</th></tr>
+    <tr><td><b>Épica</b></td><td>Vertical slice / dominio (los slices declarados en [[contexto-proyecto]])</td></tr>
+    <tr><td><b>Feature</b></td><td>Capacidad / caso de uso dentro del slice</td></tr>
+    <tr><td><b>Historia</b></td><td>Flujo / acción de negocio</td></tr>
+    <tr><td><b>Tarea</b><br><span class="c">(dev/planning)</span></td><td>Desglose técnico dentro del slice (capa <code>api</code>/<code>application</code>/<code>domain</code>/<code>infra</code>), con SDD + test de invariante (TDD) + indicador «requiere test de integración». <b>No es parte del flujo funcional:</b> por default se baja hasta Historia; las Tareas las crea Desarrollo en un segundo momento (planning).</td></tr>
+  </table>
+  <div class="callout ok"><span class="t">El payoff</span> Cada ticket queda acotado a un slice: el orquestador + los 3 sub-agentes (desarrollo, base de datos, testing) trabajan dentro de ese límite y entregan sin pisar otros tickets → <b>paralelismo real</b>. Hay <b>un solo tag temático</b> (p. ej. <code>reserva-salas</code>) que baja idéntico a toda la descendencia; el <b>slice no lleva tag</b> (es la Épica) y se filtra por su Épica.</div>
+
+  <h3>Regla de cardinalidad — el conteo lo fija la ficha, no el modelo</h3>
+  <p><b>El problema que resuelve:</b> antes, pedir "bajá esta ficha" podía dar árboles de <b>tamaño distinto</b> según la herramienta (Claude/opencode/Antigravity) — más o menos Épicas/Features/Historias — porque las reglas fijaban el <b>tipo</b> de cada nodo (slice→Épica, flujo→Historia) pero no <b>cuántos</b> había, y hasta dejaban la granularidad como pregunta abierta ("¿una Historia por flujo o por pantalla?"). Ahora el conteo sale <b>1:1</b> de un bloque que la ficha declara.</p>
+  <div class="codeblock"><span class="c">## Derivación a backlog          (lo cierra la curación + validación humana)</span>
+### Slices [Épicas]
+- [S-01] &lt;slice/dominio&gt;
+### Capacidades [Features]
+- [C-01] &lt;capacidad&gt;  · Slice: S-01
+### Flujos [Historias]
+- [F-01] &lt;flujo&gt;  · Capacidad: C-01
+- [F-02] &lt;flujo&gt;  · Capacidad: C-01</div>
+  <p><b>1 Épica</b> por cada <code>[S-nn]</code> (default 1; nunca se infieren slices no listados) · <b>1 Feature</b> por cada <code>[C-nn]</code> · <b>1 Historia</b> por cada <code>[F-nn]</code> — el <b>flujo listado, nunca la pantalla</b> — · <b>0 Tareas</b> por default. Ningún nodo fuera de la enumeración; no se parte ni se fusiona un flujo por criterio propio. <b>Si la ficha no trae el bloque (o tiene <code>⚠</code>), no se deriva:</b> se frena y se pide cerrarlo en el Cerebro — no se "cuenta a ojo" sobre la prosa.</p>
+  <div class="callout ok"><span class="t">Ejemplo gold</span> Ficha con 1 slice + 1 capacidad + 2 flujos declarados → se crean <b>exactamente 4 work items</b>: 1 Épica + 1 Feature + 2 Historias. Mismo input, mismo árbol, en cualquier LLM — porque el modelo <b>copia</b> una estructura ya cerrada por un humano, no la inventa. Fuente: <code>AGENTS.md</code> §«Redacción y carga de tickets en Azure DevOps», <code>conocimiento/organizacion-y-trazabilidad.md</code> §5.</div>
+
+  <h3>Estimación — por tokens + complejidad (la desarrolla la IA)</h3>
+  <p>Como <b>el desarrollo lo hace la IA</b>, el puntaje <b>no</b> sale de un Planning Poker ni de un consenso humano: lo <b>calcula la IA</b> a partir de la <b>complejidad a nivel sistema</b> (capas, integraciones, reglas) y el <b>consumo de tokens</b> para resolver el desarrollo e investigar lo relacionado. Se expresa en escala Fibonacci (1, 2, 3, 5, 8, 13, 20; 13+ ⇒ partir) solo por compatibilidad con el campo <i>Puntos de historia</i> de Azure. La IA propone el número; el humano puede ajustarlo. Antes de codear estima con proxies (complejidad, integraciones, relacionadas); con el token real, ajusta y calibra. Detalle: skill <code>estimar-story-points</code>.</p>
+
+  <h3>Historial — log resumido e indexable</h3>
+  <p>El historial es un <b>log liviano</b>: <b>una fila por ticket</b> en <code>historial/INDICE.md</code> con tema (etiqueta), referencia (<code>#ID</code> de Azure + ruta del documento del Cerebro) y un resumen de una línea. <b>No copia contenido y no escribe en el Cerebro Digital</b> (solo lo referencia). Así, aunque se generen miles de tickets, sigue siendo una tabla indexable, no miles de archivos. El registro <code>.md</code> detallado (con ANTES/DESPUÉS) se crea <b>solo</b> para los que se marcan <code>gold</code> — los pocos que valen como modelo de estilo a imitar.</p>
+  <div class="callout ok"><span class="t">Por qué así</span> Crear un archivo completo por ticket infla la memoria y se desincroniza cuando cambia el documento. Una fila por ticket tiene costo constante, se busca con Ctrl+F, y el detalle vivo queda donde corresponde: el ticket en Azure, el dominio en el Cerebro.</div>
+
+  <h3>Trazabilidad — enlazar, no copiar</h3>
+  <ul style="margin:.3em 0 0 1.1em;font-size:14px">
+    <li><b>Un solo tag temático — techo duro</b> sin prefijo, igual siempre, en <b>cada</b> nodo del árbol — <b>no solo la Épica</b>. El slice no lleva tag (ya es la Épica); <b>nunca</b> el nombre del producto/repo como tag (no filtra nada, lo comparte todo el tablero).</li>
+    <li><b>Relaciones</b> Parent (jerarquía) y Related (mismo tema); los <code>#ID</code> son dato duro (<code>⚠</code> hasta confirmarlos).</li>
+    <li><b>Documento fuente</b> como ruta al <code>.md</code> — referencia, nunca el contenido copiado.</li>
+    <li><b>Reglas de negocio</b> <code>[RN-…]</code> en la Descripción, citadas en cada criterio Gherkin.</li>
+    <li>Traza en las dos direcciones: ficha ↔ ticket ↔ fila del historial, por ruta + <code>#ID</code>.</li>
+  </ul>
+
+  <h3>Cambios y desfase (drift)</h3>
+  <p>Cuando un documento cambia y la tarjeta ya existe: <code>consultar-backlog</code> (solo lectura) detecta el <b>desfase</b>; <code>sincronizar-backlog</code> propone el <b>DIFF antes de pisar</b> y, al aplicar, dispara el <b>aviso</b> (comentario con @mención + etiqueta <code>cambio-pendiente-lectura</code> + un query guardado "cambios pendientes de lectura", el "git pull" del backlog). Lo ya <b>entregado no se reabre</b>: la modificación nace como un Bug (si se desvió del contrato) o una Historia nueva (si cambió la regla). Detalle: <code>conocimiento/cambios-en-el-backlog.md</code>.</p>
+
+  <h3>Mapeo a campos de Azure (referencia rápida)</h3>
+  <table>
+    <tr><th>Campo (como se ve)</th><th>Nombre interno</th></tr>
+    <tr><td>Título · Descripción</td><td><code>System.Title</code> · <code>System.Description</code></td></tr>
+    <tr><td>Criterios de aceptación · Pasos para reproducir</td><td><code>…Common.AcceptanceCriteria</code> · <code>…TCM.ReproSteps</code></td></tr>
+    <tr><td>Puntos · Etiquetas · Iteración · Historial</td><td><code>…Scheduling.StoryPoints</code> · <code>System.Tags</code> · <code>System.IterationPath</code> · <code>System.History</code></td></tr>
+  </table>
+</div>
+
+<!-- 8 -->
+<div class="card" id="glosario">
+  <div class="head"><div class="chip">📖</div><h2><span class="n">8.</span>Glosario</h2></div>
+  <dl class="glo">
+    <dt>work item</dt><dd>Cada tarjeta del tablero de Azure DevOps: Épica, Feature, Historia de usuario, Tarea o Bug.</dd>
+    <dt>Cerebro Digital</dt><dd>La documentación del proyecto en fichas <code>.md</code>: la fuente única del dominio (<code>cerebro-digital/</code>).</dd>
+    <dt>MCP (Model Context Protocol)</dt><dd>El protocolo estándar que conecta un asistente de IA con una herramienta externa; acá, con Azure DevOps.</dd>
+    <dt>PAT (Personal Access Token)</dt><dd>Un token de acceso personal: funciona como una contraseña para que una app entre a Azure en tu nombre.</dd>
+    <dt>Azure CLI</dt><dd>La herramienta de línea de comandos de Azure; permite autenticarte con tu cuenta (<code>az login</code>) sin manejar un token.</dd>
+    <dt>Gherkin</dt><dd>La forma de escribir criterios verificables con Dado / Cuando / Entonces (siempre en español).</dd>
+    <dt>Fibonacci</dt><dd>La escala de puntos 1, 2, 3, 5, 8, 13, 20; de 13 en adelante conviene partir la historia.</dd>
+    <dt>gold</dt><dd>Un ticket marcado como buen modelo a imitar; es el único caso en que se guarda su registro detallado.</dd>
+    <dt>espejo de skills</dt><dd>Copia versionada de las skills, idéntica a la fuente <code>configuracion-ia/skills/</code>. Hay dos: <code>.agents/skills/</code> (Antigravity/opencode) y <code>.claude/skills/</code> (Claude Code) — cada herramienta busca skills en una ruta fija propia.</dd>
+    <dt>hook pre-commit</dt><dd>Un script de git (<code>.githooks/pre-commit</code>) que corre antes de cada commit; acá bloquea si alguno de los dos espejos de skills quedó desincronizado. Se activa una vez por dev.</dd>
+    <dt>bloque de derivación a backlog</dt><dd>La sección <code>## Derivación a backlog</code> de una ficha: enumera sus Slices/Capacidades/Flujos y fija, 1:1, cuántos work items se crean al derivarla.</dd>
+    <dt>datos personales sensibles protegidos</dt><dd>Datos personales sensibles reales de una persona (nombre, identificador, dato sensible…). Prohibidos en tickets y fichas: se reemplazan por marcadores como <code>&lt;persona&gt;</code>.</dd>
+    <dt>reglas de negocio [RN-…]</dt><dd>Las reglas del dominio, numeradas (p. ej. <code>[RN-MOD-02]</code>), para citarlas desde los criterios.</dd>
+    <dt>backlog</dt><dd>La lista de trabajo del equipo en el tablero.</dd>
+    <dt>Merge Request</dt><dd>El pedido para incorporar los cambios de una rama a <code>main</code>, con revisión previa (en GitLab).</dd>
+  </dl>
+</div>
+
+<div class="pie">Documentación técnica · <code>tablero/</code> · complementa la GUIA-FUNCIONAL.html</div>
+</div>
+</body>
+</html>
