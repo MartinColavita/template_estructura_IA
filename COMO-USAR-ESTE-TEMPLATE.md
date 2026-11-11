@@ -136,7 +136,7 @@ por entorno** (la una se niega a arrancar donde corre la otra) y el texto compar
 marca no lo discute el modelo; un script que no corrió es `SIN DATOS`): `derivar-arbol.py` (el árbol
 1:1 de una ficha), `gate-worktree.py` (los datos del GATE de WORKTREE), `verificar-tdd.py` (rojo antes
 del verde, por ítem, desde `git log`), `auditar-diff.py` (secretos y posibles datos personales en el
-diff), `datos-cierre.py` (los datos duros del comentario de cierre) `inventariar-codigo.py` (el
+diff), `atajos.py` (las marcas `atajo:` del código y si dicen cuándo se mejoran), `datos-cierre.py` (los datos duros del comentario de cierre), `inventariar-codigo.py` (el
 inventario de una aplicación existente) y `radiografiar-codigo.py` (los hechos del código con `archivo:línea`, para que la lectura no sea a ciegas). Lo que sigue siendo del modelo es lo que pide criterio: la
 aserción literal de un test, el cierre BDD↔TDD, el contrato contra el código, los límites de módulo
 y la lectura de un aviso.

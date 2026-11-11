@@ -470,7 +470,7 @@ def generar(rapido):
                     ('7-bis · Cerebro', 'funcional / aplicacion / mejoras', 'suave')], por_fila=5))
     H.append('<h3>Los cuatro controles, una pregunta cada uno</h3><table><tr><th>Control</th><th>Pregunta</th><th>Quién</th><th>Lo mecánico</th></tr>')
     for c, p, q, m in (('5 · verificar-tdd', '¿El ciclo rojo → verde ocurrió?', 'otro agente (DEC-005)', '<code>verificar-tdd.py --modo</code>: commits <code>test(rojo): n</code> sólo con tests, verde después, <code>evidencia/&lt;ID&gt;</code>'),
-                       ('5-bis · code-review.md', '¿El código está bien escrito?', 'el mismo verificador', 'cinco dimensiones; en Claude Code <code>/code-review</code> es un atajo'),
+                       ('5-bis · code-review.md', '¿El código está bien escrito?', 'el mismo verificador', 'seis dimensiones; en Claude Code <code>/code-review</code> es un atajo'),
                        ('5-ter · auditar-codigo', '¿La entrega cumple lo que el pipeline exige?', 'el mismo verificador', '<code>auditar-diff.py</code>: secretos, PHI, elegibilidad; contrato y límites de módulo'),
                        ('5-quater · C1..C8', '¿Cumple las convenciones del Cerebro?', 'el mismo verificador', 'un veredicto por regla; C8 es SIN DATOS (pendiente DEC-003) hasta que el equipo lo escriba')):
         H.append('<tr><td><b>%s</b></td><td>%s</td><td>%s</td><td>%s</td></tr>' % (c, p, q, m))

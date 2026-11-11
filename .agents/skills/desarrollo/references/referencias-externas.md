@@ -104,3 +104,42 @@ Vale dejarlo escrito, porque justifica haber escrito material propio en vez de t
 
 El formato de comando, las referencias a subagentes inexistentes, el inglés, su stack de
 ejemplo, y su definición más floja de "test en rojo".
+
+---
+
+## `DietrichGebert/ponytail`
+
+| | |
+|---|---|
+| Origen | https://github.com/DietrichGebert/ponytail |
+| Licencia | **MIT** — uso, modificación y redistribución **con atribución** |
+| Consultado el | 2026-11-11 (versión 5.3.3, commit `96608e0`) |
+| Qué es | Un prompt de «desarrollador senior perezoso» (el cambio más chico que resuelve todo el pedido), más comandos de revisión, auditoría y registro de atajos, y adaptadores para unas 20 herramientas |
+
+### Qué se tomó
+
+**Ideas, no texto**, comparadas regla por regla contra el método antes de entrar:
+
+| De dónde | Qué se adaptó | A dónde fue |
+|---|---|---|
+| `skills/ponytail/SKILL.md` | La **escalera** antes de escribir (¿hace falta? → ¿ya existe? → biblioteca estándar → dependencia instalada → una línea → el mínimo), lo que nunca se recorta, y «completo en el cambio» | [metodo/tdd-ciclo-y-evidencia.md](metodo/tdd-ciclo-y-evidencia.md) §«VERDE» (`guiar-tdd` apunta ahí) |
+| `skills/ponytail/SKILL.md` | Buscar **todos los llamadores** antes de arreglar una función compartida | [metodo/arreglar-un-bug.md](metodo/arreglar-un-bug.md) |
+| `skills/ponytail-review/SKILL.md` | Revisar **el código que el cambio toca**, no sólo el diff; la carga esperada; «sin caso concreto no hay hallazgo»; la dimensión **lo que sobra**; el hallazgo **en cuatro partes** para una persona | [metodo/code-review.md](metodo/code-review.md); el formato para personas, en [metodo/merge-request.md](metodo/merge-request.md) |
+| `skills/ponytail-debt/SKILL.md` | La **marca de atajo** con su límite y su disparador, y juntarlas para que lo «para después» no se pudra | [metodo/refactor.md](metodo/refactor.md) §«Deuda técnica» y `bin/atajos.py` |
+
+### Dónde nos quedamos con lo nuestro
+
+1. **Tests:** la fuente pide «un test chico si hay lógica no trivial». Acá sigue el rojo por ítem,
+   con evidencia y verificado por otro agente.
+2. **Abstracciones:** la fuente marca como sobrante una interfaz con una sola implementación. Acá las
+   interfaces que manda `C1` ([[decisiones#DEC-002]]) son estructura, no sobrante.
+3. **Comentarios:** la fuente pide comentar sólo el porqué. Acá sigue el resumen de cada clase con la
+   regla `[RN-…]` que implementa (`C4`), que es trazabilidad.
+4. **Niveles** (`lite`, `full`, `ultra`): no se tomaron. El alcance lo fija la Tarea (G1); discutir el
+   pedido es de la planificación, no del código.
+
+### Qué NO se tomó
+
+El plugin y sus hooks (se inyectaría en cada sesión y en cada subagente, también en el verificador,
+que tiene que arrancar limpio), la barra de costos, los adaptadores, la auditoría del repo entero, el
+inglés, y los números de su benchmark como prueba: son del propio autor, no independientes.

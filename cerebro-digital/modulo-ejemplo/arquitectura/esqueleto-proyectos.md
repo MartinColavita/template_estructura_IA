@@ -6,7 +6,7 @@ modulo: modulo-ejemplo
 title: Especificación de Esqueletos y Estructuras Base
 description: Estructura base de los repositorios de código (back, front y despliegue), convenciones de código y su bloque de derivación a backlog. Se completa cuando el equipo decide el stack (DEC-003).
 tags: [arquitectura, esqueleto, repositorios, convenciones, modulo-ejemplo]
-last_updated: 2026-10-22
+last_updated: 2026-11-11
 author: "equipo"
 ---
 
@@ -21,6 +21,10 @@ author: "equipo"
 
 <completar: qué se va a construir, con qué restricciones de la organización (red, registry
 interno, autenticación corporativa, plataforma de despliegue), y qué queda fuera.>
+
+**Carga esperada:** ⚠ <completar: cuántas personas o procesos usan el sistema a la vez, y si hay
+tareas que corren en paralelo>. Contra esto se juzga la dimensión 4 de la revisión de código
+(`code-review.md` de `desarrollo`); mientras diga `⚠`, esa parte es `SIN DATOS (pendiente declarado)`.
 
 ### Repositorios objetivo
 

@@ -51,18 +51,28 @@ En orden de cuánto duele dejarlo:
 
 ## Deuda técnica: registrarla, no lamentarla
 
-Cuando algo queda mal a propósito —por tiempo, por una decisión pendiente, por una
-dependencia externa— **se deja escrito en el código**, no en el chat ni en la memoria de
-alguien.
+Cuando algo queda mal a propósito —un atajo con un límite conocido, por tiempo, por una decisión
+pendiente, por una dependencia externa— **se marca en el código con una sola línea**, no en el
+chat ni en la memoria de alguien. Con el comentario del lenguaje (`//`, `#`, `--`, `/*`):
 
-Qué lleva la nota:
+```
+// atajo: <qué se simplificó y hasta dónde aguanta>; cuando <qué tiene que pasar para mejorarlo> <#ID o DT-nnn>
+```
 
-| | |
+Por ejemplo: `# atajo: lee el archivo entero en memoria, alcanza hasta ~50 MB; cuando lleguen archivos más grandes, DT-004`.
+
+| Parte | Qué lleva |
 |---|---|
-| **Qué está mal** | En una línea |
-| **Por qué se dejó así** | El motivo real, no "por tiempo" a secas |
-| **Qué haría falta para arreglarlo** | Para que el que venga no tenga que redescubrirlo |
-| **El `#ID` de la Tarea**, si hay una | Trazabilidad |
+| **El límite** | Qué se simplificó y hasta dónde aguanta, en una línea |
+| **`cuando …`** | El disparador para mejorarlo. Un atajo sin disparador es el que se pudre sin que nadie lo note |
+| **`#ID` o `DT-nnn`** | La Tarea, o la fila de `aplicacion/deuda.md`, donde está el porqué y el riesgo |
+
+El **porqué** y el riesgo no van en el comentario: van a la descripción del Merge Request, como
+pendiente a confirmar en la tarjeta y, si se acepta como deuda, a `aplicacion/deuda.md` como
+`DT-nnn` (por `cerebro-curator`, con el «sí» de una persona).
+
+Para ver todo lo que un repo dejó para después: `bin/atajos.py --repo <repo> [--deuda <ruta a deuda.md>]`
+(qué marca, en el encabezado del script). Una nota suelta, sin límite ni disparador, no es deuda registrada.
 
 Una deuda sin registrar no es deuda: es un bug que todavía no se manifestó.
 

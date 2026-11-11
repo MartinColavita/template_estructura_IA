@@ -10,7 +10,21 @@
 desconfianza: es que el que escribió ya decidió que estaba bien, y va a leer buscando
 confirmarlo.
 
-## Las cinco dimensiones
+## Antes de la primera dimensión: qué toca el cambio
+
+Un cambio puede romper un archivo que no tocó. Por eso no se revisa sólo el diff:
+
+- Se lee el diff y después **el código que toca**: quién llama a cada función que cambió, a qué
+  llama ella, y sus tests.
+- Si cambia una firma, un valor devuelto o un comportamiento, se buscan **todos** los llamadores en
+  el repo, también en tests, datos de prueba y configuración.
+- Se recorre el flujo real: por dónde entra el dato, qué se guarda, qué sale.
+- **La carga esperada** (una persona corriendo un proceso, o muchos usuarios a la vez) se toma de
+  `arquitectura/esqueleto-proyectos.md` §1 del Cerebro, que el verificador ya recibe en su misión; no se
+  sale a buscarla a otro lado. Mientras ahí diga `⚠`, la parte de carga de la dimensión 4 es
+  `SIN DATOS (pendiente declarado)`: se lista y no frena.
+
+## Las seis dimensiones
 
 Se revisa **una dimensión por vez**, no todo junto. Mirar todo a la vez produce una lista de
 cosas obvias y ninguna profunda.
@@ -20,8 +34,9 @@ cosas obvias y ninguna profunda.
 | 1 | **Corrección** | Que haga lo que la Tarea dice. Casos borde, valores nulos, colecciones vacías, límites |
 | 2 | **Seguridad** | Inyección, autenticación, autorización, datos sensibles en logs. Detalle y chequeos en [seguridad-y-datos-sensibles.md](seguridad-y-datos-sensibles.md) |
 | 3 | **Arquitectura** | Acoplamiento, cohesión, y **los límites de módulo** — que es lo que más se rompe acá |
-| 4 | **Rendimiento** | Consultas en bucle (N+1), lecturas completas de tabla, ausencia de índices, cargas innecesarias |
+| 4 | **Rendimiento y carga** | Consultas en bucle (N+1), lecturas completas de tabla, ausencia de índices, cargas innecesarias. Y, contra la carga esperada: carreras de «leer y después escribir», el mismo trabajo hecho por cada proceso, estado de un proceso que tendría que ser compartido, listas que sólo crecen |
 | 5 | **Tests** | Que cubran los casos de la Tarea, que cada uno **pueda fallar**, y que ninguno tenga dos condiciones |
+| 6 | **Lo que sobra** | Lo que la escalera de [tdd-ciclo-y-evidencia.md](tdd-ciclo-y-evidencia.md) §«VERDE» no habría dejado escribir (con la ruta de lo que el repo ya tenía), y lo de [refactor.md](refactor.md) §«Qué se busca». La estructura que la escalera no cruza no es sobrante |
 
 ## Los chequeos de arquitectura, que son los nuestros
 
@@ -57,12 +72,30 @@ Fuente: [[decisiones#DEC-002]] y `arquitectura/esqueleto-proyectos.md` del Cereb
 | Nivel | Qué es | ¿Frena la entrega? |
 |---|---|---|
 | **BLOQUEANTE** | Vulnerabilidad, comportamiento incorrecto, límite de módulo roto, evidencia del rojo ausente o inválida | **Sí** |
-| **RECOMENDACIÓN** | Problema de rendimiento, test que no puede fallar, duplicación real | No, pero se responde |
-| **SUGERENCIA** | Nombres, forma, documentación | No |
+| **RECOMENDACIÓN** | Problema de rendimiento o de carga, test que no puede fallar, duplicación real, código que no tendría que existir | No, pero se responde |
+| **SUGERENCIA** | Nombres, forma, documentación, una forma más corta de lo mismo | No |
 
 **La severidad la fija el daño, no la comodidad.** Y un hallazgo bloqueante no se negocia
-bajando su nivel: se arregla, o se declara aceptado **con el motivo escrito en el código**,
-no sólo en el chat.
+bajando su nivel: se arregla, o lo acepta **una persona**, por escrito —nunca el agente que revisa
+ni el que escribió—. El porqué va a la descripción del Merge Request y a `aplicacion/deuda.md` como
+`DT-nnn`, y en el código queda la marca `atajo:` que lo señala ([refactor.md](refactor.md) §«Deuda
+técnica»). Nunca sólo en el chat. Mientras esa `DT-nnn` siga abierta, la próxima revisión que pase por
+ahí lo reporta citándola, como RECOMENDACIÓN, y no frena; vuelve a frenar si el cambio lo agrava o si la
+`DT-nnn` se cerró sin pagarlo.
+
+## Antes de reportar un hallazgo
+
+- **Sin un caso concreto no hay hallazgo.** Cada uno dice qué entrada o qué situación lleva a qué
+  resultado incorrecto. «Considerá…», una preferencia de estilo o una preocupación vaga no son hallazgos.
+- **Se vuelve a leer y se confirma:** que el llamador existe, que el valor puede venir vacío de
+  verdad, que el código no se usa en ningún lado (buscando también en tests, configuración y
+  referencias por texto).
+- **Una marca `atajo:` es una decisión, no un hallazgo, sólo en las dimensiones 4 y 6**, y mientras la
+  carga esperada no pase su límite. Sobre lo que nunca se recorta (§«VERDE» de
+  [tdd-ciclo-y-evidencia.md](tdd-ciclo-y-evidencia.md)) la marca de quien escribió no cambia nada:
+  sólo cuenta la aceptación de una persona, como dice §«Severidad».
+- **Se propone el arreglo más chico que funciona**, y mejor si borra código. Nunca uno que agregue
+  capas, frameworks o configuración que el problema no necesita.
 
 ## Veredicto de tres estados
 
@@ -89,11 +122,14 @@ REVISIÓN — <Tarea #NNNN> — <rama o diff>
 
   Revisado por: <agente distinto del que programó>
 
+  Carga esperada: <la de esqueleto-proyectos.md §1, o SIN DATOS (pendiente declarado)>
+
   1. Corrección .......... OK / HALLAZGO(n) / SIN DATOS
   2. Seguridad ........... OK / HALLAZGO(n) / SIN DATOS
   3. Arquitectura ........ OK / HALLAZGO(n) / SIN DATOS
-  4. Rendimiento ......... OK / HALLAZGO(n) / SIN DATOS
+  4. Rendimiento y carga . OK / HALLAZGO(n) / SIN DATOS
   5. Tests ............... OK / HALLAZGO(n) / SIN DATOS
+  6. Lo que sobra ........ OK / HALLAZGO(n) / SIN DATOS
 
   BLOQUEANTES: n     <- uno por línea, archivo:línea, y qué rompe
   RECOMENDACIONES: n
@@ -104,6 +140,9 @@ REVISIÓN — <Tarea #NNNN> — <rama o diff>
   El cumplimiento del ciclo TDD no se revisa acá: es el control 5 (verificar-tdd), una sola vez.
   Formato canónico de toda la cadena: orquestador-desarrollo.md §«Formato del veredicto».
 ```
+
+Cuando los hallazgos los lee una persona, van con el formato de [merge-request.md](merge-request.md)
+§«Hallazgos para una persona».
 
 ## Antes del Merge Request
 

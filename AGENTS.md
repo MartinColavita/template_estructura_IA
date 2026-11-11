@@ -200,6 +200,7 @@ Todo chequeo que es **conteo o formato** lo hace un script de `bin/`, no el mode
 - `bin/gate-worktree.py`: los datos duros del GATE de WORKTREE (worktrees abiertos, árbol sucio, rama ya usada, base al día).
 - `bin/verificar-tdd.py`: la mitad mecánica de `verificar-tdd`: por ítem, rojo sólo con tests y antes del verde, leído de `git log`; la rama `evidencia/<ID>`.
 - `bin/auditar-diff.py`: secretos y posibles datos personales en las líneas agregadas del diff, y elegibilidad.
+- `bin/atajos.py`: las marcas `atajo:` del código de un repo; HALLAZGO las que no tienen límite o `cuando …`, o citan una `DT-nnn` que no está abierta.
 - `bin/datos-cierre.py`: rama, último commit, cantidad de commits, archivos, si está pusheada, respaldo y link del Merge Request, leídos del repositorio para el comentario de cierre.
 - `bin/inventariar-codigo.py`: el inventario de una aplicación existente (lenguajes, build, pipeline, contratos, migraciones, tests, deuda, posibles secretos) para `absorber-aplicacion`.
 - `bin/radiografiar-codigo.py`: la radiografía de una aplicación existente, cada hecho con `archivo:línea` (endpoints, entidades y estados, pantallas, reglas candidatas, integraciones, permisos, dependencias entre módulos); la lectura de `absorber-aplicacion` empieza por lo que señala.

@@ -41,7 +41,8 @@ cerrada. No escribe la solución: es el árbitro del ciclo.
 ## Flujo (por cada ítem de la lista de la Tarea)
 1. **Red:** escribir el test (con el runner de tests del repo); correrlo y verificar que FALLA por
    la razón esperada.
-2. **Green:** el código mínimo que lo hace pasar. Nada de más.
+2. **Green:** el código mínimo que lo hace pasar. Nada de más: para llegar a ese mínimo, la escalera de
+   `tdd-ciclo-y-evidencia.md` §«VERDE».
 3. **Refactor:** limpiar con los tests en verde.
 4. Repetir hasta agotar la lista. Al terminar, cada test de la Tarea tiene su caso.
 

@@ -62,7 +62,7 @@ Ese último bloque es el que más se saltea y el más útil seis meses después.
 **No el que escribió.** La revisión la corre un agente o una persona distinta. No es
 desconfianza: el que escribió ya decidió que estaba bien y va a leer buscando confirmarlo.
 
-Las cinco dimensiones y las severidades: [code-review.md](code-review.md).
+Las seis dimensiones y las severidades: [code-review.md](code-review.md).
 
 **La autorevisión no cuenta como revisión.** Es un paso previo —leer el diff propio entero
 antes de pedirla— y sirve, pero no reemplaza al segundo par de ojos.
@@ -80,8 +80,22 @@ evidencia del rojo ausente o inválida, PHI.
 Las recomendaciones y sugerencias **no frenan, pero se responden**. Una recomendación
 ignorada sin respuesta enseña que revisar no sirve, y a la tercera vez nadie revisa en serio.
 
-Un hallazgo bloqueante **no se negocia bajándole la severidad**: se arregla, o se declara
-aceptado con el motivo escrito **en el código**, no sólo en el chat.
+Un hallazgo bloqueante **no se negocia bajándole la severidad**: se arregla, o lo acepta una persona
+como dice [code-review.md](code-review.md) §«Severidad».
+
+## Hallazgos para una persona
+
+El veredicto de la cadena lo leen scripts. Lo que lee una persona —esta descripción, una revisión
+suelta— va **en criollo y en cuatro partes**, numerado de corrido para poder contestar «arreglá el 2 y
+el 5», agrupado por severidad, y al final una línea con lo que no se pudo mirar:
+
+```
+2. <Título corto> (archivo:línea)
+   - Qué es: qué hace ese código, en una o dos frases.
+   - Problema: qué sale mal, con el caso concreto.
+   - Arreglo: el cambio más chico que lo resuelve.
+   - Si no lo hacemos: qué le pasa a quien usa el sistema.
+```
 
 ## Después: el comentario de cierre en la Tarea
 

@@ -47,7 +47,8 @@ apps clonadas en `front/`; si una app necesita una vuelta propia, la sobrescribe
 ## Flujo (por cada ítem de la lista de la Tarea)
 1. **Red:** escribir el test (con el runner de tests del front; las respuestas de la API,
    simuladas desde el contrato); correrlo y verificar que FALLA por la razón esperada.
-2. **Green:** el código mínimo (componente / hook / estado) que lo hace pasar. Nada de más.
+2. **Green:** el código mínimo (componente / hook / estado) que lo hace pasar. Nada de más: para llegar a ese mínimo, la escalera de
+   `tdd-ciclo-y-evidencia.md` §«VERDE».
 3. **Refactor:** limpiar con los tests en verde.
 4. Repetir hasta agotar la lista.
 

@@ -65,7 +65,7 @@ estándar diría, porque eso es inventar un estándar ajeno.
 | **Arreglar un bug** — el ciclo, y los tres tipos que no se parecen | [arreglar-un-bug.md](references/metodo/arreglar-un-bug.md) |
 | **Depurar** — causa vs. síntoma, `trace_id`, qué nunca va en un log | [depurar.md](references/metodo/depurar.md) |
 | **Refactor** y deuda técnica — la fase 3, y qué no se refactoriza | [refactor.md](references/metodo/refactor.md) |
-| Revisión de código **por 5 dimensiones**, con severidad | [code-review.md](references/metodo/code-review.md) |
+| Revisión de código **por 6 dimensiones**, con severidad, mirando también lo que el diff no toca | [code-review.md](references/metodo/code-review.md) |
 | **El Merge Request**: tamaño, descripción, checklist, quién revisa | [merge-request.md](references/metodo/merge-request.md) |
 | Ramas, commits y espacios de trabajo | [ramas-y-commits.md](references/metodo/ramas-y-commits.md) |
 

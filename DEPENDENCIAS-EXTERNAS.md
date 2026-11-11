@@ -38,6 +38,7 @@ de abajo se completa.
 | Origen | Licencia | Qué se tomó |
 |---|---|---|
 | [`wshobson/commands`](https://github.com/wshobson/commands) | **MIT** (permite uso y modificación **con atribución**) | **Ideas y estructura, no texto**, para escribir el método de desarrollo en español y con nuestras reglas. Detalle archivo por archivo en `cerebro-digital/configuracion-ia/skills/desarrollo/references/referencias-externas.md` |
+| [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail) | **MIT** (permite uso y modificación **con atribución**) | **Ideas, no texto**: la escalera antes de escribir código, la revisión más allá del diff, la dimensión «lo que sobra», el hallazgo en cuatro partes y la marca `atajo:` (con `bin/atajos.py`). Qué se tomó y dónde nos quedamos con lo nuestro, en el mismo `referencias-externas.md` |
 
 **No se instala ni se invoca nada de ahí.** Es bibliografía, no una dependencia de ejecución.
 

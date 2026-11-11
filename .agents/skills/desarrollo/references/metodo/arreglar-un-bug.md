@@ -32,6 +32,9 @@ con test, no puede volver sin que alguien lo vea en rojo.
 
 - **No arreglar donde explota.** Un `null` se rechaza donde se origina, no se tapa donde se
   ve. Ver [depurar.md](depurar.md).
+- **No arreglar en un solo llamador.** Si la causa está en código compartido, se arregla una vez
+  ahí, después de buscar quién más lo llama ([code-review.md](code-review.md) §«qué toca el
+  cambio»); uno de otro módulo no se toca (`C7`).
 - **No aprovechar y refactorizar de paso.** El arreglo tiene que ser legible en el diff. Si
   hay que ordenar, va en otro commit. Ver [refactor.md](refactor.md).
 - **No ampliar el alcance.** Si encontrás otros dos bugs, se registran aparte — no se

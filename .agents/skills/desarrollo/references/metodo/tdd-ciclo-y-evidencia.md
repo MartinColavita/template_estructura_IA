@@ -52,6 +52,34 @@ uno fabricado.
 
 Nada más que eso. Sin adelantarse a casos que ningún test pide todavía.
 
+**Cómo se llega al mínimo: la escalera.** **Una vez por Tarea**, antes del primer ítem, se lee el código
+que el cambio toca y quién lo llama (cómo: [code-review.md](code-review.md) §«qué toca el cambio»). En
+cada verde se para en el **primer escalón que alcanza**:
+
+1. **¿Hace falta?** Si ningún ítem lo pide, no (lo de arriba); se nombra en una línea del resumen final.
+2. **¿Ya existe en el repo?** Un helper, un componente, un caso de uso, un patrón: se usa como lo usa
+   el código de alrededor.
+3. **¿Lo resuelve la biblioteca estándar o la plataforma?** Se usa, salvo que el repo tenga lo suyo.
+4. **¿Lo resuelve una dependencia ya declarada en el manifiesto del repo?** Se usa (no una que llegó de
+   rebote con otra). Una nueva pasa por [dependencias-y-config.md](dependencias-y-config.md).
+5. **¿Entra en una línea que se entiende de un vistazo?** Una línea.
+6. **Si no:** el mínimo código nuevo que pone el test en verde.
+
+Lo que la escalera no cruza:
+
+- **La estructura no es abstracción de más:** las interfaces de `C1` ([[decisiones#DEC-002]]) aunque
+  tengan una sola implementación, las capas y `exceptions/`, el resumen de clase de `C4`; en el front,
+  lo que fije `arquitectura/frontend/`.
+- **Nunca se recorta** la validación en los bordes de confianza, el manejo de errores que evita perder
+  datos, la seguridad ni la accesibilidad. Eso también lleva su test: si la lista no trae el caso, se
+  anota como pendiente a confirmar, no se agrega sin rojo.
+- **Completo dentro del módulo:** se ajustan los llamadores y los datos de prueba que el cambio rompe, y
+  el código que se mueve conserva su validación. Un llamador de otro módulo no se toca (`C7`): queda
+  como pendiente. Un test existente que se rompe, como dice `guiar-tdd` (`chore(firma)` o rojo propio):
+  cambiar lo esperado sin eso es mover el arco.
+
+Un atajo tomado a sabiendas se marca con una línea `atajo:` ([refactor.md](refactor.md) §«Deuda técnica»).
+
 Se corre **toda** la suite, no sólo el test nuevo: el verde de uno con el rojo de otros tres
 no es verde.
 
