@@ -23,11 +23,15 @@ Ya tenés el PAT copiado de [[01-crear-pat-azure]]. Ahora hay que guardarlo de f
 
 ## Opción A — Windows con `setx` (persistente)
 
-`setx` guarda la variable de forma permanente para tu usuario:
+`setx` guarda la variable de forma permanente para tu usuario. El comando es de **PowerShell**; en bash o
+Git Bash, usá la Opción B:
 
 ```powershell
-setx AZDO_PAT "PEGA-AQUI-TU-TOKEN"
+setx AZDO_PAT (Read-Host 'Pegá tu token')
 ```
+
+Cuando lo pide, pegás el token y Enter: así no queda escrito en el historial de la terminal (si lo pegás
+dentro del comando, PowerShell lo guarda en su historial).
 
 Importante:
 - `setx` afecta a las **terminales nuevas**, no a la que tenés abierta. Cerrá y volvé a abrir la terminal (o reiniciá la herramienta de IA) para que tome el valor.

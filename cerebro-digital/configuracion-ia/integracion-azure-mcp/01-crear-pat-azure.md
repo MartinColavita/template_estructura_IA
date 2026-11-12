@@ -41,23 +41,25 @@ Elegí el nivel según tu caso. Si dudás, empezá por **solo lectura**.
 
 Con esto la IA puede leer y analizar todo, pero **no puede tocar nada** en Azure. Es el nivel más seguro. (**Wiki (Read)** solo si además querés que lea la wiki; el MCP de tickets no la usa.)
 
-### Paso a paso — config con API token (scope de Work Items: **Read**; **Read, write & manage** sólo si vas a escribir)
+### Paso a paso — config con API token (scope de Work Items: **Read** para leer; **Read & write** para escribir)
 
-Método: **API token (PAT)**, arrancando por solo lectura. Pasos:
+Método: **API token (PAT)**, con el mínimo que necesites. Pasos:
 
 1. Azure DevOps → tu foto (arriba a la derecha) → **Personal Access Tokens** → **New Token**.
 2. **Name**: `mcp-rw-<tu-usuario>` · **Organization**: `{{AZURE_ORG}}` · **Expiration**: 90 días.
-3. **Scopes** → **Show all scopes** → en **Work Items** elegí **Read, write, & manage**; y en **Project and Team** elegí **Read**.
+3. **Scopes** → **Show all scopes** → en **Work Items** elegí **Read & write**; y en **Project and Team** elegí **Read**.
 4. **Create** → copiá el token (se muestra **una sola vez**) → guardalo como variable de entorno ([[02-guardar-token-envvar]]).
 
 | Scope | Nivel | Habilita |
 |---|---|---|
-| **Work Items** | **Read, write & manage** (`vso.work_full`) | Leer/buscar/crear/editar tarjetas, **etiquetas**, **relaciones** (Parent/Related), **comentarios** (`System.History`) y **administrar** (mover/borrar, rutas de área/iteración) |
+| **Work Items** | **Read & write** (`vso.work_write`) | Leer/buscar/crear/editar tarjetas, **etiquetas**, **relaciones** (Parent/Related) y **comentarios** (`System.History`) |
 | **Project and Team** | **Read** (`vso.project`) | Listar proyectos/equipos (`list_projects`) |
 
-Con esos **dos** alcanza para TODO el flujo: crear Épicas/Features/Historias/Tareas/Bugs, enlazarlos, etiquetarlos, comentar y administrar. **No** hacen falta **Code** (repos/PRs), **Build**, **Release** ni **Wiki**. (Test Management solo si más adelante generan casos de prueba desde el Gherkin.)
+Con esos **dos** alcanza para todo el flujo: crear Épicas/Features/Historias/Tareas/Bugs, enlazarlos, etiquetarlos y comentar. **No** hacen falta *Read, write & manage*, **Code** (repos/PRs), **Build**, **Release** ni **Wiki**. (Test Management solo si más adelante generan casos de prueba desde el Gherkin.)
 
-> **Ojo:** *manage* incluye **borrar** work items y administrar rutas de área/iteración — es más potente. Por eso el flujo **siempre** pide confirmación humana antes de escribir (ver [[04-automatizar-con-ia]]).
+> **Ojo:** según la documentación de Microsoft, **borrar** un work item (y hasta destruirlo) pide el mismo
+> permiso *Read & write*, si tu usuario tiene permiso de borrar en el proyecto. El token no impide el borrado:
+> lo frena la regla (el GATE de BORRADO de `AGENTS.md`; ver [[04-automatizar-con-ia]]).
 
 ## Buenas prácticas
 

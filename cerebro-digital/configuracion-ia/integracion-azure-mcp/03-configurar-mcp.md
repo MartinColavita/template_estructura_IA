@@ -33,7 +33,7 @@ La conexión es a **Azure DevOps en la nube** (`dev.azure.com`), que tiene un ce
 
 ### Opción 1 — archivo `.mcp.json` (en la raíz del proyecto)
 
-> Hay un esqueleto listo en **`.mcp.json.example`** (en esta misma carpeta): copialo a un `.mcp.json` en la raíz del proyecto y reemplazá los placeholders (`<org>`, `${AZDO_PAT}`). El `.mcp.json` real no se versiona (queda per-host).
+> Hay un esqueleto listo en **`.mcp.json.example`** (en esta misma carpeta): copialo a un `.mcp.json` en la raíz del proyecto y reemplazá sólo la organización: **`${AZDO_PAT}` va tal cual** (si ponés el valor, el token queda escrito en un archivo). El `.mcp.json` real no se versiona (queda per-host).
 
 ```json
 {
@@ -54,10 +54,20 @@ La conexión es a **Azure DevOps en la nube** (`dev.azure.com`), que tiene un ce
 ### Opción 2 — comando `claude mcp add` (en una sola línea)
 
 ```bash
-claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<org> --env AZURE_DEVOPS_AUTH_METHOD=pat --env AZURE_DEVOPS_PAT=${AZDO_PAT} -- npx -y @tiberriver256/mcp-server-azure-devops
+claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<org> --env AZURE_DEVOPS_AUTH_METHOD=pat --env 'AZURE_DEVOPS_PAT=${AZDO_PAT}' -- npx -y @tiberriver256/mcp-server-azure-devops
 ```
 
-Verificá con `claude mcp list` o el comando `/mcp` dentro de una sesión: el server `azure-devops` debe figurar **conectado**.
+> **Las comillas simples son a propósito.** Sin ellas, bash reemplaza `${AZDO_PAT}` por el valor y el token
+> queda escrito en tu configuración, y PowerShell la toma como una variable propia (vacía) y el token queda
+> en blanco. Con comillas simples queda la referencia, y Claude Code la completa al arrancar el servidor.
+> Corrélo en **PowerShell o bash**, no en el «Símbolo del sistema» (cmd), que deja las comillas pegadas. Si
+> PowerShell responde con un error de argumentos, escribí el `--` entre comillas simples: `'--'`.
+>
+> **Si ya lo habías registrado con la versión anterior de esta guía** (sin comillas), el token quedó escrito
+> en tu configuración: corré `claude mcp remove azure-devops` desde la misma carpeta donde lo agregaste,
+> registralo de nuevo con el comando de arriba y **revocá ese token en Azure** ([[05-seguridad-y-phi]]).
+
+Verificá con `claude mcp list` o el comando `/mcp` dentro de una sesión: el server `azure-devops` debe figurar **conectado**, sin aviso de variable faltante.
 
 ## opencode
 

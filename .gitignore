@@ -38,6 +38,15 @@ secrets.env
 # Transcripciones en bruto de reuniones (no versionar en git)
 *.docx
 
+# documentos/: insumo crudo, puede traer datos de personas. Por que y como: documentos/README.md
+documentos/*
+!documentos/README.md
+!documentos/.gitkeep
+
+# Metricas de sesion de Claude Code (bin/registrar-sesion.py, hook SessionEnd): son por maquina, se
+# reescriben en cada sesion y guardan rutas locales. bin/tendencia.py las lee del disco.
+cerebro-digital/configuracion-ia/sesiones.jsonl
+
 # Doc del paquete Azure: los PDF se regeneran del HTML (no versionar)
 tablero/*.pdf
 

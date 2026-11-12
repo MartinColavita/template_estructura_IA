@@ -135,7 +135,7 @@
   </div>
 
   <div class="flow3">
-    <div class="f3"><div class="n">1</div><h3>Conectás una vez</h3><p>Un solo comando y tu Claude Code queda hablando con Azure.</p></div>
+    <div class="f3"><div class="n">1</div><h3>Conectás una vez</h3><p>Dos comandos y tu Claude Code queda hablando con Azure.</p></div>
     <div class="f3"><div class="n">2</div><h3>Le pedís en palabras</h3><p>«Armá un bug con esto», «bajá la ficha de Reserva de salas al board».</p></div>
     <div class="f3"><div class="n">3</div><h3>Revisás y confirmás</h3><p>Te muestra qué va a crear; con tu "dale", lo hace y te pasa el link.</p></div>
   </div>
@@ -144,21 +144,24 @@
   <div class="paso" id="c1">
     <div class="head"><div class="chip">🔌</div><div><h2>Conectá tu PC con Azure</h2><div class="sub">Se hace una sola vez. Elegí una opción.</div></div></div>
     <div class="tabs">
-      <button class="tab on" data-tab="token"><div class="t">Con un token <span class="pill alt">1 comando</span></div><div class="d">Pegás un código que copiás de Azure. No instalás nada.</div></button>
+      <button class="tab on" data-tab="token"><div class="t">Con un token <span class="pill alt">2 comandos</span></div><div class="d">Pegás un código que copiás de Azure. No instalás nada.</div></button>
       <button class="tab" data-tab="cuenta"><div class="t">Con tu cuenta <span class="pill rec">sin token</span></div><div class="d">Entrás con tu usuario de {{ORGANIZACION}} desde el navegador.</div></button>
     </div>
 
     <div class="panel on" data-panel="token">
       <div class="only-print">Opción A — con token</div>
       <ol class="mini">
-        <li><b>Conseguí tu token en Azure.</b><div class="apunte">Azure DevOps → tu foto (arriba a la derecha) → <b>Personal Access Tokens</b> → <b>New Token</b>. Nombre a gusto, vencimiento <b>90 días</b>, permiso <b>Work Items</b> (elegí <i>Read &amp; Write</i> si vas a crear/editar). <b>Create</b> → copiá el token (se muestra una sola vez).</div></li>
-        <li><b>Abrí la terminal</b> <span class="apunte">(Windows: buscá "Terminal" o "PowerShell").</span></li>
-        <li><b>Pegá este comando</b> en una sola línea, reemplazando las <b>2 partes</b> en <code>&lt;...&gt;</code>, y Enter:
-          <div class="cmd"><code id="k1">claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<span class="ln">&lt;tu-organizacion&gt;</span> --env AZURE_DEVOPS_AUTH_METHOD=pat --env AZURE_DEVOPS_PAT=<span class="ln">&lt;pega-tu-token&gt;</span> -- npx -y @tiberriver256/mcp-server-azure-devops</code><button class="copy" data-copy="k1">Copiar</button></div>
+        <li><b>Conseguí tu token en Azure.</b><div class="apunte">Azure DevOps → tu foto (arriba a la derecha) → <b>Personal Access Tokens</b> → <b>New Token</b>. Nombre a gusto, vencimiento <b>90 días</b>, permisos <b>Work Items</b> (<i>Read &amp; Write</i> si vas a crear/editar) y <b>Project and Team</b> (<i>Read</i>). <b>Create</b> → copiá el token (se muestra una sola vez).</div></li>
+        <li><b>Abrí la terminal</b> <span class="apunte">(Windows: buscá "Terminal" o "PowerShell"; no el "Símbolo del sistema", que no entiende las comillas simples del paso 4).</span></li>
+        <li><b>Guardá el token en tu usuario</b> (una sola vez): pegá este comando y Enter; cuando te lo pida, pegá el token y Enter (así no queda en el historial de la terminal). Después <b>cerrá la terminal y abrila de nuevo</b>; si usás Claude Code dentro de VS Code o IntelliJ, <b>cerrá el programa entero</b>:
+          <div class="cmd"><code id="k0">setx AZDO_PAT (Read-Host 'Pegá tu token')</code><button class="copy" data-copy="k0">Copiar</button></div>
+        </li>
+        <li><b>Pegá este comando</b> en una sola línea, reemplazando sólo <code>&lt;tu-organizacion&gt;</code>, y Enter:
+          <div class="cmd"><code id="k1">claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<span class="ln">&lt;tu-organizacion&gt;</span> --env AZURE_DEVOPS_AUTH_METHOD=pat --env 'AZURE_DEVOPS_PAT=${AZDO_PAT}' -- npx -y @tiberriver256/mcp-server-azure-devops</code><button class="copy" data-copy="k1">Copiar</button></div>
         </li>
       </ol>
-      <div class="ok-box"><b>Las 2 partes a reemplazar:</b> <code>&lt;tu-organizacion&gt;</code> = el nombre de tu organización en Azure · <code>&lt;pega-tu-token&gt;</code> = el token del paso 1. Nada más: te conectás directo a Azure en la nube. <b>No necesitás instalar ningún certificado</b> (Azure en la nube ya tiene uno público válido).</div>
-      <div class="nota"><b>Seguridad:</b> este comando <b>guarda tu token</b> en la configuración de tu PC. Es lo más simple. Si preferís no guardar ningún token, usá la pestaña <b>"Con tu cuenta"</b>. El token es como una contraseña: si se filtra, revocalo en Azure y creá uno nuevo.</div>
+      <div class="ok-box"><b>Lo único que reemplazás:</b> <code>&lt;tu-organizacion&gt;</code> = el nombre de tu organización en Azure. El <code>${AZDO_PAT}</code> va <b>tal cual, con las comillas simples</b>: es la referencia a tu token, que Claude Code completa al arrancar. Te conectás directo a Azure en la nube: <b>no necesitás instalar ningún certificado</b>.</div>
+      <div class="nota"><b>Seguridad:</b> el token queda guardado como variable de tu usuario, <b>no</b> en la configuración de Claude Code. Si preferís no guardar ningún token, usá la pestaña <b>"Con tu cuenta"</b>. El token es como una contraseña: si se filtra, revocalo en Azure y creá uno nuevo. <b>Si ya lo habías conectado con una versión anterior de esta guía</b> (pegando el token en el comando), quedó escrito en tu configuración: corré <code>claude mcp remove azure-devops</code> desde la misma carpeta donde lo agregaste, volvé a conectarlo con estos pasos y revocá ese token. Los pasos 2 y 3 son de Windows; en Mac o Linux, la variable <code>AZDO_PAT</code> se carga como dice la guía técnica (<code>integracion-azure-mcp/02-guardar-token-envvar.md</code>, opción B).</div>
     </div>
 
     <div class="panel" data-panel="cuenta">
@@ -421,12 +424,13 @@ Escenario: no hay recursos cercanos
     <div class="head"><div class="chip">🔧</div><div><h2>Si algo no funciona</h2></div></div>
     <table>
       <tr><th>Síntoma</th><th>Solución</th></tr>
-      <tr><td>"No autorizado"</td><td>El token venció (creá uno nuevo) o, con tu cuenta, volvé a hacer <code>az login</code>.</td></tr>
+      <tr><td>"No autorizado"</td><td>Primero, cerrá y volvé a abrir la terminal (o el editor entero, si usás Claude Code dentro de VS Code o IntelliJ): después del <code>setx</code>, el programa abierto no ve el token. Si sigue igual, el token venció (creá uno nuevo) o, con tu cuenta, volvé a hacer <code>az login</code>.</td></tr>
       <tr><td>No deja crear o editar</td><td>Tu token es de solo lectura. Creá uno con <b>Work Items (Read &amp; Write)</b>.</td></tr>
       <tr><td>No encuentra el proyecto</td><td>Revisá que <code>&lt;tu-organizacion&gt;</code> esté bien escrito.</td></tr>
-      <tr><td>No aparece el server</td><td>Escribí <code>/mcp</code> en Claude Code: <code>azure-devops</code> debe figurar conectado. Si no, repetí el comando del paso 1.</td></tr>
+      <tr><td>No aparece el server</td><td>Escribí <code>/mcp</code> en Claude Code: <code>azure-devops</code> debe figurar conectado. Si no, repetí el comando del paso 4.</td></tr>
       <tr><td>"No puedo bajar la ficha, falta cerrar su estructura"</td><td>Es normal: la ficha aún no declara sus slices/capacidades/flujos. Avisale al equipo de curación (Cerebro Digital) para que la cierre; recién ahí se puede derivar.</td></tr>
-      <tr><td>Cambié de PC, o probé desde otra terminal</td><td>El token guardado con el comando del paso 1 es <b>por PC</b>. Si abrís una terminal <i>nueva</i> justo después de conectarte, puede tardar en verlo: cerrá y volvé a abrir la herramienta de IA.</td></tr>
+      <tr><td>Cambié de PC</td><td>El token es <b>por PC</b>: en la otra, repetí los pasos 3 y 4.</td></tr>
+      <tr><td>PowerShell da un error de argumentos en el paso 4</td><td>Escribí el <code>--</code> entre comillas simples: <code>'--'</code>.</td></tr>
     </table>
   </div>
 

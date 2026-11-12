@@ -28,4 +28,5 @@ enchufado), `borrador/absorcion/` y `borrador/diagramas/`.
 El equipo funcional y gerencia no manejan conceptos de git, ramas o repositorios, y usan este
 proyecto como una caja negra. Esta carpeta hace transparente cómo trabaja el agente: todo lo
 que está en construcción queda visible acá, y nada se considera oficial hasta que se pide
-explícitamente moverlo a su destino final (`entregables/` o `documentos/` según el tipo).
+explícitamente moverlo a su destino final: `entregables/` (un mockup, una presentación) o el Cerebro
+por `cerebro-curator` (una ficha, una regla). Nunca a `documentos/`, que sólo recibe lo que se entrega.

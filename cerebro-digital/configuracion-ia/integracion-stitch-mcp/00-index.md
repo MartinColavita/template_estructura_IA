@@ -35,7 +35,7 @@ front. El flujo completo está en la skill [[disenar-con-stitch]].
 
 | Herramienta | Cómo |
 |---|---|
-| **Claude Code** | `claude mcp add stitch --transport http https://stitch.googleapis.com/mcp --header "X-Goog-Api-Key: $STITCH_API_KEY" -s user` (queda en tu configuración de usuario, fuera del repo). Verificá con `/mcp`. |
+| **Claude Code** | `claude mcp add stitch --transport http https://stitch.googleapis.com/mcp --header 'X-Goog-Api-Key: ${STITCH_API_KEY}' -s user` (queda en tu configuración de usuario, fuera del repo). Las comillas simples son a propósito, por lo mismo que en Azure ([[03-configurar-mcp]] §Opción 2). Verificá con `/mcp` que conecte (⚠ si no llega la clave, ver `headersHelper` en la documentación de MCP de Claude Code). Si ya lo habías registrado con comillas dobles, la clave quedó escrita en tu configuración: `claude mcp remove stitch -s user`, registralo de nuevo y generá una clave nueva. |
 | **Gemini CLI** | `gemini extensions install https://github.com/gemini-cli-extensions/stitch` (extensión oficial del equipo de Gemini CLI). |
 | **opencode / Antigravity** | Un servidor MCP remoto de tipo HTTP con la URL de arriba y el header `X-Goog-Api-Key`; el formato exacto lo fija cada herramienta (⚠ verificar). |
 

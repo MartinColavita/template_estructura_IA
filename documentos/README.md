@@ -4,9 +4,10 @@ Lo que **entra** al proyecto: requerimientos, notas, transcripciones de reunione
 origen, capturas de una app que se va a absorber. Vengan de vos, de un cliente o de un equipo
 funcional. **Nunca se genera acá, se recibe.**
 
-- Cada documento queda registrado en `cerebro-digital/fuentes.md` con su código `[DOC-nn]` y su
-  versión. Los `*.docx` **no se versionan** (`.gitignore`): si es un Word, se guarda su PDF o se
-  referencia por su ubicación oficial.
+- **Nada de esta carpeta se versiona**, salvo este README (`.gitignore`): es insumo crudo y puede
+  traer nombres y datos de personas. Cada documento queda registrado en `cerebro-digital/fuentes.md`
+  con su código `[DOC-nn]`, su versión y su ubicación oficial. Si el equipo decide versionar un
+  documento que sabe limpio, lo agrega a propósito (`git add -f`) y lo anota ahí.
 - Lo que un agente **produce** a partir de esto (borradores, fichas, mockups) va a `borrador/` y,
   con validación humana, al Cerebro Digital o a `entregables/`. Un borrador nunca se promueve a
   esta carpeta.

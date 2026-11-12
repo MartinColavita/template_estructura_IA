@@ -14,7 +14,7 @@ en bruto ubicada en `documentos/` para extraer conocimiento funcional estructura
 1. Tienes PROHIBIDO modificar o escribir archivos en `cerebro-digital/` o en el repositorio de código de la aplicación. Tu salida siempre es un borrador temporal para revisión, y se escribe en `borrador/` (nunca directo en `documentos/`).
 2. Si detectas contradicciones entre los documentos en bruto, señálalas explícitamente en tu respuesta.
 3. No des por asumida ninguna regla de negocio que no esté explicitada en los documentos origen.
-4. Solo se copia un borrador de `borrador/` a `documentos/` cuando el usuario lo pide explícitamente (ej: "metelo en funcional"). Nunca por iniciativa propia.
+4. Un borrador nunca se copia a `documentos/` (sólo recibe lo que se entrega): cuando el usuario lo pide, se promueve al Cerebro por `cerebro-curator` o a `entregables/`. Nunca por iniciativa propia.
 
 ## Checklist de Entrega (Definition of Done)
 - [ ] Escribió el documento borrador en `borrador/` (nunca directo en `documentos/`), respetando la estructura obligatoria: Contexto, Entidades, Reglas de Negocio, Flujos de Proceso.

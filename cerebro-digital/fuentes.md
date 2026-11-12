@@ -18,13 +18,13 @@ Este documento actúa como el **índice de trazabilidad** del Cerebro Digital. C
 
 ## 📂 1. Catálogo de documentación funcional de origen
 
-| Código | Documento de origen | Versión | Autor / Origen | Mapeo en el Cerebro Digital (OKF) |
-|--------|---------------------|---------|----------------|----------------------------------|
-| **[DOC-01]** | <nombre del documento funcional> | <vX.Y> | <equipo que lo entregó> | `[[contexto]]`, `[[index]]` |
+| Código | Documento de origen | Versión | Autor / Origen | Ubicación oficial | Mapeo en el Cerebro Digital (OKF) |
+|--------|---------------------|---------|----------------|-------------------|----------------------------------|
+| **[DOC-01]** | <nombre del documento funcional> | <vX.Y> | <equipo que lo entregó> | <link o ruta del original> | `[[contexto]]`, `[[index]]` |
 
-Los documentos en bruto viven en `documentos/` (no se generan: se reciben). Las
-transcripciones de reunión **no** se versionan; su extracción sí, en
-`modulo-ejemplo/extraccion-reuniones/`.
+Los documentos en bruto viven en `documentos/` (no se generan: se reciben) y **no** se
+versionan: acá queda su código, su versión y su ubicación oficial. Las transcripciones de reunión
+tampoco; su extracción sí, en `modulo-ejemplo/extraccion-reuniones/`.
 
 ---
 
