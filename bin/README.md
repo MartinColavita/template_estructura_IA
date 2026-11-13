@@ -1,0 +1,42 @@
+# `bin/` — los scripts del ecosistema
+
+Por qué existen: `AGENTS.md`, «Lo que se cuenta, lo cuenta un script». Cada script declara su contrato en su encabezado: qué mide, qué NO mira y su salida (casi todos: 0 OK, 1 HALLAZGO o FRENA, 2 SIN DATOS). Sólo biblioteca estándar de Python.
+
+- `bin/auditar-tarea.py`: secciones, numeración, Escenarios contra la tabla, reglas que existen, enlaces, HTML, guardarraíles, Modos de falla, Datos a confirmar y tamaño. También lo corre **siempre** el checklist de forma §2b de [[cargar-a-azure]]: es el autochequeo de quien escribe, no la auditoría opcional.
+- `bin/auditar-historia.py`: el Gherkin, las reglas, el bloque de derivación de la ficha y el formato.
+- `bin/analizar-tareas.py`: el conjunto de Tareas de una Historia.
+- `bin/lote.py`: prepara el lote, arma las misiones de los sub-agentes, corre las auditorías si se piden, arma la tabla del cierre, compara la tarjeta con el archivo auditado y mide el tiempo.
+- `bin/derivar-arbol.py`: el árbol Épica→Feature→Historia **1:1** desde el bloque de derivación de una ficha; si no se deriva, dice por qué.
+- `bin/gate-worktree.py`: los datos duros del GATE de WORKTREE (worktrees abiertos, árbol sucio, rama ya usada, base al día).
+- `bin/verificar-tdd.py`: la mitad mecánica de `verificar-tdd`: por ítem, rojo sólo con tests y antes del verde, leído de `git log`; la rama `evidencia/<ID>`.
+- `bin/auditar-diff.py`: secretos y posibles datos personales en las líneas agregadas del diff, y elegibilidad.
+- `bin/atajos.py`: las marcas `atajo:` del código de un repo; HALLAZGO las que no tienen límite o `cuando …`, o citan una `DT-nnn` que no está abierta.
+- `bin/datos-cierre.py`: rama, último commit, cantidad de commits, archivos, si está pusheada, respaldo y link del Merge Request, leídos del repositorio para el comentario de cierre.
+- `bin/inventariar-codigo.py`: el inventario de una aplicación existente (lenguajes, build, pipeline, contratos, migraciones, tests, deuda, posibles secretos) para `absorber-aplicacion`.
+- `bin/radiografiar-codigo.py`: la radiografía de una aplicación existente, cada hecho con `archivo:línea` (endpoints, entidades y estados, pantallas, reglas candidatas, integraciones, permisos, dependencias entre módulos); la lectura de `absorber-aplicacion` empieza por lo que señala.
+- `bin/esquema-base.py`: el esquema real de una base (SQLite con biblioteca estándar, o el DDL exportado de otro motor) a Markdown y Mermaid; nunca filas de datos.
+- `bin/armar-corpus.py`: el esqueleto del corpus de paridad de un slice desde la radiografía (un caso por endpoint, un borde por regla candidata), con `<completar>`; no inventa valores.
+- `bin/paridad.py`: `grabar` las respuestas de la aplicación vieja (el golden, firmado por el script) y `comparar` con la nueva, diferencia por diferencia; campos volátiles declarados, diferencias aceptadas sólo con nombre de persona.
+- `bin/mapa-modernizacion.py`: el avance de la modernización por slice (`ver`) y la barrera del corte de tráfico (`corte`: `DEC-004`, paridad OK y reciente, persona que aprueba).
+- `bin/armar-mision.py`: la misión del worker o del verificador, una sola plantilla para Orca e IntelliJ (la Tarea completa con el Gherkin del padre, rutas absolutas, las convenciones C1..C8 copiadas del orquestador, el bloque de veredicto); el texto de la misión no vive en ninguna skill.
+- `bin/generar-informe.py`: `INFORME-ESQUELETO.html`, el informe visual del esqueleto (skills, scripts, sondas, propuestas, decisiones, flujos); corre las pruebas y el Doctor para que las cifras sean las del día.
+- `bin/tablero-local.py`: el tablero local en archivos (`crear`, `listar`, `ver`, `tomar`, `comentar`, `estado`, `vincular`, `buscar`), cuando `DEC-006` no usa Azure; mismos GATEs, sin MCP.
+- `bin/relevar-config-ia.py`: qué configuración de IA trae un proyecto existente (instrucciones, comandos, reglas duras, idioma, skills, MCP) y adónde va cada cosa al adoptarlo.
+- `bin/adoptar-proyecto.py`: enchufa una carpeta de proyecto existente al núcleo en un comando (enlace o mudanza a `back/` o `front/`, relevamiento, inventario, radiografía, y la línea que importa `AGENTS.md` en su `CLAUDE.md`).
+- `bin/medir-uso-skills.py`: qué skills se usan de verdad (transcripciones locales de Claude Code), cuáles no y cuánto pesan; la evidencia de la poda.
+- `bin/arrancar-proyecto.py`: instanciar → git init → instalar → enchufar el proyecto existente → informe, en un comando y en ese orden; lo corre la skill `arrancar-proyecto` con tu «sí».
+- `bin/derivar-a-tablero-local.py`: baja una ficha al tablero local 1:1 contra su bloque de derivación (corre `derivar-arbol.py` y crea con `tablero-local.py`); idempotente, sin Tareas.
+- `bin/registrar-sesion.py`: al cerrar cada sesión (hook `SessionEnd`), una línea de conteos en `configuracion-ia/sesiones.jsonl`: skills usadas, veredictos con bloqueantes y SIN DATOS, fricciones, Tareas terminadas y fallidas, preguntas, errores de script, duración. Nunca texto ni datos de personas.
+- `bin/tendencia.py`: al abrir cada sesión (hook `SessionStart`), una frase: MEJOR, IGUAL o PEOR que las sesiones anteriores, con los números; PEOR es la señal de `mejorar-ecosistema`.
+- `bin/armar-e2e.py`: el esqueleto de las pruebas de punta a punta de una Historia desde su Gherkin (un test por Escenario, título textual, traza `Historia #id · Escenario`, pasos como comentarios, cada uno marcado sin automatizar), para Playwright, proceso o HTTP; no pisa lo que existe.
+- `bin/cobertura-e2e.py`: por Historia y Escenario, qué tiene prueba de punta a punta automatizada, qué es sólo esqueleto y qué no tiene nada; vale para cualquier motor porque lee la traza.
+- `bin/generar-documentacion.py`: la guía de uso (`--tipo manual`) y la documentación técnica y funcional (`--tipo tecnica --app <repo>`) de la aplicación, desde las fichas, el contexto, las decisiones, `aplicacion/`, los pendientes, la bitácora y la radiografía; HTML con índice y diagramas SVG; lo que el Cerebro no tiene queda marcado, no inventado.
+- `bin/verificar-skills.py`: cada `SKILL.md` contra la especificación abierta de Agent Skills (nombre igual a la carpeta, descripción de hasta 1024 caracteres); lo corre el hook.
+- `bin/instalar.py`: después de clonar: hook, espejos de agentes, verificación de espejos y de skills, placeholders sin instanciar.
+- `bin/instanciar.py`: instancia el template para un proyecto (placeholders, módulo, modo y tablero de `DEC-006`, la firma de `DEC-005` con `--desatendido`, stack de `DEC-003`, espejos); lo corre `arrancar-proyecto.py`.
+- `bin/verificar-sello.py`: si el sello de una auditoría pedida sigue vigente, en un tablero con historial de revisiones (Azure DevOps, Jira); con tablero local no aplica.
+- `bin/probar-*.py`: la prueba de cada script (OK o FALLA, caso por caso); `probar-reglas.py` mide a un modelo con su CLI y sin él es SIN DATOS. Las corren el CI y `generar-informe.py`.
+- `bin/sync-skills.*` y `bin/sync-agents.*`: regeneran los espejos de skills y de agentes desde la fuente.
+- `bin/actualizar.*`: trae lo último del repo y corre el instalador, en un comando.
+- `bin/auditoria/`: el paquete común de `auditar-tarea.py`, `auditar-historia.py`, `analizar-tareas.py`, `derivar-arbol.py` y `lote.py`.
+- Un `bin/<nombre>.sh` o `.ps1` con el mismo nombre que un `.py`: envoltorio para correrlo desde bash o PowerShell. `bin/extraer-reunion.ps1` es un script propio (PowerShell).

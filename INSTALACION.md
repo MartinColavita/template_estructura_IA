@@ -35,15 +35,15 @@ python -I bin/instalar.py
 
 Es el instalador del Cerebro (Python 3, biblioteca estándar, idempotente): comprueba los requisitos (git, Python; Node sólo si se van a usar los MCP), deja activo el hook pre-commit, materializa los espejos de agentes (no viajan en el clone), verifica que los espejos de skills sean idénticos a la fuente y que cada `SKILL.md` cumpla la especificación abierta de Agent Skills (`bin/verificar-skills.py`), avisa si quedan placeholders sin instanciar o falta el `.gemini/.env`, y lista lo que sigue. `--dry-run` muestra sin tocar. Tres salidas: OK, HALLAZGO (algo que arreglar, con el comando) y SIN DATOS (no es un repositorio del Cerebro).
 
-## Bootstrap por herramienta
+## Carga por herramienta
 
 Skills: cero pasos en las cuatro herramientas (viajan con el clone). **Agentes: los materializa el
 instalador** (o `bin/sync-agents.sh` / `.ps1` a mano) una sola vez después de clonar.
 
-- **Claude Code**: `.claude/skills/` ya trae las **33 skills** — invocables con `/nombre-de-la-skill`. `CLAUDE.md` carga las reglas de `AGENTS.md` automáticamente (Claude Code leería `AGENTS.md` solo únicamente si no hubiera `CLAUDE.md`; con el import funciona en toda versión). `/context` muestra qué cargó y `/doctor prompt-audit` revisa que las instrucciones no hayan envejecido. Los 5 agentes (`/agents` o invocación automática) requieren haber corrido el instalador.
+- **Claude Code**: `.claude/skills/` ya trae las **33 skills** — invocables con `/nombre-de-la-skill`. `CLAUDE.md` carga las reglas de `AGENTS.md` automáticamente (Claude Code leería `AGENTS.md` solo únicamente si no hubiera ningún `CLAUDE.md`, desde la v2.1.277, y un `CLAUDE.local.md` también lo apaga; con el import funciona en toda versión). `/context` muestra qué cargó y `/doctor prompt-audit` revisa que las instrucciones no hayan envejecido. Los agentes (`/agents` o invocación automática) requieren haber corrido el instalador.
 - **Antigravity**: lee `AGENTS.md` nativamente y las skills desde `.agents/skills/`. Los agentes los materializa el instalador.
 - **opencode**: auto-descubre `AGENTS.md` (vía `"instructions"` en `opencode.json`, versionado) y escanea por defecto tanto `.agents/skills/` como `.claude/skills/`.
-- **Gemini CLI**: `GEMINI.md` en la raíz importa las reglas con `@AGENTS.md`, igual que `CLAUDE.md`, y las skills se auto-descubren de `.agents/skills/` (alias documentado de `.gemini/skills/`). `gemini skills list` o `/skills` en la sesión muestran lo que cargó. No hay que pegar nada a mano.
+- **Gemini CLI**: `GEMINI.md` en la raíz importa las reglas con `@AGENTS.md`, igual que `CLAUDE.md`, y las skills se auto-descubren de `.agents/skills/` (alias documentado de `.gemini/skills/`). `gemini skills list` o `/skills` en la sesión muestran lo que cargó. No hay que pegar nada a mano (Gemini leería `AGENTS.md` sólo si cada persona lo agrega a `context.fileName`). Que un modelo cumpla las reglas se mide con `bin/probar-reglas.*`.
 - **Si tu herramienta no está en esta lista**: primero fijate si ya lee `AGENTS.md` de forma nativa — en ese caso funciona sin tocar nada. Si tiene su propia convención de archivo pero no lee `AGENTS.md` sola, agregale un archivo-loader de una línea (`@AGENTS.md`), mismo patrón que `CLAUDE.md`. Si no tiene ninguna convención de proyecto, pegá `AGENTS.md` a mano en el contexto.
 
 ## Para el mantenedor (cuando cambiás skills o agentes)
@@ -59,7 +59,7 @@ bin/sync-skills.sh
 bin/sync-skills.ps1
 ```
 
-Tras editar cualquier `.md` en `cerebro-digital/configuracion-ia/agentes/`, mismo mecanismo con `bin/sync-agents.sh` (o `.ps1`), y además hace falta correrlo **una vez por dev** (no viaja con el clone, ver "Bootstrap" arriba).
+Tras editar cualquier `.md` en `cerebro-digital/configuracion-ia/agentes/`, mismo mecanismo con `bin/sync-agents.sh` (o `.ps1`), y además hace falta correrlo **una vez por dev** (no viaja con el clone, ver «Carga por herramienta» arriba).
 
 **Guardarraíl:** hay un hook pre-commit versionado en `.githooks/`. Se activa una vez por dev con:
 
@@ -75,7 +75,7 @@ A partir de ahí, si intentás commitear con algún espejo desincronizado, con u
 
 **En el servidor:** `.gitlab-ci.yml` (GitLab) y `.github/workflows/verificar.yml` (GitHub) corren en cada push los espejos, la especificación y el conteo de skills, las pruebas de `bin/` y el Doctor, con sólo Python y git: el hook es local y se saltea con `--no-verify`, el servidor no. Las guardas de BOM, caracteres de control y las listas de `README.md` e `index.md` siguen sólo en el hook. En otra plataforma se traducen esos tres pasos.
 
-> `opencode` puede reportar la ubicación de una skill de forma inconsistente entre sesiones (tiene el mismo contenido en dos rutas) — no afecta el comportamiento, es un trade-off aceptado. opencode escanea `.opencode/skills/`, `.claude/skills/` y `.agents/skills/` y no documenta una variable para apagar una ruta.
+> `opencode` puede reportar la ubicación de una skill de forma inconsistente entre sesiones (tiene el mismo contenido en dos rutas) — no afecta el comportamiento y puede degradar su cacheo de prompt; es un trade-off aceptado. opencode escanea `.opencode/skills/`, `.claude/skills/` y `.agents/skills/` y no documenta una variable para apagar una ruta.
 
 ## Integraciones externas
 

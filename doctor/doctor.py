@@ -267,6 +267,7 @@ SRC_SKILLS = ROOT + "/cerebro-digital/configuracion-ia/skills"
 # 3,6 caracteres por token. Sirve para COMPARAR skills entre si y para tener un
 # orden de magnitud; no para facturar.
 CHARS_POR_TOKEN = 3.6
+TOPE_AGENTS = 7000   # tokens de AGENTS.md; arriba de esto, la sonda de tamano avisa que volvio a crecer
 
 
 def tokens_aprox(texto):
@@ -726,13 +727,23 @@ def sonda_tamano():
                       "" if n <= 250 else "grande: revisar si conviene partirla",
                       "OK" if n <= 250 else "HALLAZGO"])
     filas.sort(key=lambda f: -int(f[2].lstrip("~")))
+    # AGENTS.md se carga ENTERO en cada sesion y en cada subagente: es el costo fijo mas grande, y nadie lo medía.
+    # Paso de ~15.000 a ~5.500 tokens (M-030); el tope avisa si vuelve a crecer.
+    reglas = leer(ROOT + "/AGENTS.md")
+    if reglas:
+        tk_reglas = tokens_aprox(reglas)
+        siempre += tk_reglas
+        filas.insert(0, ["AGENTS.md (reglas)", str(len(reglas.splitlines())), "~" + str(tk_reglas), "~" + str(tk_reglas),
+                         "se carga entero en cada sesion y en cada subagente" +
+                         ("" if tk_reglas <= TOPE_AGENTS else "; paso el tope de ~" + str(TOPE_AGENTS) + " tokens: volvio a crecer"),
+                         "OK" if tk_reglas <= TOPE_AGENTS else "HALLAZGO"])
     grandes = [f[0] for f in filas if f[5] == "HALLAZGO"]
     estado = "OK" if not grandes else "HALLAZGO"
     total = sum(len(leer(FUENTE + "/" + s + "/SKILL.md").splitlines()) for s, _ in grafico)
     tk_total = sum(v for _, v in grafico)
     return res("Costo de contexto por skill", estado,
         str(len(grafico)) + " skills · ~" + str(siempre) + " tokens pesan SIEMPRE (las "
-        "descripciones) · ~" + str(tk_total) + " tokens si se cargaran todas enteras, que no pasa." +
+        "descripciones y AGENTS.md) · ~" + str(tk_total) + " tokens si se cargaran todas enteras, que no pasa." +
         ("" if estado == "OK" else " Grandes: " + ", ".join(grandes)),
         (["Skill", "Lineas", "Tokens al invocarla", "Tokens que pesan siempre", "Detalle", "Estado"], filas),
         sorted(grafico, key=lambda x: -x[1])[:15],

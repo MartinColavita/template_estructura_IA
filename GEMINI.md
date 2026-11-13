@@ -10,7 +10,7 @@ El `AGENTS.md` de la raíz ya incluye el **núcleo** + las **reglas de redacció
 
 Las skills viven en `cerebro-digital/configuracion-ia/skills/` (**fuente canónica**) y se reflejan en dos espejos versionados: `.agents/skills/` y `.claude/skills/`. Un hook pre-commit (`.githooks/`) verifica que los espejos queden idénticos a la fuente.
 
-`.agents/skills/` es el alias documentado de `.gemini/skills/`: Gemini CLI lo descubre solo, y `gemini skills list` (o `/skills` en la sesión) muestra lo que cargó. Si el entorno **no auto-descubre** ninguno de los dos espejos, las skills se usan **leyendo el `SKILL.md`** que corresponda y siguiendo sus instrucciones — el contenido es el mismo y no depende de la herramienta. El índice de skills está en `AGENTS.md`.
+`.agents/skills/` es el alias documentado de `.gemini/skills/`: Gemini CLI lo descubre solo, y `gemini skills list` (o `/skills` en la sesión) muestra lo que cargó. Si el entorno **no auto-descubre** ninguno de los dos espejos, las skills se usan **leyendo el `SKILL.md`** que corresponda y siguiendo sus instrucciones — el contenido es el mismo y no depende de la herramienta. El índice de skills está en `README.md` (§«Skills del Ecosistema»).
 
 ## Regla de neutralidad
 

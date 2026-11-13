@@ -25,3 +25,4 @@ consistencia, persistencia y estructura de la base de conocimiento en `cerebro-d
 - [ ] Lo que es de la **aplicación construida** va a `<modulo>/aplicacion/` (`mapa.md`, `aprendizajes.md` como `AP-nnn`, `deuda.md` como `DT-nnn`), siempre con su fuente (`#ID`, Merge Request, commit o corrida del Doctor) y, en un aprendizaje, con lo que cambió; nunca de memoria.
 - [ ] Enlazó conceptos relacionados mediante wikilinks (`[[concepto]]`).
 - [ ] Registró cada cambio detalladamente al final de `cerebro-digital/log.md`.
+- [ ] En una ficha derivable, **cerró** el bloque `## Derivación a backlog` (sin `⚠`) sólo con la descomposición validada por el humano (`AGENTS.md`, «Regla de cardinalidad»).
