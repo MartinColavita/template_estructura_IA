@@ -893,7 +893,8 @@ def auditar(doc, ruta='', criterios=None, error_historia=None, ruta_historia=Non
     ch_tamano(r, d)
     if d['capa'] == 'desconocida':
         r.aviso('capa', 'no pude deducir la capa del "Alcance tecnico" (api/application/domain/'
-                        'infra o front/componente): no se aplica la exencion de front')
+                        'infra o front/componente): no se aplica la exencion de front; declarala con el '
+                        'prefijo "Front:" o "Back:" en el titulo, o nombrando el repo en "Componente / repo"')
     esc = historia.escenarios(criterios) if criterios else None
     r.datos.update({
         'capa': capa,

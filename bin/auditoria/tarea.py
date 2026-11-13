@@ -364,18 +364,22 @@ def _capa(alcance_html, nombre_archivo, titulo=None):
         return 'front'
     if re.match(r'^(back|backend)\s*[:' + GUION_M + '-]', pre):
         return 'back'
-    t = n(texto.texto_plano(alcance_html or ''))
+    # Linea por linea (n() aplana todo en una sola). Lo que la Tarea deja "Fuera de alcance" no es senal de su
+    # capa: una Tarea de back suele nombrar ahi la pantalla que no toca. La etiqueta "Componente / repo" tampoco.
+    lineas = [n(l) for l in texto.texto_plano(alcance_html or '').split('\n')]
+    lineas = [l for l in lineas if l and not l.lstrip('-* ').startswith('fuera de alcance')]
     front, back = 0, 0
-    for linea in t.split('\n'):
-        if linea.startswith('componente') or 'repo' in linea.split(':', 1)[0]:
+    for linea in lineas:
+        if linea.startswith('componente') or re.search(r'\brepo\b', linea.split(':', 1)[0]):
             if re.search(r'front', linea):
                 front += 5
             if re.search(r'back', linea):
                 back += 5
+    palabras = re.sub(r'componente\s*/\s*repo', ' ', ' '.join(lineas))
     front += len(re.findall(r'\b(front|frontend|react|view|vista|componentes?|vite|vitest|tsx|'
-                            r'hook|reducer|pantalla|pagina)\b', t))
+                            r'hook|reducer|pantalla|pagina)\b', palabras))
     back += len(re.findall(r'\b(api|application|domain|infra|backend|quarkus|junit|endpoint|'
-                           r'flyway|migracion)\b', t))
+                           r'flyway|migracion)\b', palabras))
     if front > back:
         return 'front'
     if back > front:
@@ -478,7 +482,8 @@ def parsear(doc, nombre_archivo=None, titulo=None):
     titulo: el System.Title, si quien llama lo tiene (su prefijo "Front:"/"Back:" decide la
     capa). Si no, se mira lo que haya antes del primer <h3> y despues el Alcance tecnico.
     'capa' es 'back' | 'front' | 'ui' | 'desconocida'; 'ui' es la Tarea chica de solo UI/config:
-    no es de back y no tiene ni SDD ni tests (el bloque del medio se borro entero).
+    es de front y no tiene ni SDD ni tests (el bloque del medio se borro entero). Con la capa
+    desconocida no hay exencion.
     """
     largo = len(doc or '')
     doc = celdas_separadas(doc)
@@ -627,6 +632,6 @@ def parsear(doc, nombre_archivo=None, titulo=None):
     res['reglas_citadas'] = texto.reglas_citadas(doc)
     res['ids_citados'] = texto.ids_citados(doc)
     res['marcas'] = texto.marcas_lote(doc)
-    res['capa'] = ('ui' if res['capa_alcance'] != 'back' and not res['hay_sdd'] and
+    res['capa'] = ('ui' if res['capa_alcance'] == 'front' and not res['hay_sdd'] and
                    not res['hay_tests'] else res['capa_alcance'])
     return res

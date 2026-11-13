@@ -212,6 +212,28 @@ CASOS = [
             'material': '<ul><li>Regla: RN-PRU-01.</li></ul>'}, quitar=UI_SIN),
      {'historia': None}, 0, [('OK', '2b-1', 'N/A'), ('OK', '2b-5/AT-5', 'N/A')],
      [('HALLAZGO', None), ('NO_AUDITABLE', None)]),
+    ("Capa desconocida sin el bloque del medio: NO se exime como UI (se audita entera y avisa la capa)",
+     armar({'alcance': '<ul><li><b>Componente / repo:</b> a definir</li><li><b>Capa:</b> a definir</li></ul>',
+            'subtareas': '<ol><li>Hacer el cambio.</li></ol>',
+            'definicion': '<ul><li>Queda hecho.</li></ul>',
+            'material': '<ul><li>Regla: RN-PRU-01.</li></ul>'}, quitar=UI_SIN),
+     {'historia': None, 'ruta': 'prueba.html'}, 1, [('HALLAZGO', '2b-1'), ('AVISO', 'capa', 'Front:')],
+     [('OK', '2b-1')]),
+    ("Tarea de back que nombra la pantalla en 'Fuera de alcance': sigue siendo de back (sin exencion de front)",
+     armar({'alcance': '<ul><li><b>Componente / repo:</b> servicio-reservas</li><li><b>Capa afectada:</b> '
+                       '<code>domain</code></li><li><b>Fuera de alcance:</b> la pantalla y la vista del listado '
+                       '(Tarea aparte)</li></ul>'}, quitar=FRONT_SIN),
+     {'historia': None, 'ruta': 'prueba.html'}, 1, [('HALLAZGO', '2b-1', 'Contrato')], [('OK', '2b-1')]),
+    ("Una etiqueta 'Reporte:' no cuenta como el renglon del repo (no la vuelve de back)",
+     armar(dict(FRONT, alcance='<ul><li><b>Componente / repo:</b> portal-web</li><li><b>Capa afectada:</b> '
+                                'vista del listado</li><li><b>Reporte:</b> el del backoffice</li></ul>'),
+           quitar=FRONT_SIN),
+     {'ruta': 'prueba.html'}, 0, [('OK', '2b-1', 'exencion de front')], [('HALLAZGO', None)]),
+    ("Tarea de back que dice 'front' en 'Fuera de alcance': el renglon del repo tampoco la vuelve de front",
+     armar({'alcance': '<ul><li><b>Componente / repo:</b> servicio-reservas</li><li><b>Capa afectada:</b> '
+                       '<code>domain</code></li><li><b>Fuera de alcance:</b> la pantalla (la hace la Tarea de '
+                       'front)</li></ul>'}, quitar=FRONT_SIN),
+     {'historia': None, 'ruta': 'prueba.html'}, 1, [('HALLAZGO', '2b-1', 'Contrato')], [('OK', '2b-1')]),
 
     # 2b-2 / AT-4a
     ("Regla citada que no existe en el Cerebro: NO AUDITABLE",

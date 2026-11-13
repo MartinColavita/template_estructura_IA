@@ -141,7 +141,8 @@ def corte(a, filas):
     quien = (f.get('corte aprobado por') or '').strip('- ')
     persona = bool(quien) and not paridad.AGENTE.search(quien)
     checks = [('DEC-004 confirmada', conf), ('el slice esta en estado "paridad"', estado_de(f) == 'paridad')]
-    if es_refactor(f) or (a.veredicto and not a.paridad):
+    # Solo un refactor en el lugar se prueba con el veredicto; una migracion, siempre con la paridad.
+    if es_refactor(f):
         if not a.veredicto:
             print('SIN DATOS -- el slice es un refactor en el lugar: el corte se prueba con --veredicto <bloque VEREDICTO del verificador>'); return SIN_DATOS
         if not os.path.isfile(a.veredicto):
@@ -180,6 +181,10 @@ def corte(a, filas):
         checks.append(('la paridad es reciente (<= %d dias)' % a.max_dias, dias is not None and 0 <= dias <= a.max_dias))
         checks.append(('la paridad corrio contra el golden que cita la tabla (misma firma)', p.get('golden_firma') == g['firma']))
         checks.append(('la paridad no tiene aceptadas sin aprobar', not p.get('aceptadas_sin_aprobar')))
+        checks.append(('ningun caso de la paridad quedo sin comparar', not any(x.get('resultado') == 'SIN DATOS' for x in p.get('filas') or [])))
+        aceptados = [x['id'] for x in p.get('filas') or [] if x.get('resultado') == 'sin comparar, aceptado']
+        if aceptados:
+            print('  AVISO casos sin comparar que acepto una persona: %s' % ', '.join(aceptados))
         if p.get('volatiles'):
             print('  AVISO volatiles ignorados en esa paridad: %s (tienen que estar anotados en la ficha del slice)' % ', '.join(p['volatiles']))
     checks.append(('una persona aprobo el corte (columna "Corte aprobado por")', persona))

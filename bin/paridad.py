@@ -35,7 +35,8 @@ LAS DIFERENCIAS se clasifican fuera del script: un campo VOLATIL (fecha, id gene
 registra igual en el resultado); un cambio INTENCIONAL se acepta en aceptadas.json, con quien lo
 aprobo:  {"RC-01": [{"camino": "/precio", "aprobado_por": "<persona>", "fecha": "2026-11-03", "motivo": "..."}]}
 Una aceptada sin "aprobado_por", o aprobada por un agente (Claude, Gemini, "modelo", "IA"), no vale: es HALLAZGO igual
-(nadie se aprueba a si mismo, y un modelo tampoco).
+(nadie se aprueba a si mismo, y un modelo tampoco). Un caso que no se grabo (muta) no se compara: deja la paridad
+en SIN DATOS, salvo que una persona lo acepte con el camino "(sin comparar)".
 
 QUE NO HACE. No arranca ni para ninguna aplicacion, no siembra datos, no habla con hosts que no sean locales
 salvo --permitir-remoto, no toca la aplicacion vieja. Solo biblioteca estandar. ASCII en el codigo.
@@ -56,6 +57,7 @@ import urllib.request
 OK, HALLAZGO, SIN_DATOS = 0, 1, 2
 FIRMA_SAL = 'paridad.py/v1'
 AGENTE = re.compile(r'(?i)\bclaude\b|\bgemini\b|\bagente\b|\bmodelo\b|\bia\b|\bllm\b|\bgpt\b|\bcodex\b|\bcopilot\b')
+SIN_COMPARAR = '(sin comparar)'   # el "camino" con que una persona acepta en aceptadas.json un caso que no se grabo
 SOSPECHA_PHI = re.compile(r'[\w.+-]+@[\w-]+\.[\w.]+|\b\d{7,11}\b')
 
 
@@ -231,6 +233,17 @@ def verificar_golden(p, corpus_path=None):
     return g, None
 
 
+def aceptacion(aceptadas, cid, camino):
+    """(persona, problema): quien acepto ese camino de ese caso, o por que la aceptacion no vale ('' y '' si no hay)."""
+    ac = {x.get('camino'): x for x in (aceptadas.get(cid) or []) if isinstance(x, dict)}.get(camino)
+    if not ac:
+        return '', ''
+    quien = (ac.get('aprobado_por') or '').strip()
+    if quien and not AGENTE.search(quien):
+        return quien, ''
+    return '', '%s %s%s' % (cid, camino, ' (aprobado por un agente no vale)' if quien else '')
+
+
 def comparar(a):
     corpus, err = cargar_corpus(a.corpus)
     if err:
@@ -247,10 +260,17 @@ def comparar(a):
     volatiles = set(a.volatil or [])
     if any(not v.strip() for v in volatiles):
         print('SIN DATOS -- un --volatil vacio taparia el cuerpo entero: se declara el camino completo (/0/fecha)'); return SIN_DATOS
-    filas, hallazgos, iguales, sin_aprobar = [], 0, 0, []
+    filas, hallazgos, iguales, sin_aprobar, sin_comparar = [], 0, 0, [], []
     for caso in corpus['casos']:
         cid = caso['id']
         if cid not in golden['casos']:
+            quien, problema = aceptacion(aceptadas, cid, SIN_COMPARAR)
+            if quien:
+                filas.append({'id': cid, 'resultado': 'sin comparar, aceptado', 'diferencias': [
+                    {'camino': SIN_COMPARAR, 'viejo': None, 'nuevo': None, 'que': 'muta y no se grabo', 'aceptada_por': quien}]}); continue
+            if problema:
+                sin_aprobar.append(problema)
+            sin_comparar.append(cid)
             filas.append({'id': cid, 'resultado': 'SIN DATOS', 'detalle': 'no esta en el golden (muta y no se grabo)'}); continue
         resp, e = correr_caso(a.nuevo, caso, a.permitir_remoto)
         if e:
@@ -262,16 +282,14 @@ def comparar(a):
         if viejo['tipo'] != resp['tipo']:
             difs.append({'camino': '/tipo', 'viejo': viejo['tipo'], 'nuevo': resp['tipo'], 'que': 'tipo de contenido distinto'})
         diferencias(viejo['cuerpo'], resp['cuerpo'], '', volatiles, difs)
-        acept = {x.get('camino'): x for x in (aceptadas.get(cid) or []) if isinstance(x, dict)}
         pendientes = []
         for d in difs:
-            ac = acept.get(d['camino'])
-            quien = (ac or {}).get('aprobado_por', '').strip()
-            if ac and quien and not AGENTE.search(quien):
+            quien, problema = aceptacion(aceptadas, cid, d['camino'])
+            if quien:
                 d['aceptada_por'] = quien
             else:
-                if ac:
-                    sin_aprobar.append('%s %s%s' % (cid, d['camino'], ' (aprobado por un agente no vale)' if quien else ''))
+                if problema:
+                    sin_aprobar.append(problema)
                 pendientes.append(d)
         if not difs:
             iguales += 1; filas.append({'id': cid, 'resultado': 'igual', 'diferencias': []})
@@ -279,13 +297,13 @@ def comparar(a):
             filas.append({'id': cid, 'resultado': 'distinto, aceptado', 'diferencias': difs})
         else:
             hallazgos += 1; filas.append({'id': cid, 'resultado': 'HALLAZGO', 'diferencias': difs})
-    veredicto = 'HALLAZGO' if hallazgos or sin_aprobar else 'OK'
+    veredicto = 'HALLAZGO' if hallazgos or sin_aprobar else ('SIN DATOS' if sin_comparar else 'OK')
     resumen = {'veredicto': veredicto, 'slice': corpus.get('slice', ''), 'fecha': datetime.date.today().isoformat(),
                'golden': os.path.abspath(a.golden), 'golden_firma': golden['firma'], 'nuevo': a.nuevo,
                'casos': len(corpus['casos']), 'iguales': iguales, 'con_hallazgo': hallazgos,
                'volatiles': sorted(volatiles), 'aceptadas_archivo': os.path.abspath(a.aceptadas) if a.aceptadas else '',
                'aceptadas_detalle': [{'caso': f['id'], 'camino': d['camino'], 'aprobado_por': d['aceptada_por']} for f in filas for d in f.get('diferencias', []) if d.get('aceptada_por')],
-               'aceptadas_sin_aprobar': sin_aprobar, 'filas': filas, 'escrito_por': 'bin/paridad.py'}
+               'aceptadas_sin_aprobar': sin_aprobar, 'sin_comparar': sin_comparar, 'filas': filas, 'escrito_por': 'bin/paridad.py'}
     resumen['firma'] = firmar_resultado(resumen)
     if a.informe:
         L = ['# Paridad del slice %s — %s' % (resumen['slice'], veredicto), '',
@@ -307,13 +325,14 @@ def comparar(a):
         print('%s -- paridad del slice %s: %d caso(s), %d iguales, %d con hallazgo%s%s' % (
             veredicto, resumen['slice'] or '?', len(corpus['casos']), iguales, hallazgos,
             ('; volatiles ignorados: ' + ', '.join(sorted(volatiles))) if volatiles else '',
-            ('; aceptadas SIN aprobar: ' + ', '.join(sin_aprobar)) if sin_aprobar else ''))
+            ('; aceptadas SIN aprobar: ' + ', '.join(sin_aprobar)) if sin_aprobar else '') +
+            (('; sin comparar: %s (ver LAS DIFERENCIAS en el encabezado del script)' % ', '.join(sin_comparar)) if sin_comparar else ''))
         for f in filas:
             if f['resultado'] in ('HALLAZGO', 'SIN DATOS'):
                 for d in f.get('diferencias', []) or [{'camino': '', 'que': f.get('detalle', ''), 'viejo': '', 'nuevo': ''}]:
                     print('  %-8s %-10s %-30s viejo=%s nuevo=%s  %s' % (f['resultado'], f['id'], d['camino'], canonico(d['viejo'])[:40], canonico(d['nuevo'])[:40], d['que']))
         print('  Lo que este script NO mira: si una diferencia es un bug del port, un cambio intencional o un campo volatil. Eso lo decide una persona (aceptadas.json con aprobado_por; --volatil).')
-    return HALLAZGO if veredicto == 'HALLAZGO' else OK
+    return {'HALLAZGO': HALLAZGO, 'SIN DATOS': SIN_DATOS}.get(veredicto, OK)
 
 
 def main():

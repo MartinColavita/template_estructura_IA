@@ -83,6 +83,14 @@ def main():
     rc, out = correr('comparar', '--corpus', corpus, '--golden', golden, '--nuevo', url_nuevo, '--volatil', '')
     caso('--volatil vacio se rechaza: SIN DATOS (2)', rc == 2 and 'vacio' in out, out[:200])
     escribir(acept, {'RC-01': [{'camino': '/0/precio', 'motivo': 'ahora es texto', 'aprobado_por': 'Persona de prueba', 'fecha': '2026-11-03'}]})
+    rc, out = correr('comparar', '--corpus', corpus, '--golden', golden, '--nuevo', url_nuevo, '--volatil', 'fecha', '--aceptadas', acept)
+    caso('el caso que muta y no se grabo deja la paridad en SIN DATOS (2), no OK', rc == 2 and out.startswith('SIN DATOS') and 'RC-03' in out, out[:300])
+    escribir(acept, {'RC-01': [{'camino': '/0/precio', 'motivo': 'ahora es texto', 'aprobado_por': 'Persona de prueba', 'fecha': '2026-11-03'}],
+                     'RC-03': [{'camino': '(sin comparar)', 'motivo': 'escribe datos', 'aprobado_por': 'Claude (agente)'}]})
+    rc, out = correr('comparar', '--corpus', corpus, '--golden', golden, '--nuevo', url_nuevo, '--volatil', 'fecha', '--aceptadas', acept)
+    caso('el caso sin comparar aceptado por un agente no vale: HALLAZGO (1)', rc == 1 and 'un agente no vale' in out, out[:300])
+    escribir(acept, {'RC-01': [{'camino': '/0/precio', 'motivo': 'ahora es texto', 'aprobado_por': 'Persona de prueba', 'fecha': '2026-11-03'}],
+                     'RC-03': [{'camino': '(sin comparar)', 'motivo': 'escribe datos: se probo a mano contra la copia', 'aprobado_por': 'Persona de prueba'}]})
     informe = os.path.join(tmp, 'paridad.md')
     rc, out = correr('comparar', '--corpus', corpus, '--golden', golden, '--nuevo', url_nuevo, '--volatil', 'fecha', '--aceptadas', acept, '--informe', informe)
     resultado = os.path.join(tmp, 'resultado.json')

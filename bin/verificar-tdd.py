@@ -15,6 +15,8 @@ QUE MIDE (lo que no depende de criterio):
   - despues de cada rojo hay al menos un commit que toca produccion (el verde existe);
   - si se pasa --items N, cada item 1..N tiene su commit de rojo (el que falta, falta);
   - un commit de produccion ANTES del primer rojo de la rama es codigo sin test previo (aviso);
+  - en modo tdd, cambios de produccion sin NINGUN commit 'test(rojo)' es SIN DATOS: no hay evidencia del rojo
+    guardada (no hubo ciclo, o la rama se reorganizo sin evidencia/<ID>; el historial no lo distingue);
   - los 'test(guardarrail): ...' estan exentos del rojo, como dice guiar-tdd; un 'chore(firma): ...' (solo firmas vacias
     para que el rojo llegue a la asercion) no cuenta como produccion antes del rojo; un 'test(verde-de-entrada): <n>'
     (el item nacio verde porque un verde anterior ya lo cubria) cumple sin rojo y queda como pendiente a confirmar;
@@ -190,8 +192,12 @@ def main():
     if a.id and not evidencia:
         avisos.append('no existe evidencia/%s: el rojo se verifico sobre la rama de trabajo (vale); crear evidencia/%s ANTES de reorganizar los commits, o el rojo deja de ser verificable' % (a.id, a.id))
 
-    estado = HALLAZGO if hallazgos else OK
-    salida = {'estado': 'HALLAZGO' if hallazgos else 'OK', 'fuente': fuente, 'commits': len(lista), 'modo': modo, 'motivo': a.motivo.strip(),
+    sin_datos = []
+    if modo == 'tdd' and toca_produccion and not any(ROJO.match(c['asunto']) for c in lista):
+        sin_datos.append('cambios de produccion y ningun commit test(rojo): no hay evidencia del rojo guardada '
+                         '(no hubo ciclo, o la rama se reorganizo sin evidencia/<ID>)')
+    estado = HALLAZGO if hallazgos else (SIN_DATOS if sin_datos else OK)
+    salida = {'estado': {OK: 'OK', HALLAZGO: 'HALLAZGO', SIN_DATOS: 'SIN DATOS'}[estado], 'sin_datos': sin_datos, 'fuente': fuente, 'commits': len(lista), 'modo': modo, 'motivo': a.motivo.strip(),
               'items': {str(n): {'veredicto': v, 'detalle': d} for n, (v, d) in sorted(items.items())},
               'evidencia': evidencia, 'diff_evidencia_vs_rama': diff_evidencia,
               'hallazgos': hallazgos, 'avisos': avisos,
@@ -203,6 +209,11 @@ def main():
         print('VERIFICAR TDD (mecanico) -- %s  [%s, %d commits, modo %s%s]' % (salida['estado'], fuente, len(lista), modo, (': ' + a.motivo.strip()) if a.motivo.strip() else ''))
         for n, (v, d) in sorted(items.items()):
             print('  item %d: %s -- %s' % (n, v, d))
+        for h in hallazgos:
+            if not h.startswith('item '):
+                print('  hallazgo: ' + h)
+        for s in sin_datos:
+            print('  sin datos: ' + s)
         if evidencia:
             print('  evidencia: %s (diff contra la rama: %s)' % (evidencia, diff_evidencia or 'no aplica'))
         for v in avisos:

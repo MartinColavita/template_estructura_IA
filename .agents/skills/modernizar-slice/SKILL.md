@@ -65,13 +65,14 @@ Cada diferencia se clasifica **con una persona**, una por una:
 | **Bug del port** | La nueva contesta distinto y no debía | Tarea de arreglo con rojo normal; se vuelve a comparar |
 | **Cambio intencional** | Se decidió no reproducir eso (curaduría: DESCARTAR) | Entra en `aceptadas.json` con `aprobado_por` = la persona, fecha y motivo |
 | **Campo volátil** | Fecha, id generado, orden sin garantía | `--volatil <camino completo>` (`/items/0/id`, nunca el nombre suelto: taparía ese campo en todas partes); queda registrado en el resultado y se anota en la ficha del slice |
+| **Caso sin comparar** | Escribe datos y no se grabó contra la vieja | Se graba contra una copia descartable (`grabar --permitir-mutaciones`), o lo acepta una persona en `aceptadas.json` con el camino `(sin comparar)` y su nombre |
 
 El verificador de cada Tarea del slice corre la paridad como control propio (la misión la incluye cuando
 la Tarea pertenece a un slice en modernización) y la reporta en el renglón `5-quinquies paridad` del bloque
 `VEREDICTO`. El resultado de `comparar --json` va **firmado** por el script: es lo que después lee la barrera del
 corte. Si la paridad destapa un comportamiento que nadie había curado, es una regla candidata nueva: el slice
-**vuelve a `contrato`** hasta que la persona decida (migrar, descartar), y recién entonces sigue. `OK` sólo con cero
-diferencias sin aceptar; una aceptada sin nombre de persona sigue siendo `HALLAZGO`.
+**vuelve a `contrato`** hasta que la persona decida (migrar, descartar), y recién entonces sigue. `OK` sólo si cada
+diferencia y cada caso sin comparar los aceptó una persona por nombre; una aceptada sin nombre sigue siendo `HALLAZGO`.
 
 ### 5. Corte (`paridad` → `cortado`)
 ```bash
