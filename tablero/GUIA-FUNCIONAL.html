@@ -157,7 +157,7 @@
           <div class="cmd"><code id="k0">setx AZDO_PAT (Read-Host 'Pegá tu token')</code><button class="copy" data-copy="k0">Copiar</button></div>
         </li>
         <li><b>Pegá este comando</b> en una sola línea, reemplazando sólo <code>&lt;tu-organizacion&gt;</code>, y Enter:
-          <div class="cmd"><code id="k1">claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<span class="ln">&lt;tu-organizacion&gt;</span> --env AZURE_DEVOPS_AUTH_METHOD=pat --env 'AZURE_DEVOPS_PAT=${AZDO_PAT}' -- npx -y @tiberriver256/mcp-server-azure-devops</code><button class="copy" data-copy="k1">Copiar</button></div>
+          <div class="cmd"><code id="k1">claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<span class="ln">&lt;tu-organizacion&gt;</span> --env AZURE_DEVOPS_AUTH_METHOD=pat --env 'AZURE_DEVOPS_PAT=${AZDO_PAT}' -- npx -y @tiberriver256/mcp-server-azure-devops@0.1.54</code><button class="copy" data-copy="k1">Copiar</button></div>
         </li>
       </ol>
       <div class="ok-box"><b>Lo único que reemplazás:</b> <code>&lt;tu-organizacion&gt;</code> = el nombre de tu organización en Azure. El <code>${AZDO_PAT}</code> va <b>tal cual, con las comillas simples</b>: es la referencia a tu token, que Claude Code completa al arrancar. Te conectás directo a Azure en la nube: <b>no necesitás instalar ningún certificado</b>.</div>
@@ -171,7 +171,7 @@
         <li><b>Entrá con tu cuenta:</b> se abre el navegador y entrás con tu usuario de {{ORGANIZACION}}.
           <div class="cmd"><code id="k2">az login</code><button class="copy" data-copy="k2">Copiar</button></div></li>
         <li><b>Pegá este comando</b> en una sola línea, reemplazando <code>&lt;tu-organizacion&gt;</code>:
-          <div class="cmd"><code id="k3">claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<span class="ln">&lt;tu-organizacion&gt;</span> --env AZURE_DEVOPS_AUTH_METHOD=azure-cli -- npx -y @tiberriver256/mcp-server-azure-devops</code><button class="copy" data-copy="k3">Copiar</button></div></li>
+          <div class="cmd"><code id="k3">claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<span class="ln">&lt;tu-organizacion&gt;</span> --env AZURE_DEVOPS_AUTH_METHOD=azure-cli -- npx -y @tiberriver256/mcp-server-azure-devops@0.1.54</code><button class="copy" data-copy="k3">Copiar</button></div></li>
       </ol>
       <div class="ok-box"><b>Ventaja:</b> no hay token que guardar ni renovar. Cuando expira la sesión, volvés a hacer <code>az login</code> y listo.</div>
     </div>

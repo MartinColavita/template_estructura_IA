@@ -67,6 +67,30 @@ def main():
         caso('sin dependencias externas (ni http en src/href de recursos)', not re.search(r'(src|href)="https?://', t))
         caso('en modo rapido lo dice y no inventa cifras', 'modo rápido' in t and 'no corrido' in t)
     shutil.rmtree(tmp, ignore_errors=True)
+
+    # Cada fila del Doctor muestra el estado de SU sonda, aunque el README y el Doctor las listen en otro orden.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('gi', os.path.join(AQUI, 'generar-informe.py'))
+    gi = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gi)
+    hoy = [{'id': 'repos', 'titulo': 'Repos de codigo conectados', 'estado': 'SIN DATOS'},
+           {'id': 'tendencia', 'titulo': 'Como venimos', 'estado': 'OK'},
+           {'id': 'gemelas', 'titulo': 'Gemelas: back vs. front', 'estado': 'HALLAZGO'}]
+    caso('la fila «Cómo venimos» muestra la sonda tendencia, no la que está en su misma posición',
+         (gi.sonda_de_hoy('Cómo venimos', hoy) or {}).get('id') == 'tendencia')
+    caso('«Gemelas back vs. front» encuentra «Gemelas: back vs. front»', (gi.sonda_de_hoy('Gemelas back vs. front', hoy) or {}).get('id') == 'gemelas')
+    caso('una sonda que hoy no corrió no toma el estado de otra', gi.sonda_de_hoy('Contrato vs. código', hoy) is None)
+    puertas = [{'id': 'seguridad', 'titulo': 'Puerta de seguridad (SAST)'}, {'id': 'calidad', 'titulo': 'Puerta de calidad'},
+               {'id': 'contrato', 'titulo': 'Contrato declarado vs implementado'}]
+    caso('«Puerta de seguridad» y «Puerta de calidad» no se confunden',
+         (gi.sonda_de_hoy('Puerta de seguridad', puertas) or {}).get('id') == 'seguridad' and
+         (gi.sonda_de_hoy('Puerta de calidad', puertas) or {}).get('id') == 'calidad')
+    explotada = [{'id': 'seguridad', 'titulo': 'seguridad'}, {'id': 'calidad', 'titulo': 'Puerta de calidad'}]
+    caso('una sonda que exploto (titulada con su id) no toma el estado de la otra «Puerta»',
+         (gi.sonda_de_hoy('Puerta de seguridad', explotada) or {}).get('id') == 'seguridad')
+    caso('«Contrato vs. código» encuentra «Contrato declarado vs implementado» por la primera palabra',
+         (gi.sonda_de_hoy('Contrato vs. código', puertas) or {}).get('id') == 'contrato')
+
     fallas = [n for n, ok, _ in ESPERADOS if not ok]
     print()
     print('%s -- %d de %d casos dieron lo esperado.' % ('OK' if not fallas else 'FALLA', len(ESPERADOS) - len(fallas), len(ESPERADOS)))

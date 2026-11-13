@@ -40,7 +40,7 @@ import urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from auditoria import cerebro, historia, reporte, texto  # noqa: E402
+from auditoria import cerebro, historia, phi, reporte, texto  # noqa: E402
 
 HERRAMIENTA = 'auditar-historia'
 
@@ -626,6 +626,8 @@ def _para_el_auditor(escs, desc):
     res = [
         '3 y 4 - Que cada Entonces sea un resultado OBSERVABLE: la lista negra es un tamiz grueso '
         '("rapido", "intuitivo", "queda bien" no estan en la lista).',
+        'PHI - Datos personales que la heuristica no ve (nombres, direcciones, diagnosticos): leer el texto; '
+        'confirmar o descartar los AVISOS AH-PHI.',
         '5 - Un comportamiento por Escenario: un Y que introduce un sujeto distinto; confirmar o '
         'descartar los AVISOS AH-5.',
         '6 - Actor explicito y voz activa en cada Cuando (un Cuando sin sujeto, o "la parada queda '
@@ -706,6 +708,8 @@ def auditar(criterios, descripcion=None, ficha=None, flujo=None, raiz=None):
         rep.no_auditable('AH-12', 'sin --descripcion: Datos y estados no se pudo mirar')
 
     rep.datos['flujo'] = _chequear_ficha(rep, escs, desc, ficha, flujo, ficha_declarada, raiz) or ''
+    phi.revisar(rep, 'AH-PHI', crit + '\n' + (desc or ''),   # datos personales: lo inequivoco frena
+                'los Criterios y la Descripcion' if desc else 'solo los Criterios (sin --descripcion)')
     _chequear_pendientes(rep, crit, desc, bloques, escs, raiz)
     rep.para_el_auditor = _para_el_auditor(escs, desc)
     return rep

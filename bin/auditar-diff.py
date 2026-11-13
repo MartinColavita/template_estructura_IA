@@ -24,7 +24,11 @@ import argparse
 import json
 import re
 import subprocess
+import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from auditoria import phi  # noqa: E402  el mismo reconocimiento de emails que auditar-tarea
 
 OK, HALLAZGO, SIN_DATOS = 0, 1, 2
 
@@ -36,7 +40,6 @@ SECRETOS = [
     ('URL con usuario y clave', re.compile(r'[a-z][a-z0-9+.-]*://[^/\s:@]+:[^/\s@]{3,}@')),
 ]
 PHI = [
-    ('correo electronico', re.compile(r'[\w.+-]+@(?!example\.|test\.|localhost)[\w-]+\.[\w.]+')),
     ('telefono', re.compile(r'(?<![\w/])\+?\d{2,4}[\s.-]\d{3,4}[\s.-]\d{3,4}\b')),
     ('numero de documento o tarjeta', re.compile(r'(?<![\w./-])\d{7,16}(?![\w.-])')),
     ('nombre de persona asignado', re.compile(r'(?i)\b(nombre|apellido|name|surname|first_?name|last_?name)\b\s*[:=]\s*["\'][A-Z][a-z]+(\s[A-Z][a-z]+)?["\']')),
@@ -115,6 +118,8 @@ def main():
             if rx.search(t):
                 hallazgos.append('%s:%d: %s' % (f, n, nombre))
         if DATOS.search(f) or not f.endswith(('.md', '.txt')):
+            if any(real for _, real in phi.emails(t)):
+                avisos.append('%s:%d: posible correo electronico (leerlo: si es un dato real, es PHI)' % (f, n))
             for nombre, rx in PHI:
                 if nombre == 'numero de documento o tarjeta' and not DATOS.search(f):
                     continue
@@ -133,7 +138,7 @@ def main():
         print(json.dumps(salida, ensure_ascii=True, indent=1))
     else:
         print('AUDITAR DIFF (mecanico) -- %s  [%d archivo(s), %d linea(s) agregada(s); secretos: %d patron(es) mirados, %d hallazgo(s); datos personales: %d patron(es), %d aviso(s)]' % (
-            salida['estado'], len(archivos), len(agregadas), len(SECRETOS), len(hallazgos), len(PHI), sum(1 for v in avisos if 'posible' in v)))
+            salida['estado'], len(archivos), len(agregadas), len(SECRETOS), len(hallazgos), len(PHI) + 1, sum(1 for v in avisos if 'posible' in v)))
         for h in hallazgos:
             print('  HALLAZGO: ' + h)
         for v in avisos[:50]:

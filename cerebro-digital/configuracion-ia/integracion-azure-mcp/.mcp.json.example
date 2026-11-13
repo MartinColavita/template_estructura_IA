@@ -2,7 +2,7 @@
   "mcpServers": {
     "azure-devops": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@tiberriver256/mcp-server-azure-devops@0.1.54"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/{{AZURE_ORG}}",
         "AZURE_DEVOPS_AUTH_METHOD": "pat",

@@ -24,6 +24,7 @@ import os
 import re
 import subprocess
 import sys
+import unicodedata
 
 OK, _, SIN_DATOS = 0, 1, 2
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -185,6 +186,26 @@ def sondas_readme():
         if m:
             filas.append((int(m.group(1)), m.group(2), re.sub(r'\s*\|\s*(back|front|ambos)\s*$', '', m.group(3))))
     return filas
+
+
+def sonda_de_hoy(titulo, sondas_hoy):
+    """La sonda del Doctor que corresponde a una fila del README: la unica cuyo titulo tiene todas las palabras del de
+    la fila («Puerta de calidad» y «Puerta de seguridad» se distinguen) y, si no hay una sola, la unica que empieza con
+    la misma palabra («Contrato vs. codigo» -> «Contrato declarado vs implementado»). Antes se emparejaban por
+    posicion, y el README y el Doctor no las listan en el mismo orden. Sin pareja, None (la fila dice "—")."""
+    def palabras(t):
+        t = unicodedata.normalize('NFKD', t or '').encode('ascii', 'ignore').decode().lower()
+        return [p for p in re.findall(r'[a-z]+', t) if len(p) > 2 and p not in ('del', 'las', 'los', 'entre')]
+    buscadas = palabras(titulo)
+    if not buscadas:
+        return None
+    for criterio in (lambda s: set(buscadas) <= set(palabras(s.get('titulo'))),
+                     lambda s: s.get('id') in buscadas,   # una sonda que exploto se titula con su id
+                     lambda s: (palabras(s.get('titulo')) or [''])[0] == buscadas[0]):
+        pares = [s for s in (sondas_hoy or []) if criterio(s)]
+        if len(pares) == 1:
+            return pares[0]
+    return None
 
 
 def mejoras():
@@ -545,13 +566,11 @@ def generar(rapido):
 
     # 10 doctor
     H.append('<section id="doctor"><h2>10 · El Doctor</h2><p class="lead"><code>doctor/doctor.py</code> revisa el repositorio en reposo (13 sondas) y, si hay código clonado en back/ o front/, el código (10 sondas). Es periódico y manual, nunca por Tarea; sus hallazgos se atienden uno por uno con <code>atender-hallazgos</code>. También existe <code>bin/verificar-skills.py</code> para la especificación de las skills y <code>bin/instalar.py</code> para el estado de un clone.</p>')
-    hoy = {s.get('id'): s for s in (sondas_hoy or [])}
     H.append('<table><tr><th>#</th><th>Sonda</th><th>Qué mira</th>%s</tr>' % ('<th>Hoy</th>' if sondas_hoy else ''))
-    ids = [s.get('id') for s in (sondas_hoy or [])]
     for n, t, d in sondas:
         celda = ''
         if sondas_hoy:
-            s = hoy.get(ids[n - 1]) if n - 1 < len(ids) else None
+            s = sonda_de_hoy(t, sondas_hoy)
             if s:
                 est = s.get('estado', '')
                 celda = '<td>%s<br><span style="color:var(--muted);font-size:12px">%s</span></td>' % (badge(est, 'ok' if est == 'OK' else ('bad' if est == 'HALLAZGO' else '')), html.escape((s.get('resumen') or '')[:150]))

@@ -40,7 +40,7 @@ La conexión es a **Azure DevOps en la nube** (`dev.azure.com`), que tiene un ce
   "mcpServers": {
     "azure-devops": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@tiberriver256/mcp-server-azure-devops@0.1.54"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/<org>",
         "AZURE_DEVOPS_AUTH_METHOD": "pat",
@@ -51,10 +51,12 @@ La conexión es a **Azure DevOps en la nube** (`dev.azure.com`), que tiene un ce
 }
 ```
 
+> **La versión va fija** (`@0.1.54`): `npx -y` sin versión baja y corre la última publicada en cada arranque, con tu token en el entorno. Para subir de versión, mirá qué cambió en el repositorio del paquete y cambiá el número acá y en `.mcp.json.example`.
+
 ### Opción 2 — comando `claude mcp add` (en una sola línea)
 
 ```bash
-claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<org> --env AZURE_DEVOPS_AUTH_METHOD=pat --env 'AZURE_DEVOPS_PAT=${AZDO_PAT}' -- npx -y @tiberriver256/mcp-server-azure-devops
+claude mcp add azure-devops --env AZURE_DEVOPS_ORG_URL=https://dev.azure.com/<org> --env AZURE_DEVOPS_AUTH_METHOD=pat --env 'AZURE_DEVOPS_PAT=${AZDO_PAT}' -- npx -y @tiberriver256/mcp-server-azure-devops@0.1.54
 ```
 
 > **Las comillas simples son a propósito.** Sin ellas, bash reemplaza `${AZDO_PAT}` por el valor y el token
@@ -78,7 +80,7 @@ En la config de MCP de opencode (su `opencode.json` / archivo de configuración)
   "mcp": {
     "azure-devops": {
       "type": "local",
-      "command": ["npx", "-y", "@tiberriver256/mcp-server-azure-devops"],
+      "command": ["npx", "-y", "@tiberriver256/mcp-server-azure-devops@0.1.54"],
       "enabled": true,
       "environment": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/<org>",
@@ -101,7 +103,7 @@ En la configuración de MCP de Antigravity (panel de MCP servers / archivo de co
   "mcpServers": {
     "azure-devops": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@tiberriver256/mcp-server-azure-devops@0.1.54"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/<org>",
         "AZURE_DEVOPS_AUTH_METHOD": "pat",
@@ -123,7 +125,7 @@ En `~/.gemini/settings.json` (por máquina; el token sigue saliendo de la variab
   "mcpServers": {
     "azure-devops": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@tiberriver256/mcp-server-azure-devops@0.1.54"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/{{AZURE_ORG}}",
         "AZURE_DEVOPS_AUTH_METHOD": "pat",
@@ -153,7 +155,7 @@ Config sin token (Claude Code) — reemplaza al bloque `pat` (fijate que **no** 
   "mcpServers": {
     "azure-devops": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@tiberriver256/mcp-server-azure-devops@0.1.54"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/<org>",
         "AZURE_DEVOPS_AUTH_METHOD": "azure-cli"

@@ -17,8 +17,8 @@ El PAT de Azure DevOps da acceso a **toda la organización** (no se puede acotar
 
 Si el proyecto fijó el **tablero local**, el único tablero autorizado es la carpeta
 `cerebro-digital/<modulo>/backlog/` y toda lectura o escritura va por `bin/tablero-local.py`: no hay MCP, no
-hay PAT y el guard es la ruta. Los GATEs de `AGENTS.md` aplican igual (dedup con `buscar`, confirmación, nivel,
-borrado con `--confirmado`, tarjeta congelada por `estado`). Lo que sigue aplica cuando el tablero es Azure DevOps.
+hay PAT y el guard es la ruta. Los GATEs de `AGENTS.md` aplican igual (dedup con `buscar`, confirmación, borrado con
+`--confirmado`), salvo los que son de modo equipo: el de NIVEL y el de tarjeta congelada. Lo que sigue aplica cuando el tablero es Azure DevOps.
 
 ## Jira u otro tablero por MCP (modo equipo, `DEC-006`)
 

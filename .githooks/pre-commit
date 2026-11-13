@@ -11,17 +11,11 @@
 # Es una verificacion (no modifica). Compara con el diff propio de git,
 # insensible a CRLF/LF (cross-OS Windows/Linux/mac).
 #
-# Shebang BASH (no sh) a proposito: se usa "read -r -d ..." para recorrer nombres de
-# archivo separados por NUL, y la opcion -d es de bash/ksh, NO es POSIX. Con /bin/sh
-# apuntando a dash (Debian/Ubuntu, tipico en CI) el read falla, el while no itera ni
-# una vez y la guarda devuelve 0: dejaria de proteger EN SILENCIO, que es justo el modo
-# de falla que este hook existe para evitar.
-
-# Falla CERRADO si el shell no soporta "read -d" (p. ej. alguien corre "sh pre-commit"
-# en vez de dejar que git use el shebang). Sin esto, el while no itera, todo queda vacio
-# y el hook devuelve 0: dejaria pasar el commit diciendo que esta todo bien.
+# Shebang BASH (no sh) a proposito: el hook esta escrito y probado en bash (bin/probar-hook.py).
+# Falla CERRADO si se lo corre con otro shell (p. ej. "sh pre-commit"): un shell distinto puede
+# interpretar algo de otra forma y dejar pasar el commit diciendo que esta todo bien.
 if [ -z "${BASH_VERSION:-}" ]; then
-  echo "pre-commit BLOQUEADO: este hook necesita bash (usa 'read -d', que no es POSIX)."
+  echo "pre-commit BLOQUEADO: este hook necesita bash (esta escrito y probado en bash)."
   echo "  Se ejecuto con un shell que no lo soporta, asi que NO pudo verificar nada."
   echo "  Corrilo con bash, o dejá que git lo invoque por su shebang (#!/usr/bin/env bash)."
   exit 1
@@ -75,92 +69,44 @@ check_mirror() {
     return 1
   fi
 
+  # (3) La FUENTE tambien: con el espejo nuevo en stage y la fuente vieja, el commit queda con los dos distintos
+  #     aunque en el disco coincidan. Solo si el espejo tiene cambios en stage (los de agentes no se versionan).
+  if ! git diff --cached --quiet -- "$REL" &&
+     [ -n "$(git diff --name-only -- "$ORIGEN")$(git ls-files --others --exclude-standard -- "$ORIGEN")" ]; then
+    echo "pre-commit BLOQUEADO: la fuente ${ORIGEN#$ROOT/}/ tiene cambios sin 'git add' (su espejo $REL/ si esta en stage): el commit los dejaria distintos."
+    echo "  Corre:  git add ${ORIGEN#$ROOT/}   y volve a commitear."
+    return 1
+  fi
+
   return 0
 }
 
-# Guarda de caracteres de control invisibles (BEL 0x07, BS 0x08, VT 0x0B, FF 0x0C).
-# Un find/replace que interprete \a \b \f los inyecta y rompe el texto EN SILENCIO:
-# ya paso en cerebro-digital/diseno/diseno-sistema.md (propagaba CSS invalido) y en
-# una skill. Se revisan solo los archivos de texto staged.
+# Python 3 para las guardas que son scripts. Falla CERRADO: sin Python no se dice OK sobre nada.
+buscar_python() {
+  PY=""
+  for c in python3 python py; do
+    if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 6) else 1)' >/dev/null 2>&1; then
+      PY="$c"; return 0
+    fi
+  done
+  return 1
+}
+
+# Guarda de caracteres de control invisibles (BEL 0x07, BS 0x08, VT 0x0B, FF 0x0C) y de BOM UTF-8, sobre lo que esta
+# en stage. La hace bin/verificar-staged.py, en un solo proceso; el CI corre lo mismo con --todo.
 check_control_chars() {
-  HITS=""
-  BOMS=""    # sin esto, una variable heredada del entorno bloquea cualquier commit
-  SKIPPED=""
-
-  # -z + read -d '': nombres con espacios o acentos NO se parten en tokens. Con el
-  # "for f in $(...)" anterior, "ficha con espacios.md" se salteaba EN SILENCIO y el
-  # hook igual decia OK. Este repo ya tiene archivos tracked con espacios en el nombre.
-  git diff --cached --name-only -z --diff-filter=ACM > "$TMPD/staged.z"
-
-  while IFS= read -r -d '' f; do
-    case "$f" in
-      # Texto donde un caracter de control rompe algo en silencio. Ante la duda se
-      # incluye: revisar de mas cuesta cero; no revisar cuesta un byte invisible commiteado.
-      *.md|*.markdown|*.mdx|*.html|*.htm|*.css|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.jsx) ;;
-      *.json|*.yaml|*.yml|*.txt|*.csv|*.sh|*.bash|*.ps1|*.bat|*.cmd|*.py|*.sql) ;;
-      *.java|*.kt|*.cs|*.xml|*.svg|*.toml|*.ini|*.cfg|*.conf|*.properties) ;;
-      .gitignore|.gitattributes|Dockerfile|.githooks/*) ;;
-      *) continue ;;
-    esac
-
-    # Se lee el BLOB STAGED (git show :archivo), NO el archivo del disco: es lo unico
-    # que se va a commitear. Antes, con el disco limpio y lo staged sucio, daba OK y
-    # el byte invisible entraba al commit igual.
-    if ! git show ":$f" > "$TMPD/blob" 2>/dev/null; then
-      SKIPPED="$SKIPPED
-  - $f"
-      continue
-    fi
-
-    if ! LC_ALL=C tr -d '\007\010\013\014' < "$TMPD/blob" | cmp -s - "$TMPD/blob"; then
-      HITS="$HITS
-  - $f"
-    fi
-
-    # BOM UTF-8 (EF BB BF) al inicio: el proyecto exige UTF-8 SIN BOM. Rompe el
-    # frontmatter YAML de las skills y mete un caracter invisible en la primera linea.
-    #
-    # EXCEPCION DECLARADA: los scripts de PowerShell y de cmd. PowerShell 5.1 -el que
-    # viene con Windows- lee un .ps1 sin BOM como ANSI, asi que un script con acentos
-    # sale con la codificacion rota justo en el shell primario del equipo. Ahi el BOM
-    # no es un descuido: es lo que hace falta. La regla y el shell se contradecian, y
-    # ganaba la regla bloqueando commits legitimos.
-    case "$f" in
-      *.ps1|*.psm1|*.psd1|*.bat|*.cmd) ;;
-      *)
-        if [ "$(head -c 3 "$TMPD/blob" 2>/dev/null | od -An -tx1 | tr -d ' \n')" = "efbbbf" ]; then
-          BOMS="$BOMS
-  - $f"
-        fi
-        ;;
-    esac
-  done < "$TMPD/staged.z"
-
-  # BOM y control chars se reportan JUNTOS. Antes el BOM cortaba con return 1 antes de
-  # mirar HITS: el dev arreglaba uno, volvia a commitear y recien ahi se enteraba del otro.
-  RC=0
-
-  if [ -n "$BOMS" ]; then
-    echo "pre-commit BLOQUEADO: archivos con BOM UTF-8 (el proyecto usa UTF-8 SIN BOM):$BOMS"
-    echo "  Sacalo y volve a commitear."
-    RC=1
+  if ! buscar_python; then
+    echo "pre-commit BLOQUEADO: no encontre Python 3 para correr bin/verificar-staged.py (BOM y caracteres de control)."
+    return 1
   fi
-
-  if [ -n "$HITS" ]; then
-    echo "pre-commit BLOQUEADO: caracteres de control invisibles (BEL/BS/VT/FF) en:$HITS"
-    echo "  Suelen venir de un \a \b \f interpretado como escape (ej: \agentes -> BEL+gentes)."
-    echo "  Limpialos y volve a commitear. Para ubicarlos:"
-    echo "    grep -n \$'[\x07\x08\x0B\x0C]' <archivo> | cat -A"
-    RC=1
+  "$PY" -I "$ROOT/bin/verificar-staged.py" --repo "$ROOT" > "$TMPD/staged.txt" 2>&1
+  RC=$?
+  if [ "$RC" = "0" ]; then
+    return 0
   fi
-
-  # Nunca decir OK sobre algo que no se pudo mirar.
-  if [ -n "$SKIPPED" ]; then
-    echo "pre-commit: AVISO, no se pudo leer el contenido staged de:$SKIPPED"
-    echo "  Esos archivos NO fueron revisados por la guarda de encoding."
-  fi
-
-  return $RC
+  echo "pre-commit BLOQUEADO (guarda de encoding):"
+  cat "$TMPD/staged.txt"
+  return 1
 }
 
 # Espejos gemelos de los repos de codigo (back/ y front/). A diferencia de check_mirror,
@@ -257,13 +203,7 @@ check_conteo_skills() {
 # description cortada es una skill que deja de dispararse, en silencio). Lo cuenta un script.
 # Falla CERRADO si no hay Python 3: nunca decir OK sobre algo que no se pudo mirar.
 check_skills_spec() {
-  PY=""
-  for c in python3 python py; do
-    if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 6) else 1)' >/dev/null 2>&1; then
-      PY="$c"; break
-    fi
-  done
-  if [ -z "$PY" ]; then
+  if ! buscar_python; then
     echo "pre-commit BLOQUEADO: no encontre Python 3 para correr bin/verificar-skills.py."
     echo "  Sin eso no puedo verificar la especificacion de las skills (el ecosistema necesita Python 3 igual)."
     return 1
@@ -272,13 +212,18 @@ check_skills_spec() {
     echo "pre-commit BLOQUEADO: falta bin/verificar-skills.py (restauralo desde el template)."
     return 1
   fi
-  if "$PY" -I "$ROOT/bin/verificar-skills.py" "$ROOT" > "$TMPD/skills.txt" 2>&1; then
+  # El codigo se toma ANTES de cualquier if: despues de un "if ...; fi" sin rama, $? vale 0 y el 2 no se veia nunca.
+  "$PY" -I "$ROOT/bin/verificar-skills.py" "$ROOT" > "$TMPD/skills.txt" 2>&1
+  RC=$?
+  if [ "$RC" = "0" ]; then
     return 0
   fi
-  RC=$?
   if [ "$RC" = "2" ]; then
-    echo "pre-commit: AVISO, verificar-skills no encontro skills que revisar."
-    return 0
+    # 2 es SIN DATOS: tambien lo que devuelve el script cuando explota. Aca la fuente de skills existe, asi que no es
+    # "no hay skills": no se pudo verificar, y eso no es OK.
+    echo "pre-commit BLOQUEADO: verificar-skills no pudo verificar la especificacion de las skills (SIN DATOS):"
+    cat "$TMPD/skills.txt"
+    return 1
   fi
   echo "pre-commit BLOQUEADO: hay SKILL.md fuera de la especificacion de Agent Skills:"
   grep -E '^  (HALLAZGO|AVISO)' "$TMPD/skills.txt" || cat "$TMPD/skills.txt"

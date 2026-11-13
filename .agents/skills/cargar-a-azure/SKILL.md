@@ -111,7 +111,7 @@ vista, y la evidencia no se escribe de memoria:
   **SIN DATOS** —nunca «OK · 0 candidatos», nunca «OK · no está congelada»—, y con una fila en
   SIN DATOS **no se escribe**. Si se entrega el texto para pegar a mano, arriba de todo va:
   *«No busqué duplicados: buscalos vos en el tablero antes de pegar.»*
-- **NIVEL da OK sólo con una cita textual**: la frase del humano, **de esta conversación**, que
+- **NIVEL da OK sólo con una cita textual** (con `DEC-006` fijada en modo solo, la fila dice **no aplica**): la frase del humano, **de esta conversación**, que
   declara contexto dev/planning. El pedido mismo («creá las tareas») **no es** esa frase. Sin la
   cita, la fila dice FRENA, se hace la pregunta del nivel y **el turno termina ahí**: la Tarea no
   se redacta en el mismo turno, ni «de ejemplo», ni como molde vacío.
@@ -238,7 +238,7 @@ detallado solo si se promueve a `gold`.
   cierre. Nunca expandir un pedido de un ítem a varios.
 - **GATE de deduplicación (duro).** Antes de `create_work_item` se busca por tag + doc fuente + objetivo (comparando **objetivo/alcance, no título**) y el preview lleva el **Bloque de dedup** obligatorio (consultas · candidatos · veredicto); **sin ese bloque no se escribe**. **Ante la duda, es duplicado:** solapa plausible → preguntar, nunca crear. **Nunca** se crea un repetido. Detalle: [[deduplicacion-antes-de-crear]].
 - **GATE de EXISTENCIA (bloqueante — encontrar ≠ crear igual).** Si la búsqueda arroja un ticket **equivalente o solapado**, encontrarlo **obliga a frenar**, no a seguir: (1) queda **PROHIBIDO `create_work_item`** para ese ítem; (2) se presenta la lista de existentes (`#ID` + link + estado); (3) se **pregunta explícitamente** si ACTUALIZAR (`update_work_item`) el existente o modificar algo, y se **espera el "sí"**. Jamás se crea un ítem nuevo en paralelo a uno que ya existe. Esta barrera es distinta de "buscar": buscar y encontrar sin frenar es la falla que este gate prohíbe.
-- **GATE de NIVEL (bloqueante).** El **tipo** ya viene decidido en [[redactar-tarea]]
+- **GATE de NIVEL (bloqueante en modo equipo;** con `DEC-006` fijada en modo solo no se pregunta, porque quien pide la Tarea es quien la desarrolla; con la DEC en `⚠`, se pregunta). El **tipo** ya viene decidido en [[redactar-tarea]]
   por su tabla **SELECCIÓN DE TIPO (señal objetiva)**; acá se **verifica que sea
   coherente** y no se cambia en silencio. Crear un work item tipo **Tarea** obliga a
   **frenar y confirmar en su propio turno** (en modo lote, el turno de arranque de

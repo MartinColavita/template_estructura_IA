@@ -32,8 +32,8 @@ Una ficha **validada** del Cerebro Digital (`cerebro-digital/`, recortada):
 - Flujo B: <flujo de usuario completo 2>
 
 ## Reglas de negocio
-- [RN-<TEMA>-01] <regla 1>
-- [RN-<TEMA>-02] <regla 2>
+### RN-<MODULO>-001 — <regla 1>
+### RN-<MODULO>-002 — <regla 2>
 
 ## Derivación a backlog          # ← lo cierra la CURACIÓN; fija el árbol 1:1
 ### Slices [Épicas]
@@ -57,8 +57,8 @@ Con la skill [[sincronizar-backlog]], la IA copia **1:1** el bloque `## Derivaci
 ```
 Épica: <vertical slice/dominio>                   [tag: <tema>] [Doc fuente: cerebro-digital/.../<ficha>.md]
 ├─ Feature: <capacidad/caso de uso>               [Parent: Épica]
-│  ├─ Historia: <Flujo A>                          [Parent: Feature] [Related: Historia <Flujo B>] [RN-<TEMA>-01]
-│  └─ Historia: <Flujo B>                          [Parent: Feature]                                [RN-<TEMA>-02]
+│  ├─ Historia: <Flujo A>                          [Parent: Feature] [Related: Historia <Flujo B>] [RN-<MODULO>-001]
+│  └─ Historia: <Flujo B>                          [Parent: Feature]                                [RN-<MODULO>-002]
 └─ (Tareas técnicas: las crean los devs al desglosar cada Historia)
 ```
 

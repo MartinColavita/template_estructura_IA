@@ -2,8 +2,8 @@
 
 Por qué existen: `AGENTS.md`, «Lo que se cuenta, lo cuenta un script». Cada script declara su contrato en su encabezado: qué mide, qué NO mira y su salida (casi todos: 0 OK, 1 HALLAZGO o FRENA, 2 SIN DATOS). Sólo biblioteca estándar de Python.
 
-- `bin/auditar-tarea.py`: secciones, numeración, Escenarios contra la tabla, reglas que existen, enlaces, HTML, guardarraíles, Modos de falla, Datos a confirmar y tamaño. También lo corre **siempre** el checklist de forma §2b de [[cargar-a-azure]]: es el autochequeo de quien escribe, no la auditoría opcional.
-- `bin/auditar-historia.py`: el Gherkin, las reglas, el bloque de derivación de la ficha y el formato.
+- `bin/auditar-tarea.py`: secciones, numeración, Escenarios contra la tabla, reglas que existen, enlaces, HTML, guardarraíles, Modos de falla, Datos a confirmar, datos personales (un email real o un CUIT frenan; lo ambiguo avisa) y tamaño. También lo corre **siempre** el checklist de forma §2b de [[cargar-a-azure]]: es el autochequeo de quien escribe, no la auditoría opcional.
+- `bin/auditar-historia.py`: el Gherkin, las reglas, el bloque de derivación de la ficha, el formato y los datos personales.
 - `bin/analizar-tareas.py`: el conjunto de Tareas de una Historia.
 - `bin/lote.py`: prepara el lote, arma las misiones de los sub-agentes, corre las auditorías si se piden, arma la tabla del cierre, compara la tarjeta con el archivo auditado y mide el tiempo.
 - `bin/derivar-arbol.py`: el árbol Épica→Feature→Historia **1:1** desde el bloque de derivación de una ficha; si no se deriva, dice por qué.
@@ -31,6 +31,7 @@ Por qué existen: `AGENTS.md`, «Lo que se cuenta, lo cuenta un script». Cada s
 - `bin/armar-e2e.py`: el esqueleto de las pruebas de punta a punta de una Historia desde su Gherkin (un test por Escenario, título textual, traza `Historia #id · Escenario`, pasos como comentarios, cada uno marcado sin automatizar), para Playwright, proceso o HTTP; no pisa lo que existe.
 - `bin/cobertura-e2e.py`: por Historia y Escenario, qué tiene prueba de punta a punta automatizada, qué es sólo esqueleto y qué no tiene nada; vale para cualquier motor porque lee la traza.
 - `bin/generar-documentacion.py`: la guía de uso (`--tipo manual`) y la documentación técnica y funcional (`--tipo tecnica --app <repo>`) de la aplicación, desde las fichas, el contexto, las decisiones, `aplicacion/`, los pendientes, la bitácora y la radiografía; HTML con índice y diagramas SVG; lo que el Cerebro no tiene queda marcado, no inventado.
+- `bin/verificar-staged.py`: BOM UTF-8 y caracteres de control en lo que se va a commitear (lo corre el hook); con `--todo`, en todo lo versionado (lo corre el CI).
 - `bin/verificar-skills.py`: cada `SKILL.md` contra la especificación abierta de Agent Skills (nombre igual a la carpeta, descripción de hasta 1024 caracteres); lo corre el hook.
 - `bin/instalar.py`: después de clonar: hook, espejos de agentes, verificación de espejos y de skills, placeholders sin instanciar.
 - `bin/instanciar.py`: instancia el template para un proyecto (placeholders, módulo, modo y tablero de `DEC-006`, la firma de `DEC-005` con `--desatendido`, stack de `DEC-003`, espejos); lo corre `arrancar-proyecto.py`.

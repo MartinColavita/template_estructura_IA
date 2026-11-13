@@ -86,7 +86,7 @@ un test o un Escenario**; (c) un choque entre dos fuentes del mismo rango.
 Un solo mensaje, en criollo:
 
 1. **Alcance:** qué se va a crear o editar, una línea por ítem.
-2. **Nivel**, si hay Tareas: *«¿Estas Tareas son técnicas, para los devs (contexto dev/planning)? Vale para las Historias #A, #B y #C.»* Una Historia que todavía no existe se nombra con su `[H-nn]` y su título.
+2. **Nivel**, si hay Tareas y el proyecto es de equipo (con `DEC-006` fijada en modo solo no se pregunta, porque quien pide la Tarea es quien la desarrolla; con la DEC en `⚠`, se pregunta): *«¿Estas Tareas son técnicas, para los devs (contexto dev/planning)? Vale para las Historias #A, #B y #C.»* Una Historia que todavía no existe se nombra con su `[H-nn]` y su título.
 3. **Duplicados:** candidatos encontrados (o «0 candidatos en N consultas») y qué se propone.
 4. **Preguntas:** todas las P, numeradas, cada una con «Recomiendo: …».
 5. Una línea: *«Lo demás sale de la maqueta y del Cerebro; te lo listo en el cierre.»*

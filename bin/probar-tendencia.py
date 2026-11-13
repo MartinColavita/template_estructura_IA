@@ -40,6 +40,8 @@ def main():
         h.write(sesion(1, 2, 1, 5) + '\n')
     rc, out = correr('--sesiones', p)
     caso('una sola sesion: SIN DATOS (2)', rc == 2 and 'al menos 2' in out)
+    rc, out = correr('--sesiones', p, '--breve', '--hook')
+    caso('--hook con SIN DATOS: sale 0 y lo dice en el texto', rc == 0 and 'SIN DATOS' in out, out[:200])
     with open(p, 'w', encoding='utf-8') as h:
         for i, (b, s, f) in enumerate([(2, 2, 6), (2, 1, 5), (1, 1, 4), (0, 0, 2)]):
             h.write(sesion(i, b, s, f) + '\n')
@@ -52,6 +54,9 @@ def main():
             h.write(sesion(i, b, s, f, err=e) + '\n')
     rc, out = correr('--sesiones', p, '--n', '2')
     caso('empeora: PEOR (1), dice que empeora y que hacer', rc == 1 and out.startswith('PEOR') and 'Empeora:' in out and 'mejorar-ecosistema' in out, out[:400])
+    rc, out = correr('--sesiones', p, '--n', '2', '--breve', '--hook')
+    caso('--hook: sale 0 aunque sea PEOR (un hook SessionStart sólo le pasa al modelo la salida de un 0) y el PEOR va en el texto',
+         rc == 0 and 'PEOR' in out, out[:300])
     rc, out = correr('--sesiones', p, '--n', '2', '--json')
     d = json.loads(out)
     caso('--json: veredicto y detalle por medida', d['veredicto'] == 'PEOR' and len(d['detalle']) == 6 and d['skills_ultimas'] == {'guiar-tdd': 2})

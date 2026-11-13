@@ -68,9 +68,11 @@ def main():
         return SIN_DATOS
 
     todos = [repo] + [os.path.abspath(r) for r in a.repos.split(',') if r.strip()]
+    fetch_fallido = []
     if a.fetch:
         for r in todos:
-            git(r, 'fetch', 'origin', '--prune')
+            if git(r, 'fetch', 'origin', '--prune')[0] != 0:
+                fetch_fallido.append(r)
 
     abiertos = []
     for r in todos:
@@ -81,6 +83,10 @@ def main():
         abiertos += [(r, ruta, rama) for ruta, rama in w]
 
     rc, sucio = git(repo, 'status', '--porcelain')
+    if rc != 0:
+        # un status que falla no es un arbol limpio
+        print('SIN DATOS -- git no pudo leer el estado del arbol de %s (git status salio %d).' % (repo, rc))
+        return SIN_DATOS
     sucios = [l for l in sucio.splitlines() if l.strip()]
 
     con_worktree = [ruta for r, ruta, rama in abiertos if rama == a.rama and r == repo]
@@ -91,9 +97,11 @@ def main():
     rc_obase, _ = git(repo, 'rev-parse', '--verify', '--quiet', 'refs/remotes/origin/' + a.base)
     atras = adelante = None
     if rc_base == 0 and rc_obase == 0:
-        _, atras = git(repo, 'rev-list', '--count', a.base + '..origin/' + a.base)
-        _, adelante = git(repo, 'rev-list', '--count', 'origin/' + a.base + '..' + a.base)
-        atras, adelante = int(atras or 0), int(adelante or 0)
+        rc_a, atras = git(repo, 'rev-list', '--count', a.base + '..origin/' + a.base)
+        rc_d, adelante = git(repo, 'rev-list', '--count', 'origin/' + a.base + '..' + a.base)
+        # un rev-list que falla no es "al dia"
+        atras = int(atras) if rc_a == 0 and atras.isdigit() else None
+        adelante = int(adelante) if rc_d == 0 and adelante.isdigit() else None
 
     motivos = []
     if len(abiertos) >= a.techo:
@@ -109,6 +117,10 @@ def main():
         avisos.append('la rama %s ya existe en local (se reusaria, no se crea de cero)' % a.rama)
     if rc_rem == 0:
         avisos.append('la rama %s ya existe en origin' % a.rama)
+    for r in fetch_fallido:
+        avisos.append('el fetch de %s fallo: lo de origin se midio contra referencias viejas' % r)
+    if rc_base == 0 and rc_obase == 0 and (atras is None or adelante is None):
+        avisos.append('git no pudo comparar %s con origin/%s: si la base esta al dia es SIN DATOS' % (a.base, a.base))
     if rc_obase != 0:
         avisos.append('no hay origin/%s: no se puede saber si la base esta al dia (proba --fetch)' % a.base)
     elif atras:
@@ -134,7 +146,8 @@ def main():
             print('    - %s  (%s)' % (ruta, rama or 'sin rama'))
         print('  Arbol de %s: %s' % (repo, 'limpio' if not sucios else '%d cambio(s) sin commitear' % len(sucios)))
         if rc_base == 0 and rc_obase == 0:
-            print('  Base %s: %s' % (a.base, 'al dia con origin' if not atras and not adelante else
+            print('  Base %s: %s' % (a.base, 'SIN DATOS (git no pudo comparar)' if atras is None or adelante is None else
+                                     'al dia con origin' if not atras and not adelante else
                                      '%d atras / %d adelante de origin' % (atras, adelante)))
         for m in motivos:
             print('  FRENA: ' + m)

@@ -1,8 +1,8 @@
 """Lectura del Cerebro para las auditorias: que reglas existen y que dice una ficha.
 
-- indice_reglas(): todos los codigos RN-... y DEC-... que aparecen en cerebro-digital/, salvo
+- indice_reglas(): los codigos RN-... y DEC-... que el Cerebro DEFINE (titulo o primera celda de una tabla), salvo
   configuracion-ia/ (las skills mencionan reglas de ejemplo que no son del dominio). Es el
-  mismo criterio que bin/probar-reglas.py: una regla "existe" si el Cerebro la nombra.
+  mismo criterio que bin/probar-reglas.py: una regla "existe" si el Cerebro la define.
   Que diga lo que se le atribuye ya no es conteo: lo mira el auditor.
 - leer_ficha(): frontmatter (clave: valor, plano) y el bloque "## Derivacion a backlog" con
   sus Slices, Capacidades y Flujos, cada Flujo con sus reglas asignadas.
@@ -14,7 +14,12 @@ import re
 from . import texto
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-_REGLA = re.compile(r'\b(RN-[A-Z]+-\d+[A-Z]?|DEC-\d+)\b')
+# Una regla EXISTE donde el Cerebro la DEFINE: un titulo (### RN-MOD-001 -- ...) o la primera celda de una fila de
+# tabla (| RN-MOD-001 | ...). Nombrarla en un texto, en un ticket del tablero local (backlog/) o en un pendiente no la
+# crea: antes, una regla inventada en un ticket se validaba sola. Las plantillas (plantilla-*.md) y un titulo que es un
+# hueco (<...>) tampoco definen nada.
+_REGLA = re.compile(r'\b(RN-[A-Z]+-\d+[A-Z]?|DEC-\d+)\b')   # un codigo citado (en el bloque de derivacion de una ficha)
+_DEFINICION = re.compile(r'^(?:#{1,6}[ \t]+|\|[ \t]*)(RN-[A-Z]+-\d+[A-Z]?|DEC-\d+)\b(.*)$', re.M)
 
 
 def raiz_repo():
@@ -28,20 +33,22 @@ def indice_reglas(raiz=None):
     res = {}
     for d, subdirs, archivos in os.walk(base):
         rel = os.path.relpath(d, base).replace(os.sep, '/')
-        if rel == 'configuracion-ia' or rel.startswith('configuracion-ia/'):
+        if rel == 'configuracion-ia' or rel.startswith('configuracion-ia/') or 'backlog' in rel.split('/'):
             subdirs[:] = []
             continue
         subdirs.sort()
         for a in sorted(archivos):
-            if not a.endswith('.md'):
+            if not a.endswith('.md') or a.startswith('plantilla-'):
                 continue
             ruta = os.path.join(d, a)
             try:
                 s = texto.leer(ruta)
             except (OSError, UnicodeDecodeError):
                 continue
-            for c in _REGLA.findall(s):
-                res.setdefault(c, os.path.relpath(ruta, raiz).replace(os.sep, '/'))
+            for codigo, resto in _DEFINICION.findall(s):
+                if re.fullmatch(r'<[^>]*>', resto.strip(' \t|:-' + chr(0x2014) + chr(0x2013))):
+                    continue
+                res.setdefault(codigo, os.path.relpath(ruta, raiz).replace(os.sep, '/'))
     return res
 
 

@@ -1,7 +1,7 @@
 # Pipeline del repositorio del Cerebro en GitHub: lo mismo que .gitlab-ci.yml (espejos, pruebas, Doctor).
 # No construye ninguna aplicacion: verifica que ESTE repositorio este sano (espejos, especificacion y conteo de
-# skills, pruebas y Doctor), lo que el hook local frena y se puede saltear con --no-verify. Las guardas de BOM,
-# caracteres de control y listas de README/index siguen solo en el hook. Solo necesita Python 3 y git.
+# skills, BOM y caracteres de control, pruebas y Doctor), lo que el hook local frena y se puede saltear con
+# --no-verify. Las listas de README/index siguen solo en el hook. Solo necesita Python 3 y git.
 name: verificar
 
 on:
@@ -34,6 +34,8 @@ jobs:
           if [ -d front/.claude/skills ]; then diff -r front/.claude/skills front/.agents/skills; fi
       - name: Especificacion de skills
         run: python -B bin/verificar-skills.py
+      - name: BOM y caracteres de control (la misma guarda del hook, sobre todo lo versionado)
+        run: python -B bin/verificar-staged.py --todo
       - name: Conteo declarado (mismo patron que el hook)
         run: |
           REAL=$(find cerebro-digital/configuracion-ia/skills -mindepth 1 -maxdepth 1 -type d | wc -l)

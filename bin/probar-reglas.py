@@ -135,15 +135,12 @@ def reglas_citadas(t):
     return sorted(set(re.findall(r'RN-[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*', t)))
 
 
-def texto_del_cerebro():
-    partes = []
-    for base, dirs, files in os.walk(os.path.join(RAIZ, 'cerebro-digital')):
-        dirs[:] = [d for d in dirs if d != 'configuracion-ia']
-        for f in files:
-            if f.endswith('.md'):
-                with io.open(os.path.join(base, f), encoding='utf-8', errors='replace') as h:
-                    partes.append(h.read())
-    return '\n'.join(partes)
+def reglas_definidas_del_cerebro():
+    """Los codigos que el Cerebro DEFINE, con el mismo criterio que las auditorias (bin/auditoria/cerebro.py): una regla
+    que solo aparece nombrada (en un ticket, un pendiente, una plantilla) no existe."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from auditoria import cerebro as indice
+    return '\n'.join(indice.indice_reglas(RAIZ))
 
 
 def comunes(t, genera_ticket, cerebro):
@@ -269,7 +266,7 @@ def main():
     carpeta = os.path.join(RAIZ, 'borrador', 'pruebas-reglas',
                            '%s-%s%s' % (sello, a.herramienta, '-' + a.modelo if a.modelo else ''))
     os.makedirs(carpeta, exist_ok=True)
-    cerebro = texto_del_cerebro()
+    cerebro = reglas_definidas_del_cerebro()
 
     total = fallas = sin_datos = 0
     resumen = io.open(os.path.join(carpeta, 'resumen.md'), 'w', encoding='utf-8')

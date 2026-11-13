@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I \"$CLAUDE_PROJECT_DIR/bin/tendencia.py\" --breve",
+            "command": "python -I \"$CLAUDE_PROJECT_DIR/bin/tendencia.py\" --breve --hook",
             "timeout": 20
           }
         ]

@@ -77,6 +77,26 @@ def main():
     caso('base inexistente: FRENA', rc == 1 and 'no existe' in out)
     rc, out = script('gate-worktree.py', '--repo', tmp, '--base', 'develop', '--rama', 'x')
     caso('carpeta que no es repo: SIN DATOS', rc == 2)
+    rc, out = script('gate-worktree.py', '--repo', repo, '--base', 'develop', '--rama', 'task/1234-prueba', '--fetch', '--json')
+    d = json.loads(out)
+    caso('--fetch que falla (sin origin): lo avisa, no mide en silencio contra referencias viejas',
+         any(v.startswith('el fetch de') for v in d['avisos']), out[:300])
+    sh(repo, 'git', 'branch', '-f', 'develop')
+    escribir(repo, '.git/refs/remotes/origin/develop', 'f' * 40 + '\n')
+    rc, out = script('gate-worktree.py', '--repo', repo, '--base', 'develop', '--rama', 'task/1234-prueba', '--json')
+    d = json.loads(out)
+    caso('rev-list que falla (origin/develop apunta a un commit que no existe): la base no queda "al dia"',
+         d['base_atras_de_origin'] is None and any('SIN DATOS' in v for v in d['avisos']), out[:400])
+    os.remove(os.path.join(repo, '.git', 'refs', 'remotes', 'origin', 'develop'))
+    indice = os.path.join(repo, '.git', 'index')
+    with open(indice, 'rb') as h:
+        indice_ok = h.read()
+    with open(indice, 'wb') as h:
+        h.write(b'basura que no es un indice de git')
+    rc, out = script('gate-worktree.py', '--repo', repo, '--base', 'develop', '--rama', 'task/1234-prueba')
+    caso('git status que falla (indice roto): SIN DATOS, no "arbol limpio"', rc == 2 and 'limpio' not in out, out[:300])
+    with open(indice, 'wb') as h:
+        h.write(indice_ok)
 
     print('== verificar-tdd')
     sh(repo, 'git', 'checkout', '-q', '-b', 'task/1234-prueba')

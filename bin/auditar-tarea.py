@@ -39,7 +39,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from auditoria import cerebro, historia, texto, tarea  # noqa: E402
+from auditoria import cerebro, historia, phi, texto, tarea  # noqa: E402
 from auditoria import reporte as rep  # noqa: E402
 
 HERRAMIENTA = 'auditar-tarea'
@@ -534,33 +534,9 @@ def ch_markdown(r, doc):
         r.ok(c, 'sin markdown crudo ni escapes rotos')
 
 
-_PHI = [
-    ('un numero de 7 u 8 cifras (documento?)', re.compile(r'(?<![\w#/.\-:])\d{7,8}(?![\w/.\-])')),
-    ('un email', re.compile(r'[\w.+\-]+@[\w\-]+\.[\w.]+')),
-    ('un CUIT', re.compile(r'(?<![\w\-])\d{2}-\d{8}-\d(?![\w\-])')),
-    ('un telefono', re.compile(r'(?<![\w\-])(?:\+?54[\s\-]?)?(?:\(?\d{2,4}\)?[\s\-])?'
-                               r'(?:15[\s\-]?)?\d{4}-\d{4}(?![\w\-])')),
-]
-
-
 def ch_phi(r, doc):
-    c = '2b-10'
-    plano = texto.texto_plano(texto.sin_enlaces(doc))
-    vistos = 0
-    for nombre, rx in _PHI:
-        hall = []
-        for m in rx.finditer(plano):
-            x = m.group(0)
-            if nombre == 'un telefono' and re.match(r'^(19|20)\d\d-(19|20)\d\d$', x.strip()):
-                continue
-            if x not in hall:
-                hall.append(x)
-        if hall:
-            r.aviso(c, 'posible PHI: %s' % nombre, ', '.join(hall[:5]) +
-                    ' -- revisar; si es un dato real, va un marcador (<documento>, <telefono>)')
-            vistos += 1
-    if not vistos:
-        r.ok(c, 'sin numeros de documento, emails, CUIT ni telefonos a la vista (heuristica)')
+    # lo inequivoco (un email real, un CUIT) es HALLAZGO; lo ambiguo, AVISO (bin/auditoria/phi.py)
+    phi.revisar(r, '2b-10', doc)
 
 
 def ch_guardarrail(r, d):

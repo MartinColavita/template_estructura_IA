@@ -75,7 +75,7 @@ Lo que se versiona es **este documento**; el archivo lo arma cada uno en su máq
   "mcpServers": {
     "gitlab": {
       "command": "npx",
-      "args": ["-y", "@zereight/mcp-gitlab"],
+      "args": ["-y", "@zereight/mcp-gitlab@2.3.22"],
       "env": {
         "GITLAB_API_URL": "https://<host-gitlab>/api/v4",
         "GITLAB_PERSONAL_ACCESS_TOKEN": "$GITLAB_TOKEN",
@@ -92,10 +92,12 @@ Lo que se versiona es **este documento**; el archivo lo arma cada uno en su máq
 > que parecen secretos. Por eso el token se declara explícitamente en `env` con expansión
 > `"$GITLAB_TOKEN"` — **nunca con el valor escrito**.
 
+> **La versión va fija** (`@2.3.22`): `npx -y` sin versión baja y corre la última publicada en cada arranque, con tu token en el entorno. Para subir de versión, mirá qué cambió en el repositorio del paquete y cambiá el número.
+
 ### Claude Code — a nivel usuario (recomendado)
 
 ```bash
-claude mcp add-json --scope user gitlab '{"command":"npx","args":["-y","@zereight/mcp-gitlab"],"env":{"GITLAB_API_URL":"https://<host-gitlab>/api/v4","GITLAB_PERSONAL_ACCESS_TOKEN":"${GITLAB_TOKEN}","GITLAB_PERMISSION_MODE":"readonly","NODE_EXTRA_CA_CERTS":"${CA_CERT_INTERNO}","PORT":"3002"}}'
+claude mcp add-json --scope user gitlab '{"command":"npx","args":["-y","@zereight/mcp-gitlab@2.3.22"],"env":{"GITLAB_API_URL":"https://<host-gitlab>/api/v4","GITLAB_PERSONAL_ACCESS_TOKEN":"${GITLAB_TOKEN}","GITLAB_PERMISSION_MODE":"readonly","NODE_EXTRA_CA_CERTS":"${CA_CERT_INTERNO}","PORT":"3002"}}'
 ```
 
 Queda en `~/.claude.json`, que no se versiona, y anda **desde cualquier carpeta**: este repo, la

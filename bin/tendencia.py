@@ -2,7 +2,9 @@
 """Dice en una frase si el ecosistema viene MEJOR o PEOR, comparando las ultimas sesiones con las anteriores.
 Lee cerebro-digital/configuracion-ia/sesiones.jsonl (lo escribe bin/registrar-sesion.py). Lo muestra el hook SessionStart.
 
-    python bin/tendencia.py [--sesiones <sesiones.jsonl>] [--n 5] [--breve] [--json]
+    python bin/tendencia.py [--sesiones <sesiones.jsonl>] [--n 5] [--breve] [--hook] [--json]
+    --hook: sale siempre 0 y el veredicto va en el texto. Claude Code agrega al contexto del modelo el stdout de un hook
+    SessionStart sólo si sale 0 (code.claude.com/docs/en/hooks, «Exit code output»): con 1, el PEOR no le llegaba.
 
 Tres estados, nunca dos:  0 = mejor o igual   1 = PEOR (hay algo que mirar)   2 = SIN DATOS (menos de 2 sesiones)
 
@@ -64,6 +66,7 @@ def main():
     ap.add_argument('--sesiones', default=os.path.join(RAIZ, 'cerebro-digital', 'configuracion-ia', 'sesiones.jsonl'))
     ap.add_argument('--n', type=int, default=5)
     ap.add_argument('--breve', action='store_true', help='una sola linea (para el hook de inicio de sesion)')
+    ap.add_argument('--hook', action='store_true', help='salida 0 siempre: el veredicto va en el texto (hook SessionStart)')
     ap.add_argument('--json', action='store_true')
     a = ap.parse_args()
     if not os.path.isfile(a.sesiones):
@@ -115,7 +118,9 @@ if __name__ == '__main__':
     try:
         if hasattr(sys.stdout, 'reconfigure'):
             sys.stdout.reconfigure(errors='replace')
-        sys.exit(main())
+        rc = main()
     except Exception as e:
         print('SIN DATOS -- error del script: %s: %s' % (type(e).__name__, e))
-        sys.exit(SIN_DATOS)
+        rc = SIN_DATOS
+    # Como hook, siempre 0: con otro codigo Claude Code descarta el stdout y el modelo no se entera de nada.
+    sys.exit(0 if '--hook' in sys.argv else rc)

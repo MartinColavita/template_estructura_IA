@@ -105,12 +105,13 @@ def leer(p):
         return ""
 
 def git(*args):
+    """La salida de git, o None si git no respondio. None no es "nada": quien llama lo trata como SIN DATOS."""
     try:
         r = subprocess.run(["git"] + list(args), capture_output=True, text=True,
                            cwd=ROOT, timeout=60)
-        return r.stdout if r.returncode == 0 else ""
+        return r.stdout if r.returncode == 0 else None
     except Exception:
-        return ""
+        return None
 
 IGNORAR = {".git", "node_modules", "borrador", ".idea", "__pycache__", "salida"}
 
@@ -225,6 +226,8 @@ def fechas_git():
     reciente porque el log viene de nuevo a viejo."""
     salida = {}
     txt = git("log", "--format=%cd", "--date=short", "--name-only")
+    if txt is None:
+        return None   # sin historial no se sabe hace cuanto nadie toca un archivo
     fecha = None
     for linea in txt.splitlines():
         linea = linea.strip()
@@ -315,24 +318,37 @@ CIERRE = ("\n\nNo edites nada todavia: mostrame los cambios que proponés, uno p
 
 def sonda_guardarrailes():
     filas = []
-    hooks = (git("config", "core.hooksPath") or "").strip()
-    filas.append(["core.hooksPath configurado", hooks or "(sin configurar)",
-                  "OK" if hooks else "HALLAZGO"])
+    crudo = git("config", "core.hooksPath")
+    hooks = (crudo or "").strip()
+    # git config sale 1 cuando la clave no existe: eso es "sin configurar". Si git no responde, no se sabe.
+    sin_git = crudo is None and git("rev-parse", "--git-dir") is None
+    filas.append(["core.hooksPath configurado", "(git no respondio)" if sin_git else (hooks or "(sin configurar)"),
+                  "SIN DATOS" if sin_git else ("OK" if hooks else "HALLAZGO")])
     hook = ROOT + "/.githooks/pre-commit"
     presente = es_archivo(hook)
     filas.append(["Hook pre-commit presente", "si" if presente else "no",
                   "OK" if presente else "HALLAZGO"])
     if presente:
+        # Sin el permiso de ejecucion en git, Linux y macOS ignoran el hook en silencio (en Windows corre igual).
+        indice = git("ls-files", "-s", "--", ".githooks/pre-commit")
+        modo = (indice or "").split(" ")[0]
+        filas.append(["Hook ejecutable en git (100755)", modo or "(no se pudo leer)",
+                      "SIN DATOS" if not modo else ("OK" if modo == "100755" else "HALLAZGO")])
         cuerpo = leer(hook)
         for fn in ["check_mirror", "check_pair", "check_control_chars", "check_conteo_skills", "check_skills_spec"]:
-            hay = fn in cuerpo
+            # presente = definida Y llamada; nombrada en un comentario no cuenta
+            definida = re.search(r"^\s*(?:function\s+)?" + fn + r"\s*(?:\(\))?\s*\{", cuerpo, re.M)
+            llamada = re.search(r"^\s*(?:if\s+!?\s*|!\s*)?" + fn + r"\b(?!\s*(?:\(\))?\s*\{)", cuerpo, re.M)
+            hay = bool(definida and llamada)
             filas.append(["Guarda " + fn, "si" if hay else "no",
                           "OK" if hay else "HALLAZGO"])
         primera = cuerpo.splitlines()[0] if cuerpo else ""
         filas.append(["Shebang", primera, "OK" if "bash" in primera else "HALLAZGO"])
     malas = sum(1 for f in filas if f[2] == "HALLAZGO")
-    estado = "OK" if malas == 0 else "HALLAZGO"
-    if not hooks:
+    estado = "HALLAZGO" if malas else ("SIN DATOS" if any(f[2] == "SIN DATOS" for f in filas) else "OK")
+    if sin_git:
+        resumen = "git no respondio: no se pudo saber si el hook esta activado en este clone."
+    elif not hooks:
         resumen = "El hook existe pero NO esta activado en este clone: corre `git config core.hooksPath .githooks`."
     else:
         resumen = "Los guardarrailes del repositorio estan activos." if malas == 0 \
@@ -811,7 +827,7 @@ def sonda_deuda():
                     if len(ejemplos) < 30 and marca in ("TODO", "Pendiente de decisión"):
                         ejemplos.append([r, linea.strip()[:110]])
                     break
-        if tiene_marca and r in fechas:
+        if tiene_marca and fechas and r in fechas:
             m = meses_desde(fechas[r])
             if m is not None and m >= 3:
                 viejos.append((r, fechas[r], m))
@@ -827,6 +843,7 @@ def sonda_deuda():
          "de otro -los espejos de skills- y se contaron una sola vez)") +
         ("." if not viejos else ", y " + str(len(viejos)) + " archivo(s) con pendientes que "
          "nadie toca hace 3 meses o mas.") +
+        ("" if fechas is not None else " Cuales nadie toca hace meses quedo SIN DATOS: git no respondio.") +
         " No es un error: es deuda declarada a proposito. Lo que importa es que no crezca sin "
         "que nadie mire.",
         (["Marca", "Cantidad", "Detalle", "Estado"], filas),
@@ -948,12 +965,21 @@ def sonda_gemelas():
 def sonda_andamiaje():
     """Restos de la etapa de armado que ya no hacen falta."""
     filas = []
-    for ruta in git("ls-files").splitlines():
+    listado = git("ls-files")
+    if listado is None:
+        return res("Andamiaje obsoleto", "SIN DATOS", "git no respondio: no se pudieron listar los archivos.",
+                   significa="Esta sonda lista los archivos que versiona git; sin git no hay lista.",
+                   importa="SIN DATOS no es aprobado: este aspecto quedo sin revisar.")
+    for ruta in listado.splitlines():
         ruta = ruta.strip()
         if not ruta.endswith(".gitkeep"):
             continue
-        carpeta = os.path.dirname(ruta)
-        hermanos = [l for l in git("ls-files", carpeta).splitlines()
+        carpeta = os.path.dirname(ruta) or "."
+        listado_carpeta = git("ls-files", carpeta)
+        if listado_carpeta is None:
+            filas.append([ruta, "(git no respondio)", "no se pudo listar la carpeta", "SIN DATOS"])
+            continue
+        hermanos = [l for l in listado_carpeta.splitlines()
                     if l.strip() and not l.strip().endswith(".gitkeep")]
         if hermanos:
             filas.append([ruta, str(len(hermanos)) + " archivo(s) en la carpeta",
@@ -1542,6 +1568,14 @@ def _serie(historico, sufijo, resultados, hoy, parcial):
 
 def main():
     args = [a for a in sys.argv[1:]]
+    # Un argumento que no conoce no se ignora: con --help hacia una corrida completa y rotaba el historial.
+    conocidos = ("--solo", "--repo", "--comparar", "--json")
+    raros = [x for i, x in enumerate(args) if (x.startswith("-") and x not in conocidos) or
+             (not x.startswith("-") and (i == 0 or args[i - 1] not in ("--solo", "--repo")))]
+    if raros:
+        print("doctor: no conozco " + ", ".join(raros) + ". Uso: python doctor/doctor.py "
+              "[--json] [--comparar] [--solo sonda1,sonda2] [--repo carpeta]")
+        return 2
     solo = None
     if "--solo" in args:
         import codigo as _cod                                              # noqa
