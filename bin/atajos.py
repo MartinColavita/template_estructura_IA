@@ -3,12 +3,19 @@
 se mejora. SOLO LECTURA.
 
     python -I bin/atajos.py --repo <carpeta> [--repo <otra> ...] [--deuda <cerebro-digital/<modulo>/aplicacion/deuda.md>] [--json]
+    python -I bin/atajos.py --repo <worktree> --base <rama o sha de base> [...]   (solo lo que agrega el cambio)
 
 Tres estados, nunca dos:  0 = OK (cada atajo dice cuando se mejora; o no hay atajos en los archivos leidos)
                           1 = HALLAZGO (un atajo sin `cuando ...` o sin limite, o que cita una DT-nnn que no esta
                               abierta en deuda.md)
                           2 = SIN DATOS (la carpeta no existe o no es la raiz de su repo, git no pudo listar, cero
-                              archivos de codigo leidos en alguno de los repos, o deuda.md ilegible)
+                              archivos de codigo leidos en alguno de los repos, o deuda.md ilegible; con --base: la
+                              base no existe o git no pudo leer el diff. Un diff leido que no agrega codigo es OK
+                              con aviso: no hay marca nueva posible)
+
+CON --base (un solo repo, con git) se miran solo las lineas que agrega el cambio: el diff desde el punto donde la rama
+salio de la base (merge-base) hasta el arbol de trabajo, mas los archivos nuevos sin agregar. Es lo que chequea la
+convencion C4 en una Tarea; sin --base se cuenta el repo entero.
 
 LA MARCA (desarrollo/references/metodo/refactor.md, seccion Deuda tecnica), en un comentario del lenguaje:
 
@@ -78,6 +85,43 @@ def listar(repo):
     return out
 
 
+def lineas_agregadas(repo, base):
+    """{rel: [(nro, texto)]}: las lineas que el cambio agrega desde merge-base(base, HEAD), con lo no commiteado y
+    los archivos nuevos sin agregar. SinDatos si git no puede."""
+    def git(*args):
+        # El diff no puede depender de la configuracion de cada persona (prefijos, renombres).
+        r = subprocess.run(['git', '-c', 'core.quotepath=off', '-c', 'diff.mnemonicPrefix=false', '-c', 'diff.noprefix=false',
+                            '-C', repo] + list(args), capture_output=True)
+        return r.returncode, r.stdout.decode('utf-8', 'replace'), r.stderr.decode('utf-8', 'replace').strip()
+    rc, mb, err = git('merge-base', base, 'HEAD')
+    if rc != 0 or not mb.strip():
+        raise SinDatos('git no encontro el punto de partida entre %s y HEAD en %s: %s' % (base, repo, err or 'sin salida'))
+    rc, diff, err = git('diff', '--no-color', '--no-ext-diff', '-M', '--src-prefix=a/', '--dst-prefix=b/', '--unified=0', mb.strip(), '--')
+    if rc != 0:
+        raise SinDatos('git no pudo leer el diff de %s: %s' % (repo, err))
+    res, rel, nro, previa = {}, None, 0, ''
+    for l in diff.splitlines():
+        anterior, previa = previa, l
+        # La cabecera +++ va siempre justo despues de la ---: una linea agregada que empieza con "++ " no es cabecera.
+        if l.startswith('+++ ') and anterior.startswith('--- '):
+            destino = l[4:].strip()
+            rel = None if destino == '/dev/null' else (destino[2:] if destino.startswith('b/') else destino)
+        elif l.startswith('@@'):
+            m = re.search(r'\+(\d+)', l)
+            nro = int(m.group(1)) - 1 if m else 0
+        elif l.startswith('+') and rel is not None:
+            nro += 1
+            res.setdefault(rel, []).append((nro, l[1:]))
+    rc, nuevos, err = git('ls-files', '-z', '--others', '--exclude-standard')
+    if rc != 0:
+        raise SinDatos('git no pudo listar los archivos nuevos de %s: %s' % (repo, err))
+    for rel in (p for p in nuevos.split('\0') if p):
+        texto = leer_texto(os.path.join(repo, rel))
+        if texto is not None:
+            res[rel] = list(enumerate(texto.splitlines(), 1))
+    return res
+
+
 def leer_texto(ruta):
     """Contenido del archivo, o None si es binario, enorme o ilegible."""
     try:
@@ -142,8 +186,12 @@ def main():
     ap = argparse.ArgumentParser(description='Las marcas atajo: del codigo, con su limite y su disparador.')
     ap.add_argument('--repo', action='append', required=True, help='carpeta del repo de codigo (se puede repetir)')
     ap.add_argument('--deuda', help='aplicacion/deuda.md del modulo, para chequear los DT-nnn citados')
+    ap.add_argument('--base', help='rama o sha de base: solo las lineas que agrega el cambio (un solo --repo, con git)')
     ap.add_argument('--json', action='store_true')
     a = ap.parse_args()
+    if a.base and len(a.repo) != 1:
+        print('SIN DATOS -- --base mira el cambio de UN repo: pasa un solo --repo')
+        return SIN_DATOS
 
     abiertas = pagadas = None
     if a.deuda:
@@ -152,21 +200,28 @@ def main():
             return SIN_DATOS
         abiertas, pagadas = deudas(a.deuda)
 
-    leidos, atajos, en_string = 0, [], []
+    leidos, atajos, en_string, avisos = 0, [], [], []
     for repo in a.repo:
         if not os.path.isdir(repo):
             print('SIN DATOS -- no existe la carpeta %s' % repo)
             return SIN_DATOS
         etiqueta = os.path.basename(os.path.abspath(repo))
         leidos_repo = 0
-        for rel in sorted(listar(repo)):
-            if rel.lower().endswith(DOCS):
+        if a.base:
+            listar(repo)   # la misma barrera: con git y en la raiz del repo, o SIN DATOS
+            agregadas = lineas_agregadas(repo, a.base)
+        for rel in sorted(agregadas if a.base else listar(repo)):
+            if rel.lower().endswith(DOCS) or set(rel.replace('\\', '/').split('/')[:-1]) & SALTEAR:
                 continue
-            texto = leer_texto(os.path.join(repo, rel))
-            if texto is None:
-                continue
+            if a.base:
+                lineas = agregadas[rel]
+            else:
+                texto = leer_texto(os.path.join(repo, rel))
+                if texto is None:
+                    continue
+                lineas = list(enumerate(texto.splitlines(), 1))
             leidos_repo += 1
-            for n, linea in enumerate(texto.splitlines(), 1):
+            for n, linea in lineas:
                 resto, descartadas = buscar_marca(linea)
                 if descartadas:
                     en_string.append('%s/%s:%d' % (etiqueta, rel, n))
@@ -187,7 +242,10 @@ def main():
                 atajos.append({'archivo': '%s/%s' % (etiqueta, rel), 'linea': n, 'limite': limite,
                                'disparador': disparador, 'refs': refs, 'problemas': problemas})
         # La regla del cero, por repo: un repo sin codigo leido no queda tapado por otro que si lo tiene.
-        if leidos_repo == 0:
+        if leidos_repo == 0 and a.base:
+            # El diff se leyo entero y no agrega codigo (solo borra, o es un renombre): no hay marca nueva posible.
+            avisos.append('el cambio desde %s no agrega lineas de codigo en %s: no hay marcas nuevas que contar' % (a.base, repo))
+        elif leidos_repo == 0:
             print('SIN DATOS -- cero archivos de codigo leidos en %s: no hay nada que contar' % repo)
             return SIN_DATOS
         leidos += leidos_repo
@@ -197,12 +255,13 @@ def main():
     veredicto = 'HALLAZGO' if con_problema else 'OK'
     rc = HALLAZGO if con_problema else OK
     if a.json:
-        print(json.dumps({'veredicto': veredicto, 'archivos_leidos': leidos, 'atajos': atajos,
+        print(json.dumps({'veredicto': veredicto, 'archivos_leidos': leidos, 'atajos': atajos, 'avisos': avisos,
                           'sin_referencia': len(sin_ref), 'descartadas_en_string': en_string},
                          ensure_ascii=False, indent=1))
         return rc
 
-    print('Atajos -- %d archivo(s) de codigo leido(s) en %d repo(s): %d marca(s)' % (leidos, len(a.repo), len(atajos)))
+    print('Atajos -- %d archivo(s) de codigo leido(s) en %d repo(s)%s: %d marca(s)' % (
+        leidos, len(a.repo), (', solo las lineas que agrega el cambio desde %s' % a.base) if a.base else '', len(atajos)))
     for x in atajos:
         print('  %s:%d  %s | cuando: %s | %s%s' % (
             x['archivo'], x['linea'], x['limite'] or '-', x['disparador'] or '-', ' '.join(x['refs']) or 'sin ref',
@@ -212,6 +271,8 @@ def main():
               'esta abierto rompe la traza.' % (len(con_problema), len(atajos)))
     else:
         print('OK -- %d atajo(s), todos con limite y disparador.' % len(atajos))
+    for x in avisos:
+        print('  AVISO: ' + x + '.')
     if sin_ref:
         print('  AVISO: %d atajo(s) sin #ID ni DT-nnn: el porque no queda en ningun lado. Proponer su DT-nnn en '
               'aplicacion/deuda.md (cerebro-curator, con el si de una persona).' % len(sin_ref))

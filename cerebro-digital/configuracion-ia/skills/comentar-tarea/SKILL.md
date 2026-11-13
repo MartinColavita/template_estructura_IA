@@ -244,9 +244,8 @@ copia de la fuente, no se redacta a partir del título de la Tarea.
 
 - **Un veredicto que no corrió es `SIN DATOS`, no aprobado.** Si una verificación dio
   hallazgos, el comentario **lo dice**: no se omite para que la tarjeta quede prolija.
-- **El comentario no cambia el Estado.** Pasar la Tarea a *Resolved* o *Closed* no lo hace la
-  IA: la tarjeta ya está congelada y el cierre es una decisión de una persona. La única excepción
-  es *Resolved* en modo solo con `DEC-005` confirmada ([[desarrollar-asignadas]] 6.3, punto 4).
+- **El comentario no cambia el Estado**: sólo escribe `System.History` (cerrar: §«Antes de cerrar una
+  Tarea»).
 - **Sin PHI, sin secretos, sin tokens**, y sin logs pegados: es el mismo cuidado que en la
   descripción del Merge Request, y el comentario queda en Azure para siempre.
 
@@ -292,10 +291,9 @@ La lista va **en el primer aviso** del cierre:
 > ‹otro›. ¿Querés cerrarla igual?»*
 
 - **No frena el cierre**: lo decide la persona, pero con los pendientes a la vista.
-- **Los GATES del cierre no cambian.** Pasar a *Resolved* o *Closed* es edición destructiva:
-  dos "sí" en turnos distintos, y la lista de pendientes va en el primero. Si la Tarea está
-  **congelada** (en un sprint y ya tomada), la IA no le cambia el Estado: muestra los
-  pendientes y la cierra una persona ([[cambios-en-el-backlog]] §4).
+- **El cierre sigue el GATE de edición destructiva de [[AGENTS]]** (con su excepción de
+  `DEC-005`), y la lista de pendientes va en el primer aviso. Si la Tarea está **congelada**
+  (en un sprint y ya tomada), la cierra una persona ([[cambios-en-el-backlog]] §4).
 - **Sin pendientes**, se dice: *«No quedan pendientes en los comentarios.»*
 - **Si no se pudieron leer los comentarios**, es **SIN DATOS**, y se dice: no es «no hay
   pendientes».

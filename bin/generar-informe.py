@@ -63,7 +63,7 @@ BITACORA = [
 
 PENDIENTES_HUMANO = [
     ('DEC-003 — el stack', 'cerebro-digital/<modulo>/arquitectura/decisiones.md y las guías tdd-stack-back.md / tdd-stack-front.md de la skill desarrollo. Hasta que exista, C8, SAST, cobertura y la guía del stack son SIN DATOS (pendiente declarado): se listan, no frenan.'),
-    ('DEC-005 — modo equipo', 'El template la trae sin firmar; en modo solo la firma quien arranca el proyecto (Claude único, auto-Aprobar con cero bloqueantes). La columna del modo equipo sigue en propuesta: quién aprueba, quién abre el Merge Request, el otro motor.'),
+    ('DEC-005 — modo equipo', 'El template la trae sin firmar; en modo solo la firma quien arranca el proyecto. La columna del modo equipo sigue en propuesta: quién aprueba, quién abre el Merge Request, el otro motor.'),
     ('DEC-002 — módulos de dominio', 'Confirmar la estructura <modulo>/{api,application,domain,infra,exceptions} + shared/ o cambiarla.'),
     ('Contexto del tablero', 'tablero/conocimiento/contexto-proyecto.md: slices, etiquetas temáticas, proceso del tablero. Y cerebro-digital/contexto.md.'),
     ('Propuestas M-001 a M-009', 'configuracion-ia/mejoras.md: cada una espera Aplicar / Rechazar / Posponer. Las que cambian reglas duras (M-004, M-006) son las que más pesan para el flujo automático.'),
@@ -409,7 +409,8 @@ def generar(rapido):
     H.append('<title>Informe del esqueleto — TEMPLATE ESTRUCTURA IA</title><style>%s</style></head><body>' % CSS)
     H.append('<header class="portada"><h1>TEMPLATE ESTRUCTURA IA — informe del esqueleto</h1>')
     H.append('<p>Qué tiene, cómo fluye, qué mide y qué falta. Un Cerebro Digital (OKF) con agentes, skills y scripts determinísticos para crear, absorber, refactorizar o migrar aplicaciones con IA, con un «sí» humano en cada barrera.</p>')
-    H.append('<p class="meta">Generado el %s por bin/generar-informe.py%s · raíz: %s</p></header>' % (ahora, ' (modo rápido: sin correr pruebas ni Doctor)' if rapido else ' (pruebas y Doctor corridos hoy)', html.escape(RAIZ)))
+    # Solo el nombre de la carpeta: la ruta completa es de la maquina de quien lo genero, y el informe se versiona.
+    H.append('<p class="meta">Generado el %s por bin/generar-informe.py%s · carpeta: %s</p></header>' % (ahora, ' (modo rápido: sin correr pruebas ni Doctor)' if rapido else ' (pruebas y Doctor corridos hoy)', html.escape(os.path.basename(RAIZ))))
     prompt, pasos, frases = prompt_maestro()
     if prompt:
         H.append('<section id="prompt" class="prompt-maestro"><h2>00 · Prompt maestro — para pegar en Claude Code con el template abierto</h2>')

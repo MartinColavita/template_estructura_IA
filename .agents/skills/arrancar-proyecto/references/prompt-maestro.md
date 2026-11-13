@@ -53,7 +53,7 @@ pendiente marcado. Nada de datos de personas. Todo en español.
 
 | Querés… | Decile a Claude |
 |---|---|
-| Programar lo que está listo en el tablero | «desarrollá mis tareas asignadas» (worktrees y agentes en paralelo; un «Aprobar» por Tarea en modo solo lo da DEC-005) |
+| Programar lo que está listo en el tablero | «desarrollá mis tareas asignadas» (worktrees y agentes en paralelo; un «Aprobar» por Tarea en modo solo lo da DEC-005 si la firmaste al arrancar) |
 | Redactar una Historia o una Tarea | «redactá la Historia de <flujo>» · «derivá las Tareas de la Historia #N» |
 | Diseñar una pantalla | «diseñá la pantalla de <X> con Stitch» |
 | Pruebas de punta a punta | «diseñá las pruebas de la Historia #N» · «automatizá la Historia #N» · «qué cobertura de punta a punta tenemos» |

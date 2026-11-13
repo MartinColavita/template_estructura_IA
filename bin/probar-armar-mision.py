@@ -4,6 +4,7 @@ y una Tarea de mentira en una carpeta temporal.
 Se corre:  python -B bin/probar-armar-mision.py   -> OK o FALLA, con el detalle de cada caso."""
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -46,6 +47,13 @@ def main():
     rc, out = correr('--rol', 'verificador', '--entorno', 'orca', '--motor', 'gemini', *base)
     caso('verificador: se arma (0)', rc == 0, out[:300])
     caso('verificador: recibe verificar-tdd, auditar-codigo y code-review.md, NO guiar-tdd', 'verificar-tdd/SKILL.md' in out and 'auditar-codigo/SKILL.md' in out and 'code-review.md' in out and 'guiar-tdd/SKILL.md' not in out)
+    caso('verificador: C4 cuenta las marcas atajo: que agrega el cambio con atajos.py --base (el comando, no la convencion)',
+         re.search(r'atajos\.py" --repo "[^"]+" --base \S+', out) is not None, out[:300])
+    caso('verificador en modo test-despues: corre la mutacion sobre las lineas nuevas', 'Modo test-después' in out and 'mutación' in out, out[:300])
+    for literal, esperado in (('test-después: esqueleto del repo', '--modo test-despues --motivo "esqueleto del repo"'),
+                              ('caracterización primero', '--modo caracterizacion`')):
+        rc2, out2 = correr('--rol', 'verificador', '--entorno', 'intellij', '--motor', 'claude', '--modo-pruebas', literal, *base)
+        caso('el modo tal como lo escribe la plantilla (%s) llega a verificar-tdd sin tildes' % literal.split(':')[0], rc2 == 0 and esperado in out2, out2[:200])
     caso('verificador: el comando de verificar-tdd lleva --modo y --motivo de la Tarea', '--modo test-despues --motivo "esqueleto del repo"' in out, out[:200])
     caso('verificador: bloque VEREDICTO canonico y las dos clases de SIN DATOS', 'VEREDICTO-INICIO' in out and 'VEREDICTO-FIN' in out and 'pendiente declarado' in out)
     caso('verificador Gemini en Orca: canal por lineas', 'PREGUNTA-ORQUESTADOR' in out)

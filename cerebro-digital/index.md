@@ -91,12 +91,12 @@ Un segundo módulo se crea copiando esta misma estructura con otro slug y agreg�
 -   `configuracion-ia/skills/cerebro-mockup-design/`: design system y tokens para mockups HTML.
 -   `configuracion-ia/skills/cerebro-meet-analyst/`: análisis de transcripciones de reuniones y extracción al OKF.
 -   `configuracion-ia/skills/cognitive-doc-design/`: patrones de documentación cognitiva.
--   `configuracion-ia/skills/engram-memory-protocol/`: protocolo de persistencia estructurada en Engram.
+-   `configuracion-ia/skills/engram-memory-protocol/`: Engram, sólo para la continuidad entre sesiones.
 
 **Pipeline Azure DevOps (14):**
 -   `configuracion-ia/skills/redactar-tarea/`: redacta un ticket suelto (Historia/Tarea/Bug/Habilitador); no toca el board.
 -   `configuracion-ia/skills/estimar-story-points/`: calcula los Puntos de historia; no toca el board.
--   `configuracion-ia/skills/consultar-backlog/`: consulta y audita el board (cobertura, desfase); sólo lectura. Es el motor de deduplicación.
+-   `configuracion-ia/skills/consultar-backlog/`: consulta y audita el board (cobertura, desfase); sólo lectura.
 -   `configuracion-ia/skills/analizar-tareas/`: consistencia del set de Tareas antes de crearlas; opcional, a pedido.
 -   `configuracion-ia/skills/auditar-historia/`: segundo chequeo independiente de una Historia; opcional, a pedido.
 -   `configuracion-ia/skills/auditar-tarea/`: segundo chequeo independiente de la lista de tests de una Tarea; opcional, a pedido.

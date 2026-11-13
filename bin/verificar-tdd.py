@@ -202,7 +202,7 @@ def main():
               'evidencia': evidencia, 'diff_evidencia_vs_rama': diff_evidencia,
               'hallazgos': hallazgos, 'avisos': avisos,
               'no_mira': ['la asercion literal de cada test', 'que el verde pase hoy (correr la suite)',
-                          'el cierre BDD<->TDD contra la Historia', 'si cada test puede fallar']}
+                          'el cierre BDD<->TDD contra la Historia', 'si cada test puede fallar (en test-despues sobre logica: la mutacion del verificador)']}
     if a.json:
         print(json.dumps(salida, ensure_ascii=True, indent=1))
     else:

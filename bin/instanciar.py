@@ -43,6 +43,8 @@ IGNORAR_DIRS = ('.git', 'node_modules', '__pycache__', 'salida')
 # (la segunda corrida fallaria) y la guia quedaria sin sentido.
 EXCLUIR = (os.path.join('bin', 'instanciar.py'), 'COMO-USAR-ESTE-TEMPLATE.md')
 MODULO_PLACEHOLDER = 'modulo-ejemplo'
+MARCA_SIN_FIRMA = chr(0x26a0) + r' \*\*Sin firmar\*\* <la firma quien arranca[^>]*>\.'
+FIRMADA = '**Confirmado para el modo solo ('
 RUTA_MODULO = os.path.join('cerebro-digital', MODULO_PLACEHOLDER)
 ESPEJOS = (
     (os.path.join('cerebro-digital', 'configuracion-ia', 'skills'),
@@ -131,7 +133,7 @@ def main():
     ap.add_argument('--modo', choices=['solo', 'equipo'], required=True, help='solo (desarrollo personal) o equipo; se pregunta en cada proyecto (DEC-006)')
     ap.add_argument('--tablero', choices=['local', 'azure', 'jira', 'otro'], default='', help='local (archivos en el Cerebro), azure (MCP), jira u otro tablero por MCP; por defecto local en modo solo y azure en modo equipo')
     ap.add_argument('--autor', default='', help='quien instancia: queda en DEC-006 y es el nombre que firma aceptadas y cortes; por defecto git config user.name')
-    ap.add_argument('--desatendido', action='store_true', help='solo con --modo solo: quien instancia firma DEC-005 (aprobar sola una Tarea con cero bloqueantes y pasarla a Resolved); sin esto queda sin firmar')
+    ap.add_argument('--desatendido', action='store_true', help='solo con --modo solo: quien instancia firma DEC-005 (modo desatendido); sin esto queda sin firmar')
     ap.add_argument('--stack-back', default='', help='lenguaje y framework del back (DEC-003), p. ej. "Python 3.12 + FastAPI"; vacio = se decide antes de la primera Tarea')
     ap.add_argument('--stack-front', default='', help='lenguaje y framework del front (DEC-003), p. ej. "React 19 + Vite"')
     ap.add_argument('--stack-base', default='', help='motor de base y version minima (DEC-003), p. ej. "PostgreSQL 16"')
@@ -170,10 +172,24 @@ def main():
             autor = subprocess.run(['git', 'config', 'user.name'], capture_output=True, text=True, encoding='utf-8', errors='replace').stdout.strip()
         except OSError:
             autor = ''
+    if a.desatendido and not autor:
+        print('ERROR: --desatendido es una firma: pasa --autor con el nombre de quien autoriza.')
+        return 1
     autor = autor or 'equipo'
     if not os.path.isdir(os.path.join(RAIZ, 'cerebro-digital')):
         print('SIN DATOS: no encuentro cerebro-digital/ al lado de bin/. Corre esto parado en la raiz del template.')
         return 2
+    if a.desatendido:
+        # Antes de tocar nada: que haya donde firmar, y que el proyecto no haya quedado en modo equipo (DEC-006).
+        cands = [c for c in (os.path.join(RAIZ, RUTA_MODULO, 'arquitectura', 'decisiones.md'),
+                             os.path.join(RAIZ, 'cerebro-digital', a.modulo, 'arquitectura', 'decisiones.md')) if os.path.isfile(c)]
+        textos = [leer(c)[0] or '' for c in cands]
+        if any(re.search(r'Confirmado al instanciar \([^)]*\): modo equipo', t) for t in textos):
+            print('ERROR: DEC-006 dice que este proyecto es de modo equipo: DEC-005 no se firma con --desatendido.')
+            return 1
+        if not any(re.search(MARCA_SIN_FIRMA, t) or FIRMADA in t for t in textos):
+            print('ERROR: --desatendido y no encontre DEC-005 sin firmar en decisiones.md (ni en modulo-ejemplo/ ni en %s/): no se toco nada.' % a.modulo)
+            return 1
 
     modo = ' (dry-run: no se toca nada)' if a.dry_run else ''
     print('Instanciando el template en %s%s' % (RAIZ, modo))
@@ -190,6 +206,7 @@ def main():
     print('[1/4] placeholders reemplazados en %d archivo(s)' % n)
 
     # 2. modulo
+    ya_instanciado = False
     origen = os.path.join(RAIZ, RUTA_MODULO)
     destino = os.path.join(RAIZ, 'cerebro-digital', a.modulo)
     if os.path.isdir(origen):
@@ -200,6 +217,7 @@ def main():
         if not a.dry_run:
             os.rename(origen, destino)
     elif os.path.isdir(destino):
+        ya_instanciado = True
         print('[2/4] la carpeta del modulo ya se llama %s (ya instanciado)' % a.modulo)
     else:
         print('[2/4] SIN DATOS: no existe ni modulo-ejemplo/ ni %s/ dentro de cerebro-digital/' % a.modulo)
@@ -209,17 +227,29 @@ def main():
     # 2-ter. modo de trabajo (DEC-006) y, si se dijo, el stack (DEC-003)
     dec = os.path.join(RAIZ, 'cerebro-digital', a.modulo, 'arquitectura', 'decisiones.md')
     fijados = 0
+    estado_dec005 = None
     if os.path.isfile(dec):
         texto, bom = leer(dec)
         marca = '<se fija al instanciar>'
         if marca in texto:
-            texto = texto.replace('**Se fija al instanciar** con `bin/instanciar.py --modo solo|equipo --tablero local|azure` y queda\nescrito acá. ' + chr(0x26a0) + ' ' + marca,
-                                  '**Confirmado al instanciar (%s): modo %s, tablero %s, autor %s.**' % (datetime.date.today().isoformat(), a.modo, tablero, autor), 1)
+            # \r?\n: en un clon con core.autocrlf=true el archivo tiene CRLF y un literal con \n no lo encontraba
+            texto = re.sub(r'\*\*Se fija al instanciar\*\* con `bin/instanciar\.py --modo solo\|equipo --tablero local\|azure` y queda\r?\nescrito acá\. '
+                           + chr(0x26a0) + ' ' + re.escape(marca),
+                           lambda m: '**Confirmado al instanciar (%s): modo %s, tablero %s, autor %s.**' % (
+                               datetime.date.today().isoformat(), a.modo, tablero, autor), texto, count=1)
             texto = texto.replace(marca, 'modo %s, tablero %s' % (a.modo, tablero))
-        firma = '<se firma al instanciar en modo solo>'
-        if a.desatendido and firma in texto:
-            texto = texto.replace(chr(0x26a0) + ' **Sin firmar** ' + firma + '.',
-                                  '**Confirmado para el modo solo (%s, firmado por %s).**' % (datetime.date.today().isoformat(), autor), 1)
+        sin_firma = re.search(MARCA_SIN_FIRMA, texto)
+        if a.desatendido and sin_firma:
+            hoy_firma = datetime.date.today().isoformat()
+            texto = texto.replace(sin_firma.group(0), FIRMADA + '%s, firmado por %s).**' % (hoy_firma, autor), 1)
+            # cambiar la decision es cambiarla con su footer
+            texto = re.sub(r'_Últ\. modif\.: [0-9-]+ — sale sin firmar del template \(M-027\)\.',
+                           lambda m: '_Últ. modif.: %s — @%s — firmada para el modo solo al instanciar.' % (hoy_firma, autor), texto, count=1)
+        firmada = FIRMADA in texto
+        if a.desatendido and not firmada:
+            print('ERROR: se pidio --desatendido y DEC-005 no quedo firmada (no encontre su marca "Sin firmar" en %s).' % dec)
+            return 1
+        estado_dec005 = 'firmada' if firmada else 'sin firmar: todo se pregunta'
         stack = (('Lenguaje y framework del back', a.stack_back), ('Lenguaje y framework del front', a.stack_front),
                  ('Motor de base de datos y versión mínima soportada', a.stack_base), ('Herramienta de build y runner de tests del back', a.stack_build),
                  ('Tipo de aplicación (web, Electron, escritorio con webview, escritorio nativo, móvil, línea de comandos, API) y el motor de pruebas de punta a punta que le corresponde (Playwright, WebDriver, Appium o Maestro, proceso, HTTP), con el atributo de identificación estable (`data-testid` o `automation-id`)', a.stack_e2e))
@@ -251,13 +281,20 @@ def main():
         if (valor.strip() or cmd.strip()) and not a.dry_run:
             escribir(p, texto, bom)
         print('[2-quater] %s: %s' % (guia, ', '.join(x for x in (('stack' if valor.strip() else ''), ('comando de tests' if cmd.strip() else '')) if x) or 'sin cambios (queda en plantilla)'))
-    print('[2-ter] modo %s, tablero %s, autor %s -> DEC-006%s%s' % (a.modo, tablero, autor,
-          '; DEC-005 (modo desatendido) firmada' if a.desatendido else '; DEC-005 (modo desatendido) sin firmar: todo se pregunta', ('; DEC-003: %d tema(s) del stack fijados' % fijados) if fijados else '; DEC-003 (el stack) queda a definir'))
+    if estado_dec005 is None:
+        # El modulo todavia no existe (dry-run de un template nuevo) o no tiene decisiones.md: no se miro nada.
+        if a.desatendido and not a.dry_run:
+            print('ERROR: se pidio --desatendido y no encontre %s para firmar DEC-005.' % dec)
+            return 1
+        estado_dec005 = ('se firmaria' if a.desatendido else 'quedaria sin firmar') + ' (dry-run: no se leyo decisiones.md)' \
+            if a.dry_run else 'SIN DATOS: no encontre decisiones.md'
+    print('[2-ter] modo %s, tablero %s, autor %s -> DEC-006; DEC-005 (modo desatendido) %s%s' % (a.modo, tablero, autor, estado_dec005,
+          ('; DEC-003: %d tema(s) del stack fijados' % fijados) if fijados else '; DEC-003 (el stack) queda a definir'))
 
-    # 2-bis. last_updated: la fecha de instanciacion, no la del template
+    # 2-bis. last_updated: la fecha de instanciacion, no la del template (ni la de una corrida posterior)
     hoy = datetime.date.today().isoformat()
     fechados = 0
-    for ruta in archivos_de_texto():
+    for ruta in ([] if ya_instanciado else archivos_de_texto()):
         if not ruta.endswith('.md') or any(ruta.endswith(x) for x in EXCLUIR):
             continue
         texto, bom = leer(ruta)
@@ -266,11 +303,12 @@ def main():
             fechados += 1
             if not a.dry_run:
                 escribir(ruta, nuevo, bom)
-    print('[2-bis] last_updated fijado a %s en %d archivo(s)' % (hoy, fechados))
+    print('[2-bis] last_updated: salteado (ya instanciado: queda la fecha de la instanciacion)' if ya_instanciado
+          else '[2-bis] last_updated fijado a %s en %d archivo(s)' % (hoy, fechados))
 
     # 3. espejos
-    if a.sin_espejos:
-        print('[3/4] espejos: salteado (--sin-espejos)')
+    if a.sin_espejos or ya_instanciado:
+        print('[3/4] espejos: salteado (%s)' % ('--sin-espejos' if a.sin_espejos else 'ya instanciado: bin/sync-skills.* los regenera'))
     else:
         print('[3/4] regenerando espejos')
         regenerar_espejos(a.dry_run)

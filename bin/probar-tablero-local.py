@@ -66,6 +66,14 @@ def main():
     caso('Closed sin --confirmado: FRENA (1)', rc == 1 and 'confirmado' in out)
     rc, out = correr(tb, 'estado', '3', 'Closed', '--confirmado', '--json')
     caso('Closed con --confirmado: ok', rc == 0 and json.loads(out)['ahora'] == 'Closed')
+    rc, out = correr(tb, 'estado', '2', 'Resolved')
+    caso('Resolved sin --confirmado y sin DEC-005 firmada: FRENA (1)', rc == 1 and 'DEC-005' in out, out[:300])
+    dec = os.path.join(os.path.dirname(tb), 'arquitectura', 'decisiones.md')
+    os.makedirs(os.path.dirname(dec), exist_ok=True)
+    with open(dec, 'w', encoding='utf-8') as h:
+        h.write('## DEC-005 — Modo desatendido\n\n**Estado:** **Confirmado para el modo solo (2026-11-13, firmado por yo).**\n')
+    rc, out = correr(tb, 'estado', '2', 'Resolved')
+    caso('Resolved de una Feature con DEC-005 firmada: FRENA (la autorizacion es para una Tarea)', rc == 1, out[:300])
     rc, out = correr(tb, 'buscar', 'reserva', '--abiertos', '--json')
     caso('buscar --abiertos excluye la cerrada', len(json.loads(out)) == 2)
     rc, out = correr(tb, 'editar', '2', '--campo', 'iteracion', '--valor', 'sprint-1', '--json')
@@ -74,6 +82,19 @@ def main():
     caso('item inexistente: SIN DATOS (2)', rc == 2)
     rc, out = correr(tb, 'crear', '--tipo', 'Tarea', '--titulo', 'Endpoint POST /reservas', '--padre', '3', '--json')
     caso('los ids son secuenciales (#4)', rc == 0 and json.loads(out)['id'] == 4)
+    with open(dec, 'w', encoding='utf-8') as h:
+        h.write('## DEC-005 — Modo desatendido\n\n**Estado:** ⚠ **Sin firmar** <la firma quien arranca>.\n\n## DEC-006 — x\n\n**Confirmado para el modo solo (otra DEC).**\n')
+    rc, out = correr(tb, 'estado', '4', 'Resolved')
+    caso('Resolved de una Tarea con DEC-005 sin firmar (y la firma en otra DEC): FRENA (1)', rc == 1, out[:300])
+    with open(dec, 'w', encoding='utf-8') as h:
+        h.write('## DEC-005 — Modo desatendido\n\n**Estado:** **Confirmado para el modo solo (2026-11-13, firmado por yo).**\n')
+    rc, out = correr(tb, 'estado', '4', 'Resolved', '--json')
+    caso('Resolved de una Tarea con DEC-005 firmada: ok sin --confirmado', rc == 0 and json.loads(out)['ahora'] == 'Resolved', out[:300])
+    with open(dec, 'a', encoding='utf-8') as h:
+        h.write('\n## DEC-006 — Modo\n\n**Confirmado al instanciar (2026-11-13): modo equipo, tablero local, autor yo.**\n')
+    correr(tb, 'estado', '4', 'Active')
+    rc, out = correr(tb, 'estado', '4', 'Resolved')
+    caso('Resolved de una Tarea en un proyecto de equipo (DEC-006): FRENA aunque DEC-005 diga firmada', rc == 1, out[:300])
     shutil.rmtree(tmp, ignore_errors=True)
     fallas = [n for n, ok, _ in ESPERADOS if not ok]
     print()

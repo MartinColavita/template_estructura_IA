@@ -49,7 +49,8 @@ python <ruta del repositorio del Cerebro>/bin/verificar-tdd.py --repo <worktree>
 
 El `--modo` es el campo «Modo de pruebas» de la Tarea, **textual**: si la Tarea no lo declara, es `tdd`; un
 `test-despues` sin motivo el script lo audita como `tdd` y lo marca. En `test-despues` exige la red mínima
-(tests y producción en el rango) en vez del rojo por ítem; en `caracterizacion`, que el primer commit congele
+(tests y producción en el rango) en vez del rojo por ítem y, si toca lógica, vos corrés la mutación que pide
+`tdd-ciclo-y-evidencia.md` §«Cuándo TDD y cuándo test-después» de `desarrollo`; en `caracterizacion`, que el primer commit congele
 (`test(caracterizacion): …`) antes de tocar producción; en `sin-tests` devuelve `SIN DATOS` con el motivo.
 Un `chore(firma): …` (sólo firmas vacías antes del primer rojo) y un `test(verde-de-entrada): <n>` (ítem que nació
 verde, pendiente a confirmar) son parte del método (`guiar-tdd`) y el script los reconoce. Lo que el script marca `falta` o `evidencia invalida` no lo da por bueno la skill. Un script que no

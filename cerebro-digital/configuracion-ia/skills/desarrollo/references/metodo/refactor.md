@@ -72,7 +72,7 @@ pendiente a confirmar en la tarjeta y, si se acepta como deuda, a `aplicacion/de
 `DT-nnn` (por `cerebro-curator`, con el «sí» de una persona).
 
 Para ver todo lo que un repo dejó para después: `bin/atajos.py --repo <repo> [--deuda <ruta a deuda.md>]`
-(qué marca, en el encabezado del script). Una nota suelta, sin límite ni disparador, no es deuda registrada.
+(qué marca, en el encabezado del script); con `--base <rama de base>`, sólo lo que agrega el cambio. Una nota suelta, sin límite ni disparador, no es deuda registrada.
 
 Una deuda sin registrar no es deuda: es un bug que todavía no se manifestó.
 

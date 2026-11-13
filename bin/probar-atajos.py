@@ -153,6 +153,56 @@ def main():
         caso('una carpeta de adentro de un repo, que no es su raiz: SIN DATOS (2), no lista el repo de afuera',
              rc == 2 and 'no es su raiz' in out, out[:300])
 
+        # --base: solo las lineas que agrega el cambio (commit en la rama + sin commitear + archivo nuevo)
+        def g(*args):
+            return subprocess.run(['git', '-C', repo, '-c', 'user.name=t', '-c', 'user.email=t@t'] + list(args),
+                                  capture_output=True, text=True)
+        escribir(os.path.join(repo, 'src', 'viejo.py'), 'x = 1\n# atajo: sin disparador viejo\n')
+        g('add', '-A')
+        g('commit', '-qm', 'base')
+        g('branch', '-M', 'base')
+        g('checkout', '-qb', 'task/1')
+        escribir(os.path.join(repo, 'src', 'viejo.py'), 'x = 1\n# atajo: sin disparador viejo\ny = 2  # atajo: memoria; cuando haya dos #7\n')
+        g('commit', '-qam', 'cambio')
+        escribir(os.path.join(repo, 'src', 'otro.py'), '# atajo: un hilo; cuando haya carga #8\n')
+        rc, out = correr('--repo', repo)
+        caso('sin --base se cuenta el repo entero: la marca vieja sin disparador da HALLAZGO (1)',
+             rc == 1 and 'sin disparador viejo' in out, out[:500])
+        rc, out = correr('--repo', repo, '--base', 'base')
+        caso('--base: solo lo que agrega el cambio (commit y archivo nuevo); la marca vieja no cuenta -> OK (0), 2 marcas',
+             rc == 0 and '2 marca(s)' in out and 'sin disparador viejo' not in out and 'viejo.py:3' in out, out[:600])
+        escribir(os.path.join(repo, 'src', 'otro.py'), '# atajo: un hilo; cuando haya carga #8\n# atajo: sin cuando nuevo\n')
+        rc, out = correr('--repo', repo, '--base', 'base')
+        caso('--base: una marca nueva sin disparador -> HALLAZGO (1)', rc == 1 and 'sin cuando nuevo' in out, out[:500])
+        rc, out = correr('--repo', repo, '--base', 'no-existe')
+        caso('--base con una rama que no existe: SIN DATOS (2)', rc == 2 and 'no-existe' in out, out[:300])
+        os.remove(os.path.join(repo, 'src', 'otro.py'))
+        g('checkout', '-qb', 'task/2', 'base')
+        escribir(os.path.join(repo, 'NOTAS.md'), '# atajo: los docs no cuentan\n')
+        rc, out = correr('--repo', repo, '--base', 'base')
+        caso('--base y el cambio no agrega codigo (el diff se leyo): OK (0) con aviso', rc == 0 and 'no agrega lineas de codigo' in out, out[:300])
+        rc, out = correr('--repo', repo, '--base', 'base', '--json')
+        try:
+            ok = rc == 0 and any('no agrega' in v for v in json.loads(out)['avisos'])
+        except (ValueError, KeyError):
+            ok = False
+        caso('--base --json sin codigo nuevo: sigue siendo JSON, con el aviso adentro', ok, out[:300])
+        escribir(os.path.join(repo, 'src', 'mas.py'), 'x = 1\n')
+        g('add', 'src/mas.py')
+        g('commit', '-qm', 'mas')
+        escribir(os.path.join(repo, 'src', 'mas.py'), 'x = 1\n++ y  # atajo: sin cuando\n')
+        rc, out = correr('--repo', repo, '--base', 'base')
+        caso('--base: una linea agregada que empieza con "++ " no se toma por cabecera y su marca cuenta -> HALLAZGO (1)',
+             rc == 1 and 'sin cuando' in out, out[:400])
+        g('checkout', '--', 'src/mas.py')
+        g('config', 'diff.renames', 'false')
+        g('config', 'diff.mnemonicPrefix', 'true')
+        g('mv', 'src/viejo.py', 'src/renombrado.py')
+        rc, out = correr('--repo', repo, '--base', 'base')
+        caso('--base con diff.renames=false y mnemonicPrefix: un renombre no vuelve nueva la marca vieja', rc == 0 and 'sin disparador viejo' not in out, out[:400])
+        rc, out = correr('--repo', repo, '--repo', app, '--base', 'base')
+        caso('--base con dos repos: SIN DATOS (2)', rc == 2 and 'UN repo' in out, out[:300])
+
     shutil.rmtree(tmp, ignore_errors=True)
     fallas = [n for n, ok, _ in ESPERADOS if not ok]
     print()

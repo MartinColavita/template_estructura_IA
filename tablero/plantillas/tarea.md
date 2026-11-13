@@ -90,7 +90,7 @@ Detalle de campos y valores válidos: [[mapa-campos-azure]].
 - **No cruza módulos del código** (decisión de límites de módulo del Cerebro, `[DEC-…]`): modifica **un solo módulo**; si necesita otro, llama a su `application` (sus casos de uso) y puede usar los tipos que devuelven o lanzan (`<otro>.domain`, `<otro>.exceptions`). **Nunca** importa `<otro>.api` ni `<otro>.infra`.
 - Fuera de alcance: <lo que explicitamente NO entra>
 - **Requiere test de integración:** `<si | no>` — *sí* sólo si toca una dependencia externa real
-- **Modo de pruebas:** `<TDD | test-después: <motivo> | sin tests: <motivo> | caracterización primero>` — TDD por defecto; los otros sólo con motivo escrito (esqueleto, configuración, migración, UI puramente visual, spike, código existente sin red) y con la red mínima que cada modo exige
+- **Modo de pruebas:** `<TDD | test-después: <motivo> | sin tests: <motivo> | caracterización primero>` — TDD por defecto; los otros sólo con motivo escrito (esqueleto, configuración, migración, UI puramente visual, lógica que no se pudo especificar antes, spike, código existente sin red) y con la red mínima que cada modo exige
 
 > **Todo lo que sigue, hasta "Subtareas / pasos", es UN bloque: OBLIGATORIO si la capa es `api`, `application` o `domain`** (si otro código —humano o IA— va a **llamar** esto) — incluye Contrato técnico (fragmento OpenAPI si es `api`), Validaciones, Casos de error, Dependencias, Especificación cerrada (SDD) y los Tests a escribir primero (TDD test-first). **OPCIONAL/borrable entero** si la tarea es chica y de solo UI/config (p. ej. "agregar una columna a una grilla", "corregir un texto"): no infles el ticket con secciones que no aplican. Si aplica, es el corazón de la tarea — es lo que permite codear sin ida y vuelta.
 

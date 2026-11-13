@@ -80,7 +80,7 @@ Siempre las mismas cuatro partes, en este orden:
 
 | Salida | Que pasa |
 |---|---|
-| **Arreglar** | Se aplica lo propuesto, se muestra el cambio y se commitea |
+| **Arreglar** | Se aplica lo propuesto por el canal de su tipo ([[mejorar-ecosistema]] §«Tipos de cambio») y, si cambia una regla, una skill o un script, con su fila en `mejoras.md`; se muestra el cambio y se commitea |
 | **Aceptarlo** | Es una decision, no un error. Se **escribe el motivo EN EL ARCHIVO** para que la proxima corrida no lo vuelva a marcar y, si es deuda de codigo, una fila `DT-nnn` en `<modulo>/aplicacion/deuda.md` con cuando se paga |
 | **Dejarlo** | Queda abierto. Se dice por que y de quien depende |
 

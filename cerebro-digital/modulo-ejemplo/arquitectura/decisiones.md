@@ -124,13 +124,11 @@ _Últ. modif.: 2026-10-30 — @equipo — plantilla heredada del template_
 
 ## DEC-005 — Modo desatendido (autorizaciones permanentes del flujo de desarrollo)
 
-**Estado:** ⚠ **Sin firmar** <se firma al instanciar en modo solo>. La firma quien arranca el proyecto en
-modo solo, si acepta el modo desatendido (`bin/instanciar.py --desatendido`, o la pregunta de
-`arrancar-proyecto`), y queda la fecha y su nombre; sin firma no autoriza nada y todo se pregunta. Para el
-modo equipo sigue ⚠ a confirmar por el equipo. Con la columna que aplique **confirmada**, el GATE de WORKTREE y los pasos de plan de
-`desarrollar-asignadas` **toman estos valores y los citan** en vez de preguntar: una autorización escrita por
-una persona vale como su «sí». Lo que la tabla no fija, se sigue preguntando. Cambiarla es cambiar esta
-decisión, con su footer. El modo lo fija `DEC-006`.
+**Estado:** ⚠ **Sin firmar** <la firma quien arranca el proyecto en modo solo, con `bin/instanciar.py
+--desatendido` o la pregunta de `arrancar-proyecto`; sin firma no autoriza nada>. Para el modo equipo sigue ⚠ a
+confirmar por el equipo. Con la columna que aplique **confirmada**, vale como el «sí» de los GATEs que nombra
+`AGENTS.md` («Autorización permanente»). Cambiarla es cambiar esta decisión, con su footer. El modo lo fija
+`DEC-006`.
 
 | Qué fija | Modo solo | Modo equipo (⚠ propuesta) |
 |---|---|---|
@@ -143,13 +141,13 @@ decisión, con su footer. El modo lo fija `DEC-006`.
 | Commits locales de trabajo | Autorizados en la rama de la Tarea; nunca push sin el Aprobar | Igual |
 | Tomar la tarjeta | Automático: `bin/tablero-local.py tomar` (o `tomar-tarea` en Azure) sin preguntar | Con el plan |
 | Push y Merge Request | Con el Aprobar; el Merge Request lo abre quien instanció (o se trabaja sin MR: merge local a `develop` con la suite en verde) | Con el Aprobar; lo abre `<persona o cuenta técnica>` |
-| Auto-«Aprobar» | **Sí**, sólo si BLOQUEANTES = 0 y `SIN DATOS (no se pudo mirar)` = 0; con pendientes declarados se aprueba y se listan en el cierre | ⚠ a decidir |
+| Auto-«Aprobar» | **Sí**, sólo si ninguna línea del veredicto da HALLAZGO ni `SIN DATOS (no se pudo mirar)`. Con pendientes declarados se aprueba y se listan en el cierre | ⚠ a decidir |
 | Comentario de cierre | Automático, con los datos de `datos-cierre.py` | Con el Aprobar |
-| Estado de la tarjeta al cerrar | `Resolved` automático; `Closed` lo decide una persona (`--confirmado`) | Lo decide una persona |
+| Estado de la tarjeta al cerrar | `Resolved` automático sólo si el tablero lo tiene para una Tarea (el local sí; en Azure, sólo el proceso CMMI), la verificación quedó toda en OK o N/A y la tarjeta no tiene pendientes sin resolver; si no, lo decide una persona con la lista a la vista. `Closed`, siempre una persona (`--confirmado`) | Lo decide una persona |
 | Repositorios de infraestructura | Fuera de alcance salvo pedido explícito | Igual |
 | Dos Tareas sobre el mismo archivo | En serie | En serie (regla candidata) |
 
-_Últ. modif.: 2026-11-13 — el template la trae sin firmar: una autorización vale si la firmó alguien de este proyecto (Claude único, verificación por otro agente del mismo motor). La columna de modo equipo se completa **sólo si un proyecto arranca diciendo que habrá equipo**; mientras tanto no se usa y no frena nada._
+_Últ. modif.: 2026-11-13 — sale sin firmar del template (M-027). La columna de modo equipo se completa **sólo si un proyecto arranca diciendo que habrá equipo**; mientras tanto no se usa y no frena nada._
 
 ## DEC-006 — Modo de trabajo y tablero
 

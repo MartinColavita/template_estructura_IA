@@ -283,7 +283,7 @@ def descripcion_de(cuerpo):
 
 
 def res(titulo, estado, resumen, tabla=None, grafico=None,
-        significa=None, importa=None, acciones=None, pedido=None):
+        significa=None, importa=None, acciones=None, pedido=None, claves=None):
     """El resultado de una sonda.
 
     Los tres ultimos campos son los que convierten una MEDICION en algo accionable:
@@ -292,6 +292,8 @@ def res(titulo, estado, resumen, tabla=None, grafico=None,
       acciones   — que hacer, concreto, con el comando cuando existe
       pedido     — el texto para copiar y pegarle a un asistente, CON los datos del
                    hallazgo adentro, para que pueda trabajar sin pedir contexto
+      claves     — la huella de cada hallazgo, para la sonda que corta su tabla: se calcula
+                   sobre la lista completa (comparar.claves_de la usa en vez de la tabla)
 
     Van ACA y no en la plantilla HTML a proposito: solo la sonda sabe que midio y
     por que. Texto de remediacion escrito en el diseno es decoracion que se despega
@@ -300,7 +302,7 @@ def res(titulo, estado, resumen, tabla=None, grafico=None,
     return {"titulo": titulo, "estado": estado, "resumen": resumen,
             "tabla": tabla, "grafico": grafico,
             "significa": significa, "importa": importa,
-            "acciones": acciones or [], "pedido": pedido}
+            "acciones": acciones or [], "pedido": pedido, "claves": claves}
 
 
 # Todo pedido termina igual. No es formalidad: un informe que produce texto para
@@ -537,6 +539,7 @@ def sonda_wikilinks():
         ("ningun wikilink roto." if not rotos else str(len(rotos)) + " wikilink(s) que no resuelven.")
     return res("Wikilinks que no resuelven", estado, resumen,
         (["Archivo", "Enlace roto"], filas) if filas else None,
+        claves=[a + " | " + b for a, b in rotos],
         significa="Un wikilink es un enlace entre documentos, escrito [[asi]]. Esta sonda revisa "
                   "que cada uno llegue a un archivo que realmente existe.",
         importa="El que sigue el enlace no llega a ningun lado. Y peor: hace creer que la "
@@ -816,6 +819,7 @@ def sonda_deuda():
         " No es un error: es deuda declarada a proposito. Lo que importa es que no crezca sin "
         "que nadie mire.",
         (["Marca", "Cantidad", "Detalle", "Estado"], filas),
+        claves=["(sin tocar) " + r for r, _, _ in viejos],
         significa="Cuenta las marcas de pendiente que hay escritas en la documentacion: el simbolo "
                   "de advertencia, los TODO y las decisiones declaradas abiertas. Cada documento "
                   "cuenta UNA sola vez aunque viva copiado en los espejos de skills: si no, el "
@@ -1117,6 +1121,7 @@ def sonda_referencias():
                 continue
             filas.append([rel(p), m, "no resuelve desde ninguna base conocida", "HALLAZGO"])
     rotas = len(filas)
+    claves = [f[0] + " | " + f[1] for f in filas]   # una skill puede tener varias rutas rotas
     filas = filas + sin_verificar
     estado = "OK" if not rotas else "HALLAZGO"
     return res("Referencias a archivos", estado,
@@ -1129,6 +1134,7 @@ def sonda_referencias():
          "vendorizadas (" + ", ".join(sorted(set(rel(p).split("/skills/")[1].split("/")[0] for p in salteadas))) + "): "
          "son de terceros, declaradas en DEPENDENCIAS-EXTERNAS.md, y las vigila el detector de deriva."),
         (["Skill", "Ruta citada", "Detalle", "Estado"], filas) if filas else None,
+        claves=claves,
         significa="Las skills citan rutas de archivo en su texto -un contrato, un script, un "
                   "documento-. Esta sonda verifica que cada una exista de verdad. De un enlace "
                   "markdown mira el DESTINO, no la etiqueta: la etiqueta es texto para leer.",
@@ -1213,7 +1219,8 @@ def sonda_tendencia(previas=None, sufijo=""):
     # volveriamos a tener dos numeros distintos sobre los mismos datos.
     actual = {"sondas": [{"id": d["id"], "titulo": d["titulo"], "estado": d["estado"],
                           "resumen": d.get("resumen", ""),
-                          "filas": len(d["tabla"][1]) if d.get("tabla") else 0}
+                          "filas": len(d["tabla"][1]) if d.get("tabla") else 0,
+                          "claves": _cmp.claves_de(d)}
                          for d in previas]}
     cuenta, comparadas = _cmp.comparar(viejo, actual)
 
@@ -1620,10 +1627,12 @@ def main():
 
         # El JSON de la misma corrida: es lo que hace posible comparar dos dias sin
         # tener que parsear HTML. Es el insumo de la tendencia, que todavia no existe.
+        import comparar as _cmp_medidas  # noqa: la huella de cada fila, para comparar hallazgo por hallazgo
         medidas = {"fecha": hoy, "alcance": ALCANCE or "proyecto",
                    "sondas": [{"id": r["id"], "titulo": r["titulo"],
                                "estado": r["estado"], "resumen": r["resumen"],
                                "filas": len(r["tabla"][1]) if r.get("tabla") else 0,
+                               "claves": _cmp_medidas.claves_de(r),
                                "acciones": len(r.get("acciones", []))} for r in resultados]}
         crudo = json.dumps(medidas, ensure_ascii=False, indent=2)
         abrir(historico + "/reporte-" + hoy + sufijo + ".json", "w").write(crudo)

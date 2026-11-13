@@ -130,6 +130,13 @@ Opciones fijas: **Aplicar** · **Rechazar** (con motivo) · **Editar y aplicar**
 3. Se actualiza la fila del registro a `aplicada`, con el commit o la entrada de `log.md`.
 4. Si el cambio es una skill o un script, se avisa en el resumen de cierre: **cambia cómo trabajan los agentes desde ahora.**
 
+Antes y después de aplicar:
+
+- **Antes de escribir una regla, se busca dónde vive ya el tema** y se elige una sola fuente; el resto, punteros (`M-009`).
+- **Lo que se afirma de una herramienta externa** (permisos, flags, comportamiento) se verifica en su documentación oficial y se cita.
+- **Antes de publicar, dos revisiones por otro agente con contexto limpio**: corrección, y sobregiro y redundancia.
+- **Un archivo generado** (`INFORME-ESQUELETO.html`) se regenera con su script; nunca a mano.
+
 ## Barreras
 
 - **Nunca se aplica una propuesta sin su "sí" explícito**, ni por lote, ni porque "es obvia", ni porque ya se aprobó una parecida.

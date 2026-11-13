@@ -26,7 +26,7 @@ listo para que el humano decida la entrega.
 - **No elige por su cuenta** una decisión que el Cerebro tiene abierta (`⚠` en
   `arquitectura/decisiones.md`, `arquitectura/esqueleto-proyectos.md`, `pendientes.md`).
 - **No autoriza la entrega.** Commit, push, Merge Request y cambio de estado los decide una
-  persona.
+  persona, salvo lo que autoriza `DEC-005` confirmada ([[desarrollar-asignadas]] 6.3).
 
 ## Prerrequisitos — se chequean al arrancar, y se dicen
 
@@ -37,8 +37,8 @@ listo para que el humano decida la entrega.
 | MCP `gitlab` | Leer los Merge Requests y sus notas de revisión en los repos de código (sólo lectura) | Se leen a mano en GitLab y se dice en el plan. Setup: `integracion-gitlab-mcp/00-index` |
 | MCP `jetbrains` (servidor MCP de IntelliJ) | Build, tests, errores de un archivo, debug | Se corre el comando de build/test del stack en el worktree |
 | MCP `GitKraken` + GitKraken Desktop | Estado de git y mostrarle al humano diffs y conflictos | Se muestra con `git` en la terminal |
-| MCP `engram` | Memoria del proceso entre sesiones (decisiones, bugs, descubrimientos) | Se sigue sin memoria y se dice |
-| `gemini` (Gemini CLI) | Programar o verificar | Se avisa. Sin los dos LLM no hay quién verifique: lo que programe el que está queda sin despachar hasta que el otro esté (paso 4) |
+| MCP `engram` | Continuidad entre sesiones ([[engram-memory-protocol]]) | Se sigue sin memoria y se dice |
+| `gemini` (Gemini CLI) | Programar o verificar | Se avisa; con un solo motor verifica otro agente del mismo (paso 4) |
 | `claude` (Claude Code) | Programar o verificar | Ídem |
 
 `SIN DATOS` no es aprobado: una fila que no se pudo chequear se informa así, no como OK.
@@ -79,23 +79,19 @@ despacho (decisión de diseño del template). Un hueco o un gris de la Tarea que
   (los que el equipo declare como tales), salvo pedido explícito del humano para esa Tarea (regla del usuario: la
   infraestructura no se toca sin pedido; ⚠ todavía no está escrita en el Cerebro).
 
-### 4. Qué LLM programa — se PREGUNTA, no se elige
+### 4. Qué LLM programa y quién verifica
 
 > Con `DEC-005` (modo desatendido) **confirmada** en `decisiones.md`, el motor, los permisos, la carpeta de
 > worktrees y la base salen de la DEC y se citan en el plan; lo que sigue aplica cuando la DEC no existe o
 > está en `⚠`.
-**Antes de armar el plan se le pregunta al humano con qué LLM quiere programar**: para todo el
-lote o Tarea por Tarea (Claude o Gemini). No hay default ni propuesta en silencio: es su
-decisión, en criollo y en su propio turno:
+Motor y verificador, como en [[desarrollar-asignadas]] paso 4 (con motor único, no se pregunta). Con dos
+motores, en su propio turno:
 
 > *«¿Con qué querés programar estas Tareas: Claude o Gemini? Podés elegir uno para todas o uno
-> distinto por Tarea. El chequeo lo hace siempre el otro.»*
+> distinto por Tarea. El chequeo lo hace el otro.»*
 
-**El chequeo lo hace siempre el OTRO LLM**, con contexto nuevo: si programó Gemini, verifica
-Claude, y al revés. **Sin excepciones.** Si el otro no está disponible (falta `gemini` o
-`claude`, ver Prerrequisitos), se avisa **antes** de despachar y esa Tarea **no se despacha**
-hasta que esté: programar algo que después no puede verificar el otro deja la entrega sin
-control.
+Si no hay verificador disponible, se avisa **antes** de despachar y esa Tarea **no se despacha**:
+programar algo que después nadie independiente puede verificar deja la entrega sin control.
 
 ### 5. Plan y confirmación — un turno propio
 Antes de armar el plan se corren los chequeos de antes de despachar de
@@ -108,7 +104,7 @@ Se muestra, en criollo, y se termina el turno:
 | Tarea | Repo | Rama | Sale de (propuesta y por qué) | Worktree | Programa | Verifica | Estado |
 |---|---|---|---|---|---|---|---|
 
-«Programa» es lo que eligió el humano en el paso 4; «Verifica» es el otro LLM.
+«Programa» y «Verifica» salen del paso 4.
 
 Antes de armarla se corre `git -C <repo> fetch` en cada repo destino (sólo lee del servidor),
 para que «Sale de» se apoye en ramas al día y no en referencias viejas.
@@ -192,8 +188,7 @@ de antes) y la lista de `git -C <núcleo> ls-files --others --exclude-standard`.
 
 | LLM | Cómo |
 |---|---|
-| Claude, con orquestador Claude Code | Sub-agente en segundo plano con la misión, **sin** la opción de aislarlo en un worktree propio (esa crea un worktree **de este repositorio**, que está prohibido). Comparte la carpeta y el modo de permisos de la sesión del orquestador: trabaja con la ruta absoluta del worktree (punto 2 de la misión) |
-| Claude, con cualquier otro orquestador | Parado en el worktree: `claude -p "<misión>" --session-id <uuid nuevo> --add-dir <núcleo> --permission-mode <el elegido en el paso 5> --output-format json > <carpeta de worktrees>/<ID>.claude.json` |
+| Claude | **Nunca como sub-agente interno**: lo que escribe en un worktree va a la vista ([[desarrollar-asignadas]] §Barreras). Parado en el worktree: `claude -p "<misión>" --session-id <uuid nuevo> --add-dir <núcleo> --permission-mode <el elegido en el paso 5> --output-format json > <carpeta de worktrees>/<ID>.claude.json` |
 | Gemini | Parado en el worktree: `gemini -p "<misión>" --include-directories <núcleo> --approval-mode <el elegido en el paso 5> -o json > <carpeta de worktrees>/<ID>.gemini.json` |
 
 - Los comandos de terminal se corren **en segundo plano** (el orquestador no espera a cada uno)
@@ -215,7 +210,6 @@ de antes) y la lista de `git -C <núcleo> ls-files --others --exclude-standard`.
   nada por cuenta propia.
 - Una pregunta del worker se le trae al humano **tal cual**, en criollo, con la Tarea al lado.
   La respuesta vuelve al **mismo** worker, con su contexto:
-  - sub-agente de Claude Code: se le manda la respuesta al mismo sub-agente;
   - `claude -p`: `claude -p "<respuesta>" --resume <el uuid del paso 8>`, parado en el mismo
     worktree;
   - `gemini -p`: `gemini --list-sessions` en el mismo worktree para ubicar la sesión, y
@@ -232,7 +226,9 @@ Se lanza igual que en el paso 8 pero con **el verificador** (el otro LLM si hay 
 mismo motor con contexto limpio, `DEC-005`), en el mismo worktree (por eso, antes y
 después de verificar se mira `git -C <worktree> status --porcelain`: si el verificador dejó algo
 —por ejemplo, un test que reescribió un archivo—, se frena y decide el humano), con el modo de
-permisos elegido para verificar en el paso 5. **Si verifica Gemini**, siempre con
+permisos elegido para verificar en el paso 5. **Si verifica Claude**, además con `--disallowedTools "Edit"
+"Write" "NotebookEdit"`: sin herramientas de edición, como el sub-agente de la skill (Bash queda para los
+tests y el git de lectura; lo que igual escriba lo muestra el `status` de después). **Si verifica Gemini**, siempre con
 `--approval-mode plan --policy <núcleo>/bin/gemini-verificador-solo-lectura.toml`: el modo
 `plan` solo no es de sólo lectura (sin interacción pasa solo a modo automático, y deja escribir
 archivos `.md` sueltos); la política lo cierra y deja correr sólo los comandos de git de lectura
@@ -281,7 +277,8 @@ Los cuatro son preguntas distintas: **el 5-ter y el 5-quater no se saltean aunqu
 
 ### 12. Entrega — decide el humano
 Con los cuatro veredictos a la vista, el humano decide. **Push y Merge Request: un "sí" explícito
-por cada acción**, en GitLab no se escribe nada sin esa autorización puntual.
+por cada acción**, en GitLab no se escribe nada sin esa autorización puntual. Con `DEC-005`
+confirmada, el «sí» del push lo da su «Aprobar» automático ([[desarrollar-asignadas]] 6.3).
 - **Antes del push, la rama se reorganiza** **por importancia**, uno por cambio lógico
   (alrededor de 10 commits, como guía), con mensajes específicos: lo hace el orquestador (es git,
   no código), con el respaldo `evidencia/<ID>` subido a `origin` sin Merge Request y el chequeo `git diff evidencia/<ID> HEAD` vacío ([[orquestador-desarrollo]] §«Commits: de trabajo, y pocos en el Merge Request»). Sólo lo que
@@ -300,9 +297,9 @@ por cada acción**, en GitLab no se escribe nada sin esa autorización puntual.
 [[comentar-tarea]] §«Comentario de cierre de desarrollo»: rama, Merge Request y resumen técnico,
 con los veredictos de 5, 5-bis, 5-ter y 5-quater, y los **pendientes a confirmar** que devolvió el
 worker. Los datos duros salen del repositorio, no de la memoria del worker; lo que no se pudo
-leer va `⚠ sin dato`. **No cambia el Estado de la Tarea.** Cerrarla lo decide una persona, y
-antes se le muestran los pendientes sin resolver ([[comentar-tarea]] §«Antes de cerrar una
-Tarea»).
+leer va `⚠ sin dato`. **No cambia el Estado de la Tarea**, salvo [[desarrollar-asignadas]] 6.3,
+punto 4. Cerrarla lo decide una persona, y antes se le muestran los pendientes sin resolver
+([[comentar-tarea]] §«Antes de cerrar una Tarea»).
 
 ### 13-bis. Resumen al humano, siempre
 Al terminar cada Tarea —entregada, frenada o fallida— el orquestador le da al humano el resumen
@@ -310,10 +307,8 @@ de qué se hizo y qué quedó pendiente, con el molde de [[orquestador-desarroll
 todas.
 
 ### 14. Memoria y limpieza
-- **Engram** ([[engram-memory-protocol]]): el orquestador hace `mem_save` ante cada decisión,
-  bug con causa raíz o descubrimiento no obvio, y `mem_session_summary` al cerrar, para que otra
-  sesión arranque con el contexto. **Nunca PHI en Engram**, y el verificador no la consulta
-  sobre la Tarea que audita (paso 10).
+- **Engram**, si está: [[engram-memory-protocol]]. El verificador no lo consulta sobre la Tarea que
+  audita (paso 10).
 - **Borrar un worktree:** GATE de BORRADO de `AGENTS.md`. Se muestra lo que hay sin pushear y
   sin commitear; si hay algo, **lo borra el humano a mano**.
 
@@ -340,7 +335,7 @@ todas.
 |---|---|---|
 | Commits locales en la rama del worktree | La evidencia del rojo exige un commit por test, local y de trabajo (antes del push se reorganiza por importancia, con el respaldo `evidencia/<ID>` en `origin`); la regla del usuario es no commitear sin pedido | Se pregunta en el paso 5: un "sí" **por Tarea** que autoriza commits locales en su rama, nunca push. Sin ese "sí" la Tarea no se despacha: sin commits, `verificar-tdd` da `SIN DATOS` |
 | Modo de permisos de Gemini | `--approval-mode` acepta `default`, `auto_edit`, `yolo` y `plan`; el worker tiene que editar y correr tests | Se pregunta en el paso 5, para programar y para verificar |
-| Modo de permisos de Claude | `--permission-mode` de `claude -p`. Un sub-agente de Claude Code no lo elige: usa el de la sesión del orquestador | Se pregunta en el paso 5; si el worker es sub-agente, se dice cuál es el modo de la sesión |
+| Modo de permisos de Claude | `--permission-mode` de `claude -p` | Se pregunta en el paso 5 |
 | Quién abre el Merge Request | El MCP de GitLab es de sólo lectura | Lo abre el humano |
 | Dos Tareas sobre el mismo archivo | Regla candidata del GATE de WORKTREE | En serie |
 | Dónde viven los repos de código | El Cerebro dice adentro de `back/` y `front/`; en la práctica pueden estar al lado | Se buscan en los dos lugares y, ante la duda, se pregunta (paso 3) |

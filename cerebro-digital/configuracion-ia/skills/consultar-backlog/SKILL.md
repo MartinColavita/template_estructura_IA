@@ -18,9 +18,8 @@ description: >-
 > y se opera con `bin/tablero-local.py`, con los mismos GATEs y sin MCP (detalle: `backlog/README.md` del módulo).
 > Con Azure DevOps, Jira u otro tablero, las operaciones se traducen con la tabla de `integracion-azure-mcp/00-index.md`.
 
-Es la contraparte de **lectura** de las skills de escritura: donde
-[[sincronizar-backlog]] y [[cargar-a-azure]] **escriben** en el board,
-`consultar-backlog` solo **lee y audita**. No tiene riesgo: no llama a ninguna
+Es la contraparte de **lectura** de las skills de escritura: donde ellas
+**escriben** en el board, `consultar-backlog` solo **lee y audita**. No tiene riesgo: no llama a ninguna
 herramienta de escritura del MCP.
 
 > Simetría del paquete: el Cerebro Digital (`cerebro-digital/`) tiene sus propias
@@ -34,10 +33,8 @@ herramienta de escritura del MCP.
    linkeada a su documento fuente?" → busca por **etiqueta temática**, **objetivo/
    alcance** y **documento fuente** (comparando objetivo/alcance, **NO título** — un
    título distinto no prueba que no sea duplicado) y devuelve los `#ID` + links.
-   **Este uso es el MOTOR de deduplicación** que [[cargar-a-azure]] y
-   [[sincronizar-backlog]] invocan como precondición obligatoria **antes de crear**,
-   produciendo el **Bloque de dedup** que gatea la escritura (ver
-   [[deduplicacion-antes-de-crear]]).
+   Es la misma búsqueda que hacen las skills de escritura antes de crear (GATE de
+   deduplicación, [[deduplicacion-antes-de-crear]]); acá corre a pedido y sólo informa.
 2. **Cobertura (auditoría).** Cruza el Cerebro Digital con el board:
    - **Fichas sin ticket**: documentos con el bloque `## Derivación a backlog`
      cerrado que todavía no bajaron al backlog.

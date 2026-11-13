@@ -178,8 +178,8 @@ no hay comportamiento que afirmar todavía. La Tarea lo declara en **«Modo de p
 | Modo | Cuándo | La red mínima que igual se exige |
 |---|---|---|
 | **TDD** (default) | Reglas de negocio, casos de uso, endpoints, lógica de front, arreglo de bugs | El ciclo entero con evidencia del rojo |
-| **test-después**, con motivo | Esqueleto y scaffolding de un repo, configuración, migraciones de base, UI puramente visual | Esqueleto: el build y la suite vacía en verde; migración: el test antes/después de [migracion-de-base.md](migracion-de-base.md); UI visual: revisión humana y el test de aceptación del flujo |
-| **sin tests**, con motivo | Un spike o prueba de concepto que **no va a producción** | Que se borre o se reescriba con TDD antes de entrar a una rama de entrega |
+| **test-después**, con motivo | Esqueleto y scaffolding de un repo, configuración, migraciones de base, UI puramente visual; lógica que no se pudo especificar antes (exploración, integración con un sistema externo) | Esqueleto: el build y la suite vacía en verde; migración: el test antes/después de [migracion-de-base.md](migracion-de-base.md); UI visual: revisión humana y el test de aceptación del flujo; **lógica: la mutación sobre las líneas nuevas** ([armar-la-suite.md](armar-la-suite.md) §«Testing por mutación»), que corre el verificador en lugar de la evidencia del rojo; sin herramienta de mutación en el stack, `SIN DATOS (pendiente declarado)` |
+| **sin tests**, con motivo | Un spike o prueba de concepto que **no va a producción** | Que se borre, o que entre a una rama de entrega como test-después sobre lógica (caracterización y mutación) o reescrito con TDD |
 | **caracterización primero** | Código existente sin red ([refactor-y-migracion.md](refactor-y-migracion.md)) | El test que congela lo que hace hoy, antes de tocar |
 
 **El campo «Modo de pruebas» de la Tarea gana sobre esta tabla**: si una migración de base declara TDD, es TDD (la

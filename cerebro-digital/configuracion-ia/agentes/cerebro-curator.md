@@ -23,6 +23,5 @@ consistencia, persistencia y estructura de la base de conocimiento en `cerebro-d
 - [ ] Toda regla/decisión nueva o modificada cierra con el footer `_Últ. modif.: YYYY-MM-DD — @autor — motivo_` (ver `cerebro-digital/index.md` § "Footer de trazabilidad por regla").
 - [ ] Nunca repite el enunciado de una pregunta abierta en una ficha — solo linkea `[[pendientes#P-0nn]]`.
 - [ ] Lo que es de la **aplicación construida** va a `<modulo>/aplicacion/` (`mapa.md`, `aprendizajes.md` como `AP-nnn`, `deuda.md` como `DT-nnn`), siempre con su fuente (`#ID`, Merge Request, commit o corrida del Doctor) y, en un aprendizaje, con lo que cambió; nunca de memoria.
-- [ ] Si Engram está configurado en la máquina, registró el cambio con `mem_save` (skill `engram-memory-protocol`); si no, alcanza con `log.md`.
 - [ ] Enlazó conceptos relacionados mediante wikilinks (`[[concepto]]`).
 - [ ] Registró cada cambio detalladamente al final de `cerebro-digital/log.md`.

@@ -1,0 +1,81 @@
+# Pipeline del repositorio del Cerebro en GitHub: lo mismo que .gitlab-ci.yml (espejos, pruebas, Doctor).
+# No construye ninguna aplicacion: verifica que ESTE repositorio este sano (espejos, especificacion y conteo de
+# skills, pruebas y Doctor), lo que el hook local frena y se puede saltear con --no-verify. Las guardas de BOM,
+# caracteres de control y listas de README/index siguen solo en el hook. Solo necesita Python 3 y git.
+name: verificar
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Con `shell: bash` GitHub corre `bash --noprofile --norc -eo pipefail`; sin declararlo es `bash -e`, sin pipefail,
+# y un Doctor que explota antes del `| tee` dejaria el paso en verde (docs.github.com, workflow-syntax, defaults.run.shell).
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  espejos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Espejos identicos a la fuente
+        run: |
+          diff -r cerebro-digital/configuracion-ia/skills .agents/skills
+          diff -r cerebro-digital/configuracion-ia/skills .claude/skills
+          if [ -d back/.claude/skills ]; then diff -r back/.claude/skills back/.agents/skills; fi
+          if [ -d front/.claude/skills ]; then diff -r front/.claude/skills front/.agents/skills; fi
+      - name: Especificacion de skills
+        run: python -B bin/verificar-skills.py
+      - name: Conteo declarado (mismo patron que el hook)
+        run: |
+          REAL=$(find cerebro-digital/configuracion-ia/skills -mindepth 1 -maxdepth 1 -type d | wc -l)
+          DECL=$(grep -oE '\*\*[0-9]+ habilidades\*\*' AGENTS.md | grep -oE '[0-9]+')
+          test "$REAL" = "$DECL" || { echo "AGENTS.md declara $DECL skills y hay $REAL"; exit 1; }
+
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # los scripts leen el historial
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: git config --global user.name ci && git config --global user.email ci@example.com
+      - name: Pruebas de bin/
+        # probar-reglas.py mide a un modelo con su CLI; aca no hay CLI y saldria SIN DATOS (2)
+        run: |
+          fallas=0
+          for t in bin/probar-*.py; do
+            case "$t" in *probar-reglas.py) echo "== $t salteado (necesita el CLI de un modelo)"; continue;; esac
+            echo "== $t"
+            python -B "$t" || { echo "FALLA en $t"; fallas=$((fallas+1)); }
+          done
+          test "$fallas" = 0
+
+  doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # SIN DATOS y HALLAZGO no frenan: el Doctor informa y decide una persona (skill atender-hallazgos).
+      # Lo unico que frena es que explote.
+      - name: Doctor
+        run: python -B doctor/doctor.py --json | tee doctor-resumen.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: doctor-resumen
+          path: doctor-resumen.json
+          retention-days: 14

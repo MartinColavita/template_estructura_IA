@@ -21,7 +21,7 @@ Orquesta el desarrollo de las tarjetas asignadas al usuario en el tablero
 autorizado, respetando las dependencias declaradas entre ellas, disparando
 en paralelo lo que está libre en worktrees separados (una ventana o un
 worker por tarjeta), con una verificación independiente, y pidiendo un "Aprobar"
-humano antes de cerrar el ciclo de cada una (push, comentario de cierre y
+humano (o el que fije `DEC-005`) antes de cerrar el ciclo de cada una (push, comentario de cierre y
 link del MR).
 
 ## Modo sin Orca (IntelliJ o terminal) y tablero local
@@ -354,10 +354,9 @@ que estar conectado (`/mcp` lo muestra activo); si no lo está, avisar y derivar
 
    ### 6.3 Validación y entrega: un "Aprobar" por Tarea
 
-   0. **Con `DEC-005` confirmada para el modo solo**, si la verificación dio cero BLOQUEANTES y cero
-      `SIN DATOS (no se pudo mirar)`, no se pregunta: se hace el punto 3 como si el humano hubiera
-      aprobado, y lo que la pregunta iba a mostrar (resumen, verificación, pendientes) va en el
-      resumen del punto 5. Con un bloqueante o algo sin mirar, se pregunta igual.
+   0. **Con `DEC-005` confirmada y su fila «Auto-Aprobar» cumplida** (la cuenta el orquestador línea por
+      línea del veredicto, no el total que declara el verificador), no se pregunta: se hace el punto 3, y
+      lo que la pregunta iba a mostrar va en el resumen del punto 5.
    1. **Una sola pregunta por Tarea**, apenas está la verificación: *«¿Validás
       la #NNNN?»* (Aprobar / Ajustar). Lleva, para que el "Aprobar" cubra todo
       lo que se va a escribir:
@@ -396,12 +395,9 @@ que estar conectado (`/mcp` lo muestra activo); si no lo está, avisar y derivar
         (`<grupo>/<proyecto>` sale de `git remote get-url origin`), con el
         título `feat: [AB#<ID>] <título en español>` y la descripción lista
         para pegar.
-   4. **No se cambia el Estado.** Al tomarla, la tarjeta quedó congelada si
-      está en un sprint, y una tarjeta congelada sólo se comenta
-      ([[cambios-en-el-backlog]] §4). Pasarla a revisión o cerrarla lo
-      decide una persona. **Única excepción:** con `DEC-005` confirmada para el modo solo, una
-      Tarea aprobada pasa a *Resolved* después del comentario de cierre; *Closed* sigue siendo de
-      una persona.
+   4. **El Estado no se cambia**, salvo lo que fije `DEC-005` confirmada («Estado de la tarjeta al
+      cerrar»), después del comentario de cierre. Lo demás lo decide una persona; una tarjeta
+      congelada sólo se comenta ([[cambios-en-el-backlog]] §4).
    5. **Resumen al humano, siempre**, al terminar cada Tarea —entregada,
       frenada o fallida—, con el molde de [[orquestador-desarrollo]]
       §«Resumen al terminar cada Tarea». Al terminar el lote, la tabla con
@@ -410,7 +406,8 @@ que estar conectado (`/mcp` lo muestra activo); si no lo está, avisar y derivar
 7. **Bloqueadas.** No se disparan en esta corrida. Quedan listadas con su
    dependencia. Cuando el humano aprueba la tarjeta que las bloqueaba, el
    orquestador —que sigue atento— lo avisa y las vuelve a proponer por el
-   paso 4 (aprobada no es mergeada: la base se pregunta de nuevo).
+   paso 4 (aprobada no es mergeada: la base se pregunta de nuevo). Con el «Aprobar» automático de
+   `DEC-005`, la dependiente se libera recién cuando la que la bloqueaba está mergeada en la base.
 
 ## Barreras
 
@@ -429,13 +426,14 @@ que estar conectado (`/mcp` lo muestra activo); si no lo está, avisar y derivar
   pregunta — nunca se completa el hueco por cuenta propia.
 - **Tres confirmaciones, ni una más:** el plan (paso 4), tomar la tarjeta
   (paso 5) y el "Aprobar" de cada Tarea (6.3), que cubre todo lo que se
-  escribe después: reorganizar, pushear y el comentario de cierre.
+  escribe después: reorganizar, pushear y el comentario de cierre. Con `DEC-005`
+  confirmada, sólo las que ella no fija.
 - **Quien verifica no es quien programó** (`DEC-005`): el otro motor si hay dos; otro
   agente del mismo motor, con contexto limpio, si hay uno.
 - **El orquestador queda atento (6.0)** hasta que la última Tarea termina,
   y avisa de cada una.
-- **Fuera de pasarla a Active al tomarla (paso 5), el Estado de la tarjeta
-  no lo cambia este flujo**, salvo *Resolved* con `DEC-005` confirmada para el modo solo (6.3, punto 4).
+- **Fuera de pasarla a Active al tomarla (paso 5) y de 6.3 punto 4, el Estado
+  de la tarjeta no lo cambia este flujo.**
 - **Todo trabajo que escribe en un worktree va a la vista:** un worker
   supervisado de Orca, una pestaña, o un `claude -p` con su registro en
   `borrador/`. **Prohibido** usar un

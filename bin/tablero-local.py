@@ -5,7 +5,7 @@
     python bin/tablero-local.py listar [--tipo Tarea] [--estado New] [--asignado yo] [--json]
     python bin/tablero-local.py ver 12 [--json]
     python bin/tablero-local.py tomar 12 --quien yo            (asigna y pasa a Active; frena si ya es de otro y no esta en New)
-    python bin/tablero-local.py estado 12 Active|Resolved|Closed|Removed [--confirmado]   (Closed/Removed exigen --confirmado)
+    python bin/tablero-local.py estado 12 Active|Resolved|Closed|Removed [--confirmado]   (Closed/Removed exigen --confirmado; Resolved tambien, salvo una Tarea con DEC-005 firmada)
     python bin/tablero-local.py comentar 12 --texto "..." [--autor yo]
     python bin/tablero-local.py vincular 12 15 [--relacion Related|Parent]
     python bin/tablero-local.py buscar "texto" [--etiqueta x] [--abiertos] [--json]       (deduplicacion por objetivo)
@@ -59,6 +59,21 @@ def tablero(ruta):
     if len(modulos) != 1:
         return None
     return os.path.join(os.path.dirname(modulos[0]), 'backlog')
+
+
+def dec005_firmada(dir_tablero):
+    """True si DEC-005 (modo desatendido) esta firmada en el decisiones.md del modulo del tablero: es la autorizacion
+    escrita que deja pasar a Resolved sin --confirmado. Sin el archivo, o sin firma, False: se pregunta."""
+    p = os.path.join(os.path.dirname(dir_tablero), 'arquitectura', 'decisiones.md')
+    try:
+        with open(p, encoding='utf-8-sig') as h:
+            t = h.read()
+    except OSError:
+        return False
+    if re.search(r'Confirmado al instanciar \([^)]*\): modo equipo', t):
+        return False   # la columna del modo solo no vale en un proyecto de equipo (DEC-006)
+    seccion = t.split('## DEC-005', 1)[1].split('\n## ', 1)[0] if '## DEC-005' in t else ''
+    return '**Confirmado para el modo solo (' in seccion
 
 
 def leer(p):
@@ -212,6 +227,10 @@ def main():
     if a.accion == 'estado':
         if a.nuevo in TERMINALES and not a.confirmado:
             print('FRENA -- pasar #%d a %s es terminal: exige --confirmado (el segundo "si" de la persona).' % (a.id, a.nuevo))
+            return FRENA
+        if a.nuevo == 'Resolved' and not a.confirmado and not (d.get('tipo') == 'Tarea' and dec005_firmada(dir_)):
+            print('FRENA -- pasar #%d a Resolved es cerrar: exige --confirmado, salvo una Tarea con DEC-005 (modo '
+                  'desatendido) firmada en arquitectura/decisiones.md.' % a.id)
             return FRENA
         anterior = d.get('estado')
         d['estado'] = a.nuevo

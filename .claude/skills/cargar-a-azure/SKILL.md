@@ -18,8 +18,8 @@ description: >-
 > Con Azure DevOps, Jira u otro tablero, las operaciones se traducen con la tabla de `integracion-azure-mcp/00-index.md`.
 
 Toma el ticket ya redactado (por [[redactar-tarea]]) y lo **crea o actualiza** en
-el board vía el MCP de Azure DevOps. Es la única skill del toolkit que **escribe**
-en un sistema externo; por eso el control humano es obligatorio.
+el board vía el MCP de Azure DevOps: **un** work item, nunca un árbol. Escribir en el board
+no se deshace solo; por eso el control humano es obligatorio.
 
 ## Precondiciones (verificar antes de intentar)
 
@@ -272,7 +272,8 @@ detallado solo si se promueve a `gold`.
     reemplaza contenido existente **no** es aditivo: cae acá. *Excepción del modo lote:*
     pisar la Descripción o los Criterios de una tarjeta en `New`, sin asignar o asignada a
     quien confirma, con el ANTES guardado y la fila marcada **PISA**, se confirma con el "sí"
-    del cierre ([[AGENTS]]). Vaciar un campo y el Estado terminal, nunca en el lote.
+    del cierre ([[AGENTS]]). Vaciar un campo y el Estado terminal, nunca en el lote. La excepción
+    de `DEC-005` confirmada, en [[AGENTS]].
   - *Cerrar una Tarea* (*Resolved*/*Closed*): el **primer** aviso lleva los pendientes sin
     resolver de sus comentarios y de su «Datos a confirmar» ([[comentar-tarea]] §«Antes de
     cerrar una Tarea»). Si está congelada, no se cierra desde acá: la cierra una persona.

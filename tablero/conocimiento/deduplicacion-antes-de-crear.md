@@ -95,5 +95,5 @@ buscar en el board  (tag temático · objetivo/alcance · documento fuente; foco
 
 ## Relación con las skills
 
-- El **motor de búsqueda** es [[consultar-backlog]] (uso «Localización»); las skills que escriben ([[cargar-a-azure]], [[sincronizar-backlog]]) lo invocan como **precondición obligatoria** antes de crear.
+- La búsqueda la hace la skill que va a escribir, con este método, como **precondición obligatoria** antes de crear; [[consultar-backlog]] corre la misma búsqueda a pedido, sólo para informar.
 - Relacionar el equivalente (Related) es una escritura: va con la misma confirmación humana que todo el MCP. Si el equivalente está **congelado**, el vínculo se crea **desde** la tarjeta nueva, nunca desde la congelada ([[cambios-en-el-backlog]] §4).

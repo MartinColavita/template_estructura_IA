@@ -108,8 +108,9 @@ Tres cosas que no se negocian:
 
 - **Todo sale del repositorio**: la rama y el commit de `git`, el link del Merge Request leído
   de GitLab **en sólo lectura**. El comentario no abre ni toca el Merge Request.
-- **No cambia el Estado de la Tarea.** Está en el sprint y tomada: sólo se comenta.
-- **Se muestra antes de postear** y se espera el "sí", como todo lo que se escribe en Azure.
+- **No cambia el Estado de la Tarea.** En modo equipo está en el sprint y tomada: sólo se comenta.
+- **Se muestra antes de postear** y se espera el "sí", como todo lo que se escribe en Azure (con `DEC-005`
+  confirmada, lo que ella fija: [[AGENTS]], «Autorización permanente»).
 
 ## Nada de PHI, tampoco acá
 

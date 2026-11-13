@@ -74,7 +74,7 @@ un test o un Escenario**; (c) un choque entre dos fuentes del mismo rango.
 0. **Lo primero:** `python bin/lote.py preparar <tema> --ficha <ficha>` y `python bin/lote.py tiempos <carpeta> preparar inicio`, así la fase se mide entera (ver el paso 6).
 1. Verificar el tablero autorizado y leer las tarjetas involucradas (Estado, Ruta de iteración, Asignado).
 2. Leer las fuentes: la ficha y su bloque de derivación, la maqueta, las reglas, los contratos ya cargados.
-3. **Dedup por ítem** con [[consultar-backlog]] (tag + documento fuente + objetivo).
+3. **Dedup por ítem** ([[deduplicacion-antes-de-crear]]: tag + documento fuente + objetivo).
 4. **Tareas, sólo si se pidió auditoría:** correr [[auditar-historia]] sobre cada Historia padre, **un agente por Historia, en paralelo**. Si no se pidió, este paso no corre.
 5. Clasificar cada duda —propia o, si corrieron, de las auditorías— en **F** (la resuelve una fuente: se anota cuál y el arreglo exacto), **R** (recomendación técnica clara) o **P** (necesita a una persona).
 6. `python bin/lote.py preparar` (paso 0) crea `borrador/lote-<AAAAMMDD>-<tema>/` con el esqueleto de `CONTEXTO.md`, `items.json` y `tiempos.json`. Cada ítem se anota con `python bin/lote.py item <carpeta> --clave T-01 --tipo Tarea --accion ALTA --titulo "…" --padre "#NNNNN" …`. En `CONTEXTO.md` van el alcance, las fuentes leídas (rutas), lo decidido por F y R con su fuente, las P con su recomendación, la dedup por ítem y el estado de cada tarjeta a editar.

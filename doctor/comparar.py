@@ -13,6 +13,7 @@ import html
 import io
 import json
 import os
+from collections import Counter
 
 ORDEN = {"OK": 0, "HALLAZGO": 1, "SIN DATOS": 2}
 
@@ -39,6 +40,22 @@ def _cargar(p):
 PROPIAS_DEL_INFORME = ("tendencia", "autocontrol")
 
 
+def claves_de(r):
+    """La huella de cada hallazgo de una sonda, para comparar dos corridas hallazgo por hallazgo (contar filas
+    confunde uno arreglado y otro nuevo con "sin cambios"). Si la sonda la calculo sobre su lista completa (la que
+    corta su tabla), esa. Si no, la primera columna de cada fila de la tabla y, si la tabla tiene columna Estado,
+    solo de las filas en HALLAZGO: una fila en OK no es un hallazgo. Con repetidas: dos filas, dos hallazgos."""
+    if isinstance(r.get("claves"), list):
+        return sorted(str(c) for c in r["claves"])
+    t = r.get("tabla")
+    if not t or len(t) < 2:
+        return []
+    cab = [str(c).strip().lower() for c in t[0]]
+    ie = cab.index("estado") if "estado" in cab else None
+    return sorted(str(f[0]) for f in t[1]
+                  if f and (ie is None or (ie < len(f) and "HALLAZGO" in str(f[ie]))))
+
+
 def comparar(previo, actual):
     """Devuelve (resumen, filas). Cada fila: id, titulo, antes, ahora, veredicto."""
     pa = {s["id"]: s for s in previo.get("sondas", [])
@@ -49,13 +66,21 @@ def comparar(previo, actual):
     filas, cuenta = [], {"arreglado": 0, "empeoro": 0, "igual": 0, "nuevo": 0, "ya no esta": 0}
     for sid in sorted(set(pa) | set(ac), key=lambda k: ORDEN.get(ac.get(k, {}).get("estado", "SIN DATOS"), 9)):
         a, b = pa.get(sid), ac.get(sid)
+        nuevos = resueltos = None
         if not a:
             v = "nuevo"
         elif not b:
             v = "ya no esta"
+        elif (a["estado"] == b["estado"] == "HALLAZGO" and isinstance(a.get("claves"), list)
+              and isinstance(b.get("claves"), list)):
+            # Hallazgo por hallazgo: uno nuevo es EMPEORO aunque se hayan arreglado otros (lo nuevo pide
+            # atencion); sin nuevos, arreglar alguno es progreso aunque siga en HALLAZGO.
+            ca, cb = Counter(a["claves"]), Counter(b["claves"])
+            nuevos, resueltos = sum((cb - ca).values()), sum((ca - cb).values())
+            v = "empeoro" if nuevos else ("arreglado" if resueltos else "igual")
         elif a["estado"] == b["estado"]:
-            # Mismo estado, pero puede haber cambiado la cantidad de hallazgos:
-            # pasar de 12 wikilinks rotos a 3 es progreso aunque siga en HALLAZGO.
+            # Una corrida vieja, sin huellas: solo se puede comparar la cantidad de filas.
+            # Pasar de 12 wikilinks rotos a 3 es progreso aunque siga en HALLAZGO.
             if a.get("filas", 0) != b.get("filas", 0) and b["estado"] == "HALLAZGO":
                 v = "arreglado" if b.get("filas", 0) < a.get("filas", 0) else "empeoro"
             else:
@@ -77,6 +102,8 @@ def comparar(previo, actual):
             "resumen_antes": a.get("resumen", "") if a else "",
             "resumen_ahora": b.get("resumen", "") if b else "",
             "veredicto": v,
+            "nuevos": nuevos,
+            "resueltos": resueltos,
         })
     return cuenta, filas
 
@@ -110,7 +137,10 @@ def render(previo, actual, cuenta, filas):
         etq, cl = VER[f["veredicto"]]
         # Cuanto bajo, cuando el estado no cambio pero si la cantidad
         delta = ""
-        if f["filas_antes"] > f["filas_ahora"] > 0:
+        if f.get("nuevos") or f.get("resueltos"):
+            delta = ('<div class="delta">Se resolvi' + ('ó ' if f["resueltos"] == 1 else 'eron ') + str(f["resueltos"] or 0) +
+                     ' y apareci' + ('ó ' if f["nuevos"] == 1 else 'eron ') + str(f["nuevos"] or 0) + '.</div>')
+        elif f["filas_antes"] > f["filas_ahora"] > 0:
             delta = ('<div class="delta">Bajó de ' + str(f["filas_antes"]) + " a " +
                      str(f["filas_ahora"]) + " — sigue abierto, pero menos.</div>")
         elif f["filas_antes"] and not f["filas_ahora"]:

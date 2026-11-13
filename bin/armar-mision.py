@@ -31,6 +31,7 @@ import argparse
 import os
 import re
 import sys
+import unicodedata
 
 OK, _, SIN_DATOS = 0, 1, 2
 SK = os.path.join('cerebro-digital', 'configuracion-ia', 'skills')
@@ -84,6 +85,14 @@ def version_motor(motor):
 def gherkin_de(tarea_md):
     m = re.search(r'(?ims)^#+\s*(criterios de aceptaci.n|gherkin)[^\n]*\n(.*?)(?=^#+\s|\Z)', tarea_md)
     return m.group(2).strip() if m else ''
+
+
+def modo_cli(modo):
+    """El --modo de verificar-tdd.py desde el texto del campo «Modo de pruebas», tal como lo escribe la plantilla:
+    sin tildes y con los nombres del script (test-después -> test-despues, caracterización primero -> caracterizacion)."""
+    base = unicodedata.normalize('NFKD', modo.split(':')[0]).encode('ascii', 'ignore').decode().strip().lower()
+    base = re.sub(r'\s+', '-', base)
+    return {'caracterizacion-primero': 'caracterizacion'}.get(base, base)
 
 
 def modo_de(tarea_md):
@@ -221,9 +230,13 @@ def main():
         L.append('- **No** cargás `verificar-tdd` ni `auditar-codigo`: son del verificador. Quien produce no lee la guía de cómo auditarse.')
     else:
         L.append('- `%s` — control 5: ¿el ciclo ocurrió? Primero el script: `python "%s" --repo "%s" --base %s --id %s --modo %s%s`.' % (
-            verificar, os.path.join(nucleo, 'bin', 'verificar-tdd.py'), a.worktree, a.sha_base, a.id, modo.split(':')[0].strip().replace(' ', '-').lower(), (' --motivo "%s"' % modo.split(':', 1)[1].strip()) if ':' in modo else ''))
+            verificar, os.path.join(nucleo, 'bin', 'verificar-tdd.py'), a.worktree, a.sha_base, a.id, modo_cli(modo), (' --motivo "%s"' % modo.split(':', 1)[1].strip()) if ':' in modo else ''))
         L.append('- `%s` — control 5-ter: contrato de la Tarea, límites de módulo, sin PHI ni secretos. Primero el script: `python "%s" --repo "%s" --base %s --id %s`.' % (
             auditar, os.path.join(nucleo, 'bin', 'auditar-diff.py'), a.worktree, a.sha_base, a.id))
+        L.append('- Control 5-quater, en C4, las marcas `atajo:` que agrega el cambio: `python "%s" --repo "%s" --base %s`; lo que el script cuenta, su veredicto lo decide.' % (
+            os.path.join(nucleo, 'bin', 'atajos.py'), a.worktree, a.sha_base))
+        if modo_cli(modo) == 'test-despues':
+            L.append('- **Modo test-después**: si el cambio toca lógica, corré la **mutación** del stack sobre las líneas nuevas (`armar-la-suite.md`, sección «Testing por mutación»; la herramienta está en `tdd-stack-*.md`). Reemplaza la evidencia del rojo: cada superviviente es HALLAZGO en 5; sin herramienta de mutación en el stack, `SIN DATOS (pendiente declarado)`.')
         if toca_paridad:
             L.append('- Control de **paridad** (la Tarea pertenece a un slice en modernización): `python "%s" comparar --corpus <corpus.json> --golden <golden.json> --nuevo <url o cmd de la nueva> --json` con el corpus y el golden que cita la Tarea; el veredicto es el del script (OK, HALLAZGO o SIN DATOS). Si no corrió, `SIN DATOS`. Vos no aceptás diferencias: las listás.' % os.path.join(nucleo, 'bin', 'paridad.py'))
         if toca_base:

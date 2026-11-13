@@ -173,8 +173,8 @@ significa estar resuelto; significa que ya se miró.
 **Nada sale de este repositorio hacia afuera sin un "sí" explícito sobre lo que se va a
 publicar.** Publicar en un repositorio ajeno (una propuesta de mejora a un estándar corporativo,
 un issue, un Merge Request) es un turno aparte: primero se muestra el contenido exacto y se
-termina el turno; recién un "sí" nuevo habilita escribir afuera. Y si el token disponible es de
-sólo lectura, directamente no está en el alcance.
+termina el turno; recién un "sí" nuevo habilita escribir afuera (con `DEC-005` confirmada, lo que ella fija:
+[[AGENTS]], «Autorización permanente»). Y si el token disponible es de sólo lectura, directamente no está en el alcance.
 
 ### G5 — Lo externo se declara, con hash y detector de deriva
 

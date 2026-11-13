@@ -37,10 +37,9 @@ se puede deducir no se pregunta: se propone y se marca «propuesto».
 3. **El módulo:** un slug corto para el Cerebro (propuesto desde el nombre del proyecto).
 4. **¿Solo o en equipo?** (propuesto: solo; **equipo sólo si decís que va a haber un equipo**: cambia el
    tablero, quién escribe el Cerebro y quién confirma, `DEC-006`).
-4-bis. Sólo en modo solo: **¿la IA trabaja en modo desatendido?** Aprueba sola una Tarea cuando la
-   verificación da cero bloqueantes y nada sin mirar, la pasa a *Resolved* y te deja el resumen;
-   *Closed* lo decidís vos (`DEC-005`; propuesto: sí). Si decís que sí, queda firmada con tu nombre
-   (`--desatendido`); si no, cada Tarea te pide su «Aprobar».
+4-bis. Sólo en modo solo: **¿firmás el modo desatendido (`DEC-005`)?** Se muestra la columna «Modo solo» de
+   su tabla, leída del archivo y no de memoria: es lo que la IA hará sin preguntarte. **No va por defecto: se
+   firma sólo si contestás que sí** (`--desatendido`); si no, cada paso te pide su «sí».
 5. **Tablero:** local (archivos del Cerebro; propuesto en modo solo), Azure DevOps, Jira u otro por
    MCP. Si es Azure: organización, proyecto y team, tal cual se llaman.
 6. **Quién sos** (tu nombre firma las diferencias aceptadas y los cortes; propuesto: tu usuario de git).

@@ -75,6 +75,9 @@ def main():
         ya = ('{{' + 'PROYECTO' + '}}').encode() not in h.read()   # armado por partes: el instanciador reemplaza el literal
     if ya and os.path.isdir(os.path.join(RAIZ, 'cerebro-digital', a.modulo)):
         print('--- [1/5] instanciar: ya estaba instanciado (modulo %s); se saltea' % a.modulo)
+        if a.desatendido:
+            print('    AVISO -- --desatendido NO se aplico: DEC-005 sigue como esta en decisiones.md. Para firmarla: '
+                  'python -I bin/instanciar.py <los mismos datos> --modo solo --desatendido --autor "<vos>"')
     else:
         args = [py, '-I', os.path.join(RAIZ, 'bin', 'instanciar.py'), '--proyecto', a.proyecto, '--producto', a.producto,
                 '--organizacion', a.organizacion, '--modulo', a.modulo, '--modo', a.modo, '--tablero', tablero]
@@ -89,7 +92,10 @@ def main():
             args += ['--azure-org', a.azure_org, '--azure-proyecto', a.azure_proyecto, '--azure-team', a.azure_team]
         if a.dry_run:
             args.append('--dry-run')
-        rc, _ = correr(args, '[1/5] instanciar')
+        rc, salida_inst = correr(args, '[1/5] instanciar')
+        for linea in salida_inst.splitlines():
+            if linea.startswith('[2-ter]'):
+                print('    ' + linea)   # modo, tablero y DEC-005, tal como quedaron escritos
         if rc != 0:
             print('FRENA -- instanciar fallo (codigo %d). Arreglalo y volve a correr: el resto no se ejecuto.' % rc)
             return FRENA

@@ -105,6 +105,7 @@ def main():
     rc, out = script('verificar-tdd.py', '--repo', repo, '--base', base, '--items', '3', '--modo', 'test-despues', '--motivo', 'esqueleto del repo', '--json')
     d = json.loads(out)
     caso('modo test-despues con motivo: red minima OK, sin rojo por item', rc == 0 and d['modo'] == 'test-despues' and any('red minima' in v for v in d['avisos']), out[:300])
+    caso('modo test-despues: lo que no mira nombra la mutacion del verificador', any('mutacion' in v for v in d['no_mira']), out[:300])
     rc, out = script('verificar-tdd.py', '--repo', repo, '--base', base, '--items', '3', '--modo', 'test-despues', '--json')
     d = json.loads(out)
     caso('modo test-despues SIN motivo: se audita como tdd y se marca', rc == 1 and d['modo'] == 'tdd' and any('SIN motivo' in h for h in d['hallazgos']), out[:300])

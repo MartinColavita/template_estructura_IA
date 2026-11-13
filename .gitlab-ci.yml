@@ -1,7 +1,7 @@
 # Pipeline del repositorio del Cerebro (opcional; se usa si el repo vive en GitLab).
-# No construye ninguna aplicacion: verifica que ESTE repositorio este sano, con lo mismo que
-# corre el hook y las pruebas de bin/. Solo necesita Python 3 y git. Si el repo vive en otra
-# plataforma, se traduce: son tres pasos (espejos, pruebas, doctor).
+# No construye ninguna aplicacion: verifica que ESTE repositorio este sano (espejos, conteo de skills,
+# pruebas de bin/ y Doctor; las guardas de BOM y de listas siguen solo en el hook). Solo necesita Python 3 y git. En GitHub, lo mismo esta en
+# .github/workflows/verificar.yml; en otra plataforma se traducen los tres pasos (espejos, pruebas, doctor).
 
 image: python:3.12-slim
 
@@ -35,11 +35,10 @@ doctor:
   stage: verificar
   script:
     - apt-get update -qq && apt-get install -y -qq git > /dev/null
-    - python -B doctor/doctor.py --json | tee doctor-resumen.json
+    - set -o pipefail; python -B doctor/doctor.py --json | tee doctor-resumen.json   # sin pipefail, un Doctor que explota pasaria
     # SIN DATOS no es error: es lo esperado mientras no haya codigo clonado. HALLAZGO tampoco frena:
     # el Doctor informa; decide una persona (skill atender-hallazgos). Lo unico que frena es que explote.
   artifacts:
     paths:
-      - doctor/salida/
-      - doctor-resumen.json
+      - doctor-resumen.json   # con --json el Doctor no escribe doctor/salida/
     expire_in: 2 weeks
