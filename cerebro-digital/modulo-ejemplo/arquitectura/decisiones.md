@@ -124,13 +124,15 @@ _Últ. modif.: 2026-10-30 — @equipo — plantilla heredada del template_
 
 ## DEC-005 — Modo desatendido (autorizaciones permanentes del flujo de desarrollo)
 
-**Estado:** **Confirmado para el modo solo (2026-11-02)**; para el modo equipo sigue ⚠ a confirmar por el
-equipo. Con la columna que aplique **confirmada**, el GATE de WORKTREE y los pasos de plan de
+**Estado:** ⚠ **Sin firmar** <se firma al instanciar en modo solo>. La firma quien arranca el proyecto en
+modo solo, si acepta el modo desatendido (`bin/instanciar.py --desatendido`, o la pregunta de
+`arrancar-proyecto`), y queda la fecha y su nombre; sin firma no autoriza nada y todo se pregunta. Para el
+modo equipo sigue ⚠ a confirmar por el equipo. Con la columna que aplique **confirmada**, el GATE de WORKTREE y los pasos de plan de
 `desarrollar-asignadas` **toman estos valores y los citan** en vez de preguntar: una autorización escrita por
 una persona vale como su «sí». Lo que la tabla no fija, se sigue preguntando. Cambiarla es cambiar esta
 decisión, con su footer. El modo lo fija `DEC-006`.
 
-| Qué fija | Modo solo (confirmado) | Modo equipo (⚠ propuesta) |
+| Qué fija | Modo solo | Modo equipo (⚠ propuesta) |
 |---|---|---|
 | Base de los worktrees | `develop` al día con `origin` (si avanzó, merge; nunca rebase); sin remoto, `develop` local | Igual |
 | Techo de worktrees por máquina | 6 | 6 |
@@ -147,7 +149,7 @@ decisión, con su footer. El modo lo fija `DEC-006`.
 | Repositorios de infraestructura | Fuera de alcance salvo pedido explícito | Igual |
 | Dos Tareas sobre el mismo archivo | En serie | En serie (regla candidata) |
 
-_Últ. modif.: 2026-11-04 — modo solo confirmado (Claude único, verificación por otro agente del mismo motor). La columna de modo equipo se completa **sólo si un proyecto arranca diciendo que habrá equipo**; mientras tanto no se usa y no frena nada._
+_Últ. modif.: 2026-11-13 — el template la trae sin firmar: una autorización vale si la firmó alguien de este proyecto (Claude único, verificación por otro agente del mismo motor). La columna de modo equipo se completa **sólo si un proyecto arranca diciendo que habrá equipo**; mientras tanto no se usa y no frena nada._
 
 ## DEC-006 — Modo de trabajo y tablero
 

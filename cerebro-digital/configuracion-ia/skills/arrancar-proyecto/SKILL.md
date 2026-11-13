@@ -37,6 +37,10 @@ se puede deducir no se pregunta: se propone y se marca «propuesto».
 3. **El módulo:** un slug corto para el Cerebro (propuesto desde el nombre del proyecto).
 4. **¿Solo o en equipo?** (propuesto: solo; **equipo sólo si decís que va a haber un equipo**: cambia el
    tablero, quién escribe el Cerebro y quién confirma, `DEC-006`).
+4-bis. Sólo en modo solo: **¿la IA trabaja en modo desatendido?** Aprueba sola una Tarea cuando la
+   verificación da cero bloqueantes y nada sin mirar, la pasa a *Resolved* y te deja el resumen;
+   *Closed* lo decidís vos (`DEC-005`; propuesto: sí). Si decís que sí, queda firmada con tu nombre
+   (`--desatendido`); si no, cada Tarea te pide su «Aprobar».
 5. **Tablero:** local (archivos del Cerebro; propuesto en modo solo), Azure DevOps, Jira u otro por
    MCP. Si es Azure: organización, proyecto y team, tal cual se llaman.
 6. **Quién sos** (tu nombre firma las diferencias aceptadas y los cortes; propuesto: tu usuario de git).
@@ -64,7 +68,7 @@ Proponer y ejecutar son turnos distintos.
 
 ```bash
 python -I bin/arrancar-proyecto.py --proyecto "<nombre>" --producto "<producto>" --organizacion "<org>" --modulo <slug> \
-    --modo <solo|equipo> --tablero <local|azure|jira|otro> --autor "<quién>" \
+    --modo <solo|equipo> [--desatendido] --tablero <local|azure|jira|otro> --autor "<quién>" \
     [--existente "<ruta>" --como <back|front> [--mover] [--importar-reglas]] \
     [--azure-org <org> --azure-proyecto <proyecto> --azure-team <team>]
 ```

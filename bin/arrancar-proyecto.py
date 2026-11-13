@@ -49,6 +49,7 @@ def main():
     ap.add_argument('--modo', choices=['solo', 'equipo'], required=True)
     ap.add_argument('--tablero', choices=['local', 'azure', 'jira', 'otro'], default='')
     ap.add_argument('--autor', default='')
+    ap.add_argument('--desatendido', action='store_true', help='modo solo: quien arranca firma DEC-005 (modo desatendido)')
     ap.add_argument('--stack-back', default=''); ap.add_argument('--stack-front', default=''); ap.add_argument('--stack-base', default=''); ap.add_argument('--stack-build', default='')
     ap.add_argument('--comando-tests-back', default=''); ap.add_argument('--comando-tests-front', default=''); ap.add_argument('--stack-e2e', default='')
     ap.add_argument('--azure-org', default='')
@@ -82,6 +83,8 @@ def main():
                 args += ['--' + k.replace('_', '-'), getattr(a, k)]
         if a.autor:
             args += ['--autor', a.autor]
+        if a.desatendido:
+            args.append('--desatendido')
         if tablero == 'azure':
             args += ['--azure-org', a.azure_org, '--azure-proyecto', a.azure_proyecto, '--azure-team', a.azure_team]
         if a.dry_run:

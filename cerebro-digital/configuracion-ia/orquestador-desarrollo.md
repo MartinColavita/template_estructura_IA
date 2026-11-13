@@ -69,7 +69,8 @@ que queda en la tarjeta ([[comentar-tarea]] §«Pendientes a confirmar») y se r
 > **El paso 7 no cambia el Estado de la Tarea.** Desde el paso 1 la Tarea está en un sprint y
 > tomada, o sea **congelada**: sólo se comenta ([[cambios-en-el-backlog]] §4). Pasarla a
 > *Resolved* o *Closed* lo decide una persona, y antes se le muestran los pendientes sin
-> resolver de los comentarios ([[comentar-tarea]] §«Antes de cerrar una Tarea»). Y los **datos duros** del comentario salen del
+> resolver de los comentarios ([[comentar-tarea]] §«Antes de cerrar una Tarea»). La única
+> excepción es *Resolved* en modo solo con `DEC-005` confirmada ([[desarrollar-asignadas]] 6.3). Y los **datos duros** del comentario salen del
 > repositorio —`git`, el Merge Request leído de GitLab en sólo lectura, los veredictos que
 > devolvieron los controles—, nunca de la memoria del worker. Del resumen del worker sale sólo
 > la prosa, y sólo si no hay Merge Request de donde leerla. Lo que no se pudo leer va

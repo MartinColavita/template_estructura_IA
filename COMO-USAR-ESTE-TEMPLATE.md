@@ -30,7 +30,7 @@ El mismo esqueleto sirve para un desarrollo personal y para un equipo, y los flu
 | Tablero | Local: `cerebro-digital/<modulo>/backlog/` con `bin/tablero-local.py` (sin MCP, sin tokens) | Azure DevOps, Jira u otro del mercado por su MCP (`--tablero azure|jira|otro`; la tabla de herramientas por función traduce) |
 | Conocimiento | Directo a `develop`, por `cerebro-curator` con tu «sí» | Igual; si hay un segundo dev, cada uno en su rama y lo integra un Merge Request que revisa el otro |
 | Verificación | Otro agente del mismo motor, contexto limpio (DEC-005) | El otro motor |
-| Confirmaciones | Las que deja DEC-005 modo solo (auto-Aprobar con cero bloqueantes) | Todas las de los GATEs |
+| Confirmaciones | Las que deja DEC-005 modo solo si la firmaste al arrancar (auto-Aprobar con cero bloqueantes); sin firma, todas | Todas las de los GATEs |
 
 Nada se borra al elegir: las skills del otro modo quedan disponibles por si el proyecto cambia.
 

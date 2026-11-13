@@ -8,6 +8,7 @@
     python -I bin/instanciar.py ... --dry-run      (muestra que haria, no toca nada)
     python -I bin/instanciar.py ... --sin-espejos  (no regenera .claude/ ni .agents/)
     python -I bin/instanciar.py --modo solo --tablero local --proyecto ... (sin Azure: el tablero son archivos del Cerebro)
+    python -I bin/instanciar.py --modo solo --desatendido ...  (quien instancia firma DEC-005, el modo desatendido)
 
 QUE HACE, en orden:
   1. Reemplaza los placeholders {{PROYECTO}}, {{PRODUCTO}}, {{ORGANIZACION}}, {{AZURE_ORG}},
@@ -130,6 +131,7 @@ def main():
     ap.add_argument('--modo', choices=['solo', 'equipo'], required=True, help='solo (desarrollo personal) o equipo; se pregunta en cada proyecto (DEC-006)')
     ap.add_argument('--tablero', choices=['local', 'azure', 'jira', 'otro'], default='', help='local (archivos en el Cerebro), azure (MCP), jira u otro tablero por MCP; por defecto local en modo solo y azure en modo equipo')
     ap.add_argument('--autor', default='', help='quien instancia: queda en DEC-006 y es el nombre que firma aceptadas y cortes; por defecto git config user.name')
+    ap.add_argument('--desatendido', action='store_true', help='solo con --modo solo: quien instancia firma DEC-005 (aprobar sola una Tarea con cero bloqueantes y pasarla a Resolved); sin esto queda sin firmar')
     ap.add_argument('--stack-back', default='', help='lenguaje y framework del back (DEC-003), p. ej. "Python 3.12 + FastAPI"; vacio = se decide antes de la primera Tarea')
     ap.add_argument('--stack-front', default='', help='lenguaje y framework del front (DEC-003), p. ej. "React 19 + Vite"')
     ap.add_argument('--stack-base', default='', help='motor de base y version minima (DEC-003), p. ej. "PostgreSQL 16"')
@@ -149,6 +151,9 @@ def main():
         return 1
     if a.modulo == MODULO_PLACEHOLDER:
         print('ERROR: el slug del modulo no puede ser el placeholder "%s".' % MODULO_PLACEHOLDER)
+        return 1
+    if a.desatendido and a.modo != 'solo':
+        print('ERROR: --desatendido firma la columna del modo solo de DEC-005; en modo equipo la decide el equipo.')
         return 1
     tablero = a.tablero or ('local' if a.modo == 'solo' else 'azure')
     if tablero == 'azure':
@@ -211,6 +216,10 @@ def main():
             texto = texto.replace('**Se fija al instanciar** con `bin/instanciar.py --modo solo|equipo --tablero local|azure` y queda\nescrito acá. ' + chr(0x26a0) + ' ' + marca,
                                   '**Confirmado al instanciar (%s): modo %s, tablero %s, autor %s.**' % (datetime.date.today().isoformat(), a.modo, tablero, autor), 1)
             texto = texto.replace(marca, 'modo %s, tablero %s' % (a.modo, tablero))
+        firma = '<se firma al instanciar en modo solo>'
+        if a.desatendido and firma in texto:
+            texto = texto.replace(chr(0x26a0) + ' **Sin firmar** ' + firma + '.',
+                                  '**Confirmado para el modo solo (%s, firmado por %s).**' % (datetime.date.today().isoformat(), autor), 1)
         stack = (('Lenguaje y framework del back', a.stack_back), ('Lenguaje y framework del front', a.stack_front),
                  ('Motor de base de datos y versión mínima soportada', a.stack_base), ('Herramienta de build y runner de tests del back', a.stack_build),
                  ('Tipo de aplicación (web, Electron, escritorio con webview, escritorio nativo, móvil, línea de comandos, API) y el motor de pruebas de punta a punta que le corresponde (Playwright, WebDriver, Appium o Maestro, proceso, HTTP), con el atributo de identificación estable (`data-testid` o `automation-id`)', a.stack_e2e))
@@ -242,7 +251,8 @@ def main():
         if (valor.strip() or cmd.strip()) and not a.dry_run:
             escribir(p, texto, bom)
         print('[2-quater] %s: %s' % (guia, ', '.join(x for x in (('stack' if valor.strip() else ''), ('comando de tests' if cmd.strip() else '')) if x) or 'sin cambios (queda en plantilla)'))
-    print('[2-ter] modo %s, tablero %s, autor %s -> DEC-006%s' % (a.modo, tablero, autor, ('; DEC-003: %d tema(s) del stack fijados' % fijados) if fijados else '; DEC-003 (el stack) queda a definir'))
+    print('[2-ter] modo %s, tablero %s, autor %s -> DEC-006%s%s' % (a.modo, tablero, autor,
+          '; DEC-005 (modo desatendido) firmada' if a.desatendido else '; DEC-005 (modo desatendido) sin firmar: todo se pregunta', ('; DEC-003: %d tema(s) del stack fijados' % fijados) if fijados else '; DEC-003 (el stack) queda a definir'))
 
     # 2-bis. last_updated: la fecha de instanciacion, no la del template
     hoy = datetime.date.today().isoformat()

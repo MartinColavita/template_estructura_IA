@@ -63,7 +63,7 @@ BITACORA = [
 
 PENDIENTES_HUMANO = [
     ('DEC-003 — el stack', 'cerebro-digital/<modulo>/arquitectura/decisiones.md y las guías tdd-stack-back.md / tdd-stack-front.md de la skill desarrollo. Hasta que exista, C8, SAST, cobertura y la guía del stack son SIN DATOS (pendiente declarado): se listan, no frenan.'),
-    ('DEC-005 — modo equipo', 'Confirmada para el modo solo (Claude único, auto-Aprobar con cero bloqueantes). La columna del modo equipo sigue en propuesta: quién aprueba, quién abre el Merge Request, el otro motor.'),
+    ('DEC-005 — modo equipo', 'El template la trae sin firmar; en modo solo la firma quien arranca el proyecto (Claude único, auto-Aprobar con cero bloqueantes). La columna del modo equipo sigue en propuesta: quién aprueba, quién abre el Merge Request, el otro motor.'),
     ('DEC-002 — módulos de dominio', 'Confirmar la estructura <modulo>/{api,application,domain,infra,exceptions} + shared/ o cambiarla.'),
     ('Contexto del tablero', 'tablero/conocimiento/contexto-proyecto.md: slices, etiquetas temáticas, proceso del tablero. Y cerebro-digital/contexto.md.'),
     ('Propuestas M-001 a M-009', 'configuracion-ia/mejoras.md: cada una espera Aplicar / Rechazar / Posponer. Las que cambian reglas duras (M-004, M-006) son las que más pesan para el flujo automático.'),
