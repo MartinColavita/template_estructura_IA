@@ -53,6 +53,9 @@ Estas dos definiciones atacan de raíz el problema recurrente del tablero: histo
 - [ ] **Objetivo técnico concreto**: qué repo/módulo se toca, qué rama, qué se espera al terminar. Para reestructuración: origen, destino y alcance.
 - [ ] **Esfuerzo original** estimado en horas (campo de la Tarea) si el equipo trabaja con horas.
 - [ ] **Actividad** definida (Development / Testing / Documentation / Deployment...).
+- [ ] **Lista para desarrollar**: las cuatro piezas de [[redactar-tarea]] §3.1 (capa `api`, `application` o `domain`;
+  las exenciones de otras capas, ahí), con lo dudoso declarado en **«⚠ Datos a confirmar»**. Lo cuenta
+  `bin/auditar-tarea.py`.
 
 ### Adicional para BUG
 

@@ -41,7 +41,7 @@ La dedup deja de ser "un paso que el modelo debería hacer" y pasa a ser **evide
 
 **Regla dura:** si ese bloque **no está** en el preview, la escritura **no está habilitada** — da igual que el contenido esté perfecto. El "sí" humano confirma el contenido **y** el resultado de dedup a la vez. Un preview sin Bloque de dedup es un preview inválido: se rehace, no se escribe.
 
-**En modo lote** ([[planificar-lote]]) la búsqueda corre en la preparación, el detalle de los tres puntos queda en el `CONTEXTO.md` del lote, y la tabla del cierre lleva una columna de dedup por ítem (candidatos y veredicto). Un candidato dudoso se pregunta en el arranque, con los demás: no se espera al cierre para frenar un alta.
+**En modo lote** ([[planificar-lote]]) la búsqueda corre en la preparación, el detalle de los tres puntos queda en el `CONTEXTO.md` del lote, y la tabla del cierre lleva una columna de dedup por ítem (formato: [[planificar-lote]] Fase 0, paso 3). Un candidato dudoso se pregunta en el arranque, con los demás: no se espera al cierre para frenar un alta.
 
 ### GATE de existencia (bloqueante) — encontrar ≠ crear igual
 

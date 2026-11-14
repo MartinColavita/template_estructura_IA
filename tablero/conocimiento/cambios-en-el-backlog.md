@@ -53,10 +53,10 @@ aviso, para que el que la trabaja no siga sobre lo viejo:
    > defecto 02→03 [RN-…-13]. FUENTE: `<ruta-del-doc>` (v2). Si venías trabajando
    > una versión anterior, refrescá antes de seguir.
 
-2. **Etiqueta `cambio-pendiente-lectura`** en la tarjeta: señal visible en el
-   board. La persona la **saca cuando la leyó** (queda como "acuse de lectura").
-   **En una tarjeta congelada no se pone** —la etiqueta es una edición—: ahí queda
-   sólo el comentario con la @mención (§4).
+2. **Acuse de lectura: la persona responde el comentario** («Leído»). No se agrega una
+   etiqueta: el techo es **una sola**, la temática ([[organizacion-y-trazabilidad]] §1), y
+   además una etiqueta es una edición, que una tarjeta congelada no admite (§4). El comentario
+   con la @mención sirve en los dos casos.
 
 3. **Notificaciones nativas de Azure DevOps** que sostienen esto sin esfuerzo:
    *History* (todo cambio queda registrado: quién, cuándo, antes/después),
@@ -65,21 +65,23 @@ aviso, para que el que la trabaja no siga sobre lo viejo:
 
 ### Query guardado para el equipo — el "git pull" del backlog
 
-Guardá en Azure DevOps un query **"Mis items con cambios pendientes de lectura"**
-y revisalo al empezar el día:
+Guardá en Azure DevOps un query **"Mis items que cambiaron"** y revisalo al empezar el día;
+en cada uno, la @mención sin respuesta es el cambio que falta leer. Mira la última semana, para
+que el lunes aparezca lo del viernes; lo que quedó más atrás sin leer lo trae la vista
+**«Mencionado»** del hub de Work items de Azure Boards (las tarjetas donde te @mencionaron):
 
 ```
 SELECT [System.Id], [System.Title], [System.ChangedDate]
 FROM WorkItems
 WHERE [System.AssignedTo] = @Me
-  AND [System.Tags] CONTAINS 'cambio-pendiente-lectura'
+  AND [System.ChangedDate] >= @Today - 7
 ```
 
 ### Convención cultural (sin esto, ninguna herramienta alcanza)
 
 - Antes de **cerrar** trabajo en una tarjeta, mirá su **History**.
-- Antes de **empezar** el día, mirá tu query de cambios pendientes.
-- La IA etiqueta y notifica; el **hábito del equipo** cierra el circuito.
+- Antes de **empezar** el día, mirá tu query «Mis items que cambiaron».
+- La IA comenta y notifica; el **hábito del equipo** cierra el circuito.
 
 ---
 
@@ -134,7 +136,7 @@ significa lo mismo: no se edita.
 | Leerla, con su historial y sus comentarios | Libre |
 | **Comentar**: `System.History`, y **ningún otro campo** en esa misma escritura | Sí, con el "sí" de siempre ([[comentar-tarea]]) |
 | Colgarle un **hijo nuevo**, o relacionar con ella una tarjeta **que no está congelada** | Sí, **siempre creando el vínculo desde la otra tarjeta** (`manage_work_item_link` con la no congelada como origen). Azure lo muestra en las dos, pero no se escribe **en** la congelada |
-| Todo lo demás: Título, Descripción, Criterios de aceptación, Puntos de historia, Etiquetas (incluida `cambio-pendiente-lectura`), Estado, Asignado, Ruta de iteración, vínculos creados desde ella | **La IA no lo toca.** Frena y avisa |
+| Todo lo demás: Título, Descripción, Criterios de aceptación, Puntos de historia, Etiquetas, Estado, Asignado, Ruta de iteración, vínculos creados desde ella | **La IA no lo toca.** Frena y avisa |
 
 Esta barrera se chequea **antes** que las demás: sobre una tarjeta congelada **no hay "sí" que
 habilite una edición**, ni uno ni dos.

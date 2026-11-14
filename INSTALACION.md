@@ -48,7 +48,8 @@ instalador** (o `bin/sync-agents.sh` / `.ps1` a mano) una sola vez después de c
 
 ## Para el mantenedor (cuando cambiás skills o agentes)
 
-Tras editar cualquier `SKILL.md` en `cerebro-digital/configuracion-ia/skills/`, regenerá los dos espejos **antes de commitear**:
+Tras editar cualquier `SKILL.md` en `cerebro-digital/configuracion-ia/skills/`, regenerá los dos espejos **antes de commitear**
+(los dos envoltorios llaman a `bin/sync-espejos.py`: hace falta Python 3):
 
 ```bash
 # Linux / macOS / Git Bash

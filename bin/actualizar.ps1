@@ -13,7 +13,11 @@ Write-Host "   {{PROYECTO}} - Actualizar todo"                     -ForegroundCo
 Write-Host "=============================================" -ForegroundColor Cyan
 
 Write-Host "[1/2] Trayendo lo ultimo (git pull)..."
-git pull
+git pull --ff-only   # si la rama local se aparto de la remota, frena: no mezcla en silencio
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "El git pull no se pudo hacer (rama apartada de la remota, o sin red): no sigo con el instalador." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
 
 Write-Host "[2/2] Instalador (hook, espejos de agentes, espejos de skills, especificacion de skills)..."
 $Py = $null

@@ -24,14 +24,13 @@ archivos binarios ni .git/. Idempotente: correrlo dos veces no rompe nada (la se
 encuentra placeholders).
 
 Tres estados:  0 = OK   1 = no se pudo instanciar (argumento invalido o carpeta rota)   2 = SIN DATOS
-ASCII puro en este archivo, igual que el resto de bin/.
+El codigo y los comentarios, en ASCII; los textos que busca y escribe en los .md van con sus acentos.
 """
 
 import argparse
 import datetime
 import os
 import re
-import shutil
 import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +38,8 @@ TEXTO = ('.md', '.html', '.py', '.sh', '.ps1', '.toml', '.yaml', '.yml', '.json'
          '.example', '.css', '.js')
 NOMBRES_TEXTO = ('.gitignore', '.gitattributes', 'pre-commit')
 IGNORAR_DIRS = ('.git', 'node_modules', '__pycache__', 'salida')
+# lo que entra de afuera (documentos/) y el borrador de trabajo no son del template: no se tocan
+IGNORAR_EN_RAIZ = ('documentos', 'borrador')
 # Estos dos hablan DE los placeholders: si se reemplazaran, el instanciador se rompe a si mismo
 # (la segunda corrida fallaria) y la guia quedaria sin sentido.
 EXCLUIR = (os.path.join('bin', 'instanciar.py'), 'COMO-USAR-ESTE-TEMPLATE.md')
@@ -59,9 +60,27 @@ def es_texto(ruta):
     return nombre.endswith(TEXTO) or nombre in NOMBRES_TEXTO
 
 
+def es_enlace(carpeta):
+    if os.path.islink(carpeta):
+        return True
+    if hasattr(os.path, 'isjunction'):   # Python 3.12 o mas nuevo
+        return os.path.isjunction(carpeta)
+    try:
+        os.readlink(carpeta)   # en Windows, desde Python 3.8, tambien lee una junction (la que arma adoptar-proyecto)
+        return True
+    except (OSError, ValueError, NotImplementedError):
+        return False
+
+
+def es_ajeno(carpeta):
+    return es_enlace(carpeta) or os.path.exists(os.path.join(carpeta, '.git'))
+
+
 def archivos_de_texto():
     for base, dirs, archivos in os.walk(RAIZ):
-        dirs[:] = sorted(d for d in dirs if d not in IGNORAR_DIRS)
+        # un proyecto enchufado en back/ o front/ (otro repo, o un enlace a su carpeta) es codigo ajeno: no se toca
+        dirs[:] = sorted(d for d in dirs if d not in IGNORAR_DIRS and not (base == RAIZ and d in IGNORAR_EN_RAIZ)
+                         and not es_ajeno(os.path.join(base, d)))
         for a in sorted(archivos):
             ruta = os.path.join(base, a)
             if os.path.relpath(ruta, RAIZ) in EXCLUIR:
@@ -109,19 +128,30 @@ def reemplazar_en_todo(pares, dry_run):
 
 
 def regenerar_espejos(dry_run):
+    """Los espejos que no se pudieron regenerar (lista vacia = todos bien). bin/sync-espejos.py arma cada espejo
+    aparte y recien al final reemplaza el viejo. pisar=True: al instanciar, la fuente manda (los placeholders recien
+    reemplazados estan en los dos lados)."""
+    import importlib.util
+    try:
+        spec = importlib.util.spec_from_file_location('sync_espejos', os.path.join(RAIZ, 'bin', 'sync-espejos.py'))
+        espejos = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(espejos)
+    except (OSError, ImportError) as e:
+        print('  SIN DATOS: no se pudo cargar bin/sync-espejos.py (%s)' % type(e).__name__)
+        return ['todos (falta bin/sync-espejos.py)']
+    fallidos = []
     for fuente_rel, destinos in ESPEJOS:
         fuente = os.path.join(RAIZ, fuente_rel)
         if not os.path.isdir(fuente):
-            print('  SIN DATOS: no existe la fuente %s' % fuente_rel)
+            # como instalar.py: sin fuente no hay espejo que regenerar (un aviso, no una falla)
+            print('  AVISO: no existe la fuente %s: su espejo no se regenera' % fuente_rel)
             continue
         for destino_rel in destinos:
-            destino = os.path.join(RAIZ, destino_rel)
-            print('  espejo %s <- %s' % (destino_rel, fuente_rel))
-            if dry_run:
-                continue
-            if os.path.isdir(destino):
-                shutil.rmtree(destino)
-            shutil.copytree(fuente, destino)
+            ok, msj = espejos.regenerar(fuente, os.path.join(RAIZ, destino_rel), pisar=True, dry_run=dry_run)
+            print('  espejo %s <- %s%s' % (destino_rel, fuente_rel, '' if ok else ': ' + msj.replace(RAIZ + os.sep, '')))
+            if not ok:
+                fallidos.append(destino_rel)
+    return fallidos
 
 
 def main():
@@ -307,11 +337,12 @@ def main():
           else '[2-bis] last_updated fijado a %s en %d archivo(s)' % (hoy, fechados))
 
     # 3. espejos
+    espejos_fallidos = []
     if a.sin_espejos or ya_instanciado:
         print('[3/4] espejos: salteado (%s)' % ('--sin-espejos' if a.sin_espejos else 'ya instanciado: bin/sync-skills.* los regenera'))
     else:
         print('[3/4] regenerando espejos')
-        regenerar_espejos(a.dry_run)
+        espejos_fallidos = regenerar_espejos(a.dry_run)
 
     # 4. que sigue
     print('[4/4] listo (modo %s, tablero %s). Lo que sigue, a mano (nada de esto se inventa):' % (a.modo, tablero))
@@ -330,6 +361,11 @@ def main():
     print('  - MCP por maquina: integracion-azure-mcp/ e integracion-gitlab-mcp/ (nunca el token en un archivo)')
     print('  - verificar: bash doctor/bin/doctor.sh  y  python -B bin/probar-*.py')
     print('Detalle: COMO-USAR-ESTE-TEMPLATE.md')
+    if espejos_fallidos:
+        # lo demas quedo instanciado; sin los espejos, las herramientas leen las skills viejas: no se sigue como si nada
+        print('SIN DATOS -- no se regeneraron los espejos %s (arriba, por que). Corre  bin/sync-skills.sh  y  '
+              'bin/sync-agents.sh  (o .ps1) cuando nada los tenga abiertos.' % ', '.join(espejos_fallidos))
+        return 2
     return 0
 
 

@@ -44,7 +44,7 @@ def armar(raiz):
     escribir(raiz, '.githooks/pre-commit', '#!/usr/bin/env bash\nexit 0\n')
     escribir(raiz, 'AGENTS.md', '# Proyecto\n')
     os.makedirs(os.path.join(raiz, 'bin'))
-    for f in ('instalar.py', 'verificar-skills.py'):
+    for f in ('instalar.py', 'verificar-skills.py', 'sync-espejos.py'):
         shutil.copy(os.path.join(AQUI, f), os.path.join(raiz, 'bin', f))
 
 

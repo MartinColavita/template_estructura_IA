@@ -127,6 +127,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, AQUI)
@@ -169,8 +170,9 @@ ESQUEMA = {
     'id': '#ID en Azure: obligatorio en PISA y EXISTE; null hasta que se escribe',
     'ficha': 'ficha fuente (default: la del lote)',
     'flujo': 'Historia: el [F-nn] de la ficha',
-    'dedup': 'opcional: columna Dedup del cierre (N consultas, 0 cand. / #ID); sin el: SIN DATOS',
-    'gates': 'opcional: columna GATES y 2b del cierre (OK / FRENA: cual); sin el: SIN DATOS',
+    'dedup': 'opcional: columna Dedup del cierre (N consultas . 0 cand. / N consultas . #ID veredicto / no aplica); '
+             'sin el: SIN DATOS',
+    'gates': 'opcional: columna GATES y 2b del cierre (OK / FRENA: cual / no aplica); sin el: SIN DATOS',
     'cambia': 'PISA: que cambia, en dos lineas',
     '_rutas': 'relativas a la carpeta del lote, o al repo, o absolutas',
 }
@@ -359,8 +361,74 @@ def _cargar(carpeta):
 
 def _guardar(carpeta, datos):
     items = [_ordenar_campos(i) for i in _ordenados(datos['items'])]
-    _escribir_json(os.path.join(carpeta, 'items.json'),
-                   {'_esquema': ESQUEMA, 'lote': datos.get('lote', {}), 'items': items})
+    ruta = os.path.join(carpeta, 'items.json')
+    # se escribe aparte y se reemplaza de una: quien lee al mismo tiempo nunca ve un json a medias
+    _escribir_json(ruta + '.nuevo', {'_esquema': ESQUEMA, 'lote': datos.get('lote', {}), 'items': items})
+    for _ in range(40):
+        try:
+            os.replace(ruta + '.nuevo', ruta)
+            return
+        except PermissionError:
+            # Windows no deja reemplazar un archivo que otro proceso tiene abierto (un lector de lote.py, OneDrive,
+            # el antivirus): se reintenta unos 2 s
+            time.sleep(0.05)
+    # sigue abierto: se escribe encima, como antes del reemplazo de una (el bloqueo ya deja afuera a los demas
+    # escritores; lo que se pierde es solo que un lector, en ese instante, pueda ver el json a medias)
+    with open(ruta + '.nuevo', 'rb') as h:
+        contenido = h.read()
+    with open(ruta, 'wb') as h:
+        h.write(contenido)
+    os.remove(ruta + '.nuevo')
+
+
+def _trabar(fd):
+    if os.name == 'nt':
+        import msvcrt
+        os.lseek(fd, 0, os.SEEK_SET)
+        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _destrabar(fd):
+    try:
+        if os.name == 'nt':
+            import msvcrt
+            os.lseek(fd, 0, os.SEEK_SET)
+            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    except OSError:
+        pass
+
+
+def _con_bloqueo(carpeta, accion, espera=60):
+    """Un escritor por vez en items.json. Los redactores corren en paralelo, y un leer-cambiar-escribir sin
+    bloqueo perdia items: dos leian la misma version y el segundo pisaba al primero. El bloqueo es del sistema
+    operativo (msvcrt en Windows, fcntl en los demas) sobre items.json.lock: si el proceso muere, el sistema lo
+    suelta, asi que no hay un bloqueo vencido que adivinar ni que sacar. El archivo queda en la carpeta del lote
+    (en borrador/, que no se versiona): borrarlo con otro proceso esperando abriria la puerta a dos escritores."""
+    lock = os.path.join(carpeta, 'items.json.lock')
+    fd = os.open(lock, os.O_CREAT | os.O_RDWR)
+    limite = time.time() + espera
+    try:
+        while True:
+            try:
+                _trabar(fd)
+                break
+            except OSError:
+                if time.time() > limite:
+                    raise Falla(SIN_DATOS, 'SIN DATOS -- items.json esta bloqueado hace mas de %d s por otro '
+                                'proceso de lote.py (%s)' % (espera, _mostrar(lock)))
+                time.sleep(0.05)
+        try:
+            return accion()
+        finally:
+            _destrabar(fd)
+    finally:
+        os.close(fd)
 
 
 def _buscar(datos, clave):
@@ -640,6 +708,12 @@ def _desde_json(carpeta, clave):
 
 
 def cmd_item(a):
+    if not os.path.isdir(a.carpeta):
+        raise Falla(SIN_DATOS, 'SIN DATOS -- no existe la carpeta del lote: ' + a.carpeta)
+    return _con_bloqueo(a.carpeta, lambda: _cmd_item(a))
+
+
+def _cmd_item(a):
     carpeta = a.carpeta
     datos = _cargar(carpeta)
     clave = a.clave.strip().strip('[]').upper()
@@ -1360,13 +1434,62 @@ def _antes(carpeta, it):
 def _col_gates(carpeta, it):
     if it.get('accion') == 'PISA' and (not it.get('id') or not os.path.isfile(_antes(carpeta, it))):
         return 'FRENA: falta el ANTES (antes/' + (it.get('id') or '?') + '.html)'
-    return it.get('gates') or 'SIN DATOS'
+    g = (it.get('gates') or '').strip()
+    if not g:
+        return 'SIN DATOS'
+    # el resultado del checklist de forma (2b): OK o FRENA con cual; otro texto no es un resultado
+    if g != 'OK' and not g.startswith(('FRENA', 'SIN DATOS', 'no aplica')):
+        return 'FRENA: GATES "' + g[:40] + '" no es OK ni FRENA (va el resultado de auditar-tarea.py, 2b)'
+    if g.startswith('no aplica') and it.get('accion') in ESCRIBIBLES:
+        return 'FRENA: GATES "no aplica" en una fila que escribe contenido (ALTA o PISA): va el resultado de 2b'
+    return g
 
 
 def _col_dedup(it):
-    if it.get('dedup'):
-        return it['dedup']
-    return 'SIN DATOS' if it.get('accion') == 'ALTA' else 'no aplica'
+    """La columna Dedup del cierre. El formato es el de planificar-lote (Fase 0, paso 3): cuantas consultas se
+    corrieron y, por candidato, su #ID y su veredicto (equivalente / solapa / distinto)."""
+    d = (it.get('dedup') or '').strip()
+    alta = it.get('accion') == 'ALTA'
+    if not d:
+        return 'SIN DATOS' if alta else 'no aplica'
+    if d.startswith(('SIN DATOS', 'FRENA')):
+        return d
+    if d.startswith('no aplica'):
+        return 'FRENA: un alta lleva su dedup ("no aplica" es para una fila que no crea)' if alta else d
+    # un "OK" suelto no muestra que se busco
+    if not re.search(r'\b[1-9][0-9]*\s+consultas?\b', d):
+        return ('FRENA: el dedup no dice cuantas consultas se corrieron ("N consultas . 0 cand.", o '
+                '"N consultas . #ID veredicto" por candidato)')
+    candidatos = [('#' + n, _veredicto(resto)) for n, resto in re.findall(r'#([0-9]+)([^#]*)', d)]
+    cuantos = re.search(r'\b([0-9]+)\s+cand', d)
+    if cuantos and int(cuantos.group(1)) > len(candidatos):
+        return 'FRENA: el dedup dice %s candidato(s) y trae %d #ID con su veredicto' % (cuantos.group(1), len(candidatos))
+    sin_veredicto = [i for i, v in candidatos if v is None]
+    if sin_veredicto:
+        return 'FRENA: ' + ', '.join(sin_veredicto) + ' sin su veredicto (equivalente / solapa / distinto)'
+    bloquean = [i for i, v in candidatos if v[1]]
+    if alta and bloquean:
+        # deduplicacion-antes-de-crear: un equivalente abierto bloquea el alta, y ante la duda es duplicado
+        return ('FRENA: ' + ', '.join(bloquean) + ' es equivalente, solapa o queda en duda: bloquea el alta (se '
+                'actualiza el existente o se pregunta)')
+    return d
+
+
+VEREDICTOS_DEDUP = (('distint', False), ('equivalente', True), ('solapa', True), ('duplicad', True), ('dud', True))
+
+
+def _veredicto(texto):
+    """El veredicto de un candidato: la primera palabra de veredicto en su tramo ("distinto: no solapa" es
+    distinto). (palabra, bloquea un alta) o None. Un equivalente CERRADO no bloquea: no se reabre, y el alta es el
+    bug o el evolutivo que deriva de el (deduplicacion-antes-de-crear)."""
+    t = texto.lower()
+    hallados = sorted((t.find(p), p, bloquea) for p, bloquea in VEREDICTOS_DEDUP if p in t)
+    if not hallados:
+        return None
+    _, palabra, bloquea = hallados[0]
+    if palabra == 'equivalente' and re.search(r'equivalente\W+(?:y\W+)?cerrad', t):
+        return palabra, False
+    return palabra, bloquea
 
 
 def _frena(*celdas):

@@ -15,7 +15,7 @@ echo -e "[36m   {{PROYECTO}} - Actualizar todo[0m"
 echo -e "[36m=============================================[0m"
 
 echo "[1/2] Trayendo lo ultimo (git pull)..."
-git pull
+git pull --ff-only   # si la rama local se aparto de la remota, frena: no mezcla en silencio
 
 echo "[2/2] Instalador (hook, espejos de agentes, espejos de skills, especificacion de skills)..."
 PY=""

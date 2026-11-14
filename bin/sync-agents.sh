@@ -1,35 +1,15 @@
 #!/usr/bin/env bash
 
-# {{PROYECTO}} - Sincronizador de Agentes (espejos versionados)
-# Copia la fuente versionada cerebro-digital/configuracion-ia/agentes/
-# hacia los DOS espejos locales (NO versionados: cada dev los genera una vez
-# despues de clonar; ver INSTALACION.md):
-#   .agents/agents/  -> lo lee Antigravity (y opencode lo auto-descubre)
-#   .claude/agents/  -> lo lee Claude Code (subagentes project-scoped)
-# Mismo mecanismo que sync-skills.sh. Herramienta del MANTENEDOR: regenera
-# los espejos ANTES de commitear cuando cambian los agentes. El hook
-# pre-commit (.githooks/) lo verifica al commitear, si esta activado
-# (git config core.hooksPath .githooks). El que clona NO necesita correr
-# esto. Idempotente: rehace los espejos desde cero en cada corrida.
+# {{PROYECTO}} - Sincronizador de Agentes (espejos)
+# Regenera .agents/agents/ y .claude/agents/ (no se versionan) desde cerebro-digital/configuracion-ia/agentes/.
+# Herramienta del MANTENEDOR. Envoltorio de bin/sync-espejos.py (el como, en su encabezado); necesita Python 3.
 
-set -eo pipefail
-
+set -o pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SRC="$ROOT/cerebro-digital/configuracion-ia/agentes"
-
-echo -e "\033[36m=============================================\033[0m"
-echo -e "\033[36m   {{PROYECTO}} - Sincronizador de Agentes (espejos)\033[0m"
-echo -e "\033[36m=============================================\033[0m"
-
-if [ ! -d "$SRC" ]; then
-  echo -e "\033[31mERROR: no existe la fuente: $SRC\033[0m"
-  exit 1
-fi
-
-for DST in "$ROOT/.agents/agents" "$ROOT/.claude/agents"; do
-  rm -rf "$DST"
-  mkdir -p "$DST"
-  cp -r "$SRC/." "$DST/"
-  N=$(find "$DST" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')
-  echo -e "\033[32mOK: espejo regenerado con $N agentes en ${DST#$ROOT/}\033[0m"
+for c in python3 python py; do
+  if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 7) else 1)' >/dev/null 2>&1; then
+    exec "$c" -I "$ROOT/bin/sync-espejos.py" agentes "$@"
+  fi
 done
+echo "ERROR: hace falta Python 3 para regenerar los espejos (bin/sync-espejos.py)."
+exit 2

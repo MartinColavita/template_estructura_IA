@@ -24,6 +24,6 @@ técnicas* sobre cómo construimos el software.
 
 ## Contenido de esta carpeta
 
-* [[decisiones]]: decisiones arquitectónicas y funcionales confirmadas por el equipo (`DEC-nnn`). Vienen con el template `DEC-001` (el código no vive acá) y `DEC-002` (módulos de dominio con capas, ⚠ a confirmar); `DEC-003` (el stack) es la primera que hay que tomar. Se nutre de las reuniones en `../extraccion-reuniones/`.
+* [[decisiones]]: decisiones arquitectónicas y funcionales confirmadas por el equipo (`DEC-nnn`). Vienen con el template `DEC-001` (el código no vive acá) y `DEC-002` (módulos de dominio con capas, confirmada; su materialización en el stack, ⚠ hasta `DEC-003`); `DEC-003` (el stack) es la primera que hay que tomar. Se nutre de las reuniones en `../extraccion-reuniones/`.
 * [[esqueleto-proyectos]]: estructura base de los repositorios de código (back, front y despliegue), convenciones de código (C8 del verificador) y su bloque de derivación a backlog.
 * `frontend/` (opcional): si el proyecto tiene front, acá va su arquitectura: un `index.md` con qué leer antes de tocar qué, las reglas duras numeradas y un documento por área.

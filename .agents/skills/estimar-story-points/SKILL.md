@@ -10,7 +10,7 @@ description: >-
   "/estimar-story-points". Salida en escala Fibonacci (1,2,3,5,8,13,20) por
   compatibilidad con el campo de Azure; 13+ => partir. La IA propone el número y
   el humano puede ajustarlo. NO inventa: lo que falta va (pendiente) y se
-  pregunta. Español (Argentina). NO escribe en el board.
+  pregunta. Español (Argentina). NO escribe en el board; sí anota la estimación en tablero/historial/INDICE.md, para calibrar.
 ---
 
 # Estimar Story Points

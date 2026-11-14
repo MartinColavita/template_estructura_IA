@@ -25,6 +25,7 @@ lleva tokens y es por persona). Solo biblioteca estandar. ASCII puro.
 """
 
 import argparse
+import importlib.util
 import os
 import shutil
 import subprocess
@@ -138,16 +139,20 @@ def main():
     elif a.sin_agentes:
         print('  salteado (--sin-agentes)')
     else:
-        for rel in ESPEJOS_AGENTES:
-            destino = os.path.join(RAIZ, rel)
-            if a.dry_run:
-                print('  (dry-run) %s <- %s' % (rel, FUENTE_AGENTES))
-                continue
-            if os.path.isdir(destino):
-                shutil.rmtree(destino)
-            shutil.copytree(fuente_ag, destino)
-            n = len([f for f in os.listdir(destino) if f.endswith('.md')])
-            print('  %s <- %s (%d agentes)' % (rel, FUENTE_AGENTES, n))
+        espejos = None
+        try:
+            spec = importlib.util.spec_from_file_location('sync_espejos', os.path.join(RAIZ, 'bin', 'sync-espejos.py'))
+            espejos = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(espejos)
+        except (OSError, ImportError) as e:
+            hallazgo('falta bin/sync-espejos.py (%s)' % type(e).__name__, 'restaurarlo desde el template')
+        for rel in (ESPEJOS_AGENTES if espejos else ()):
+            # sync-espejos: arma el espejo aparte y no pisa lo que se edito en el (estos espejos no se versionan)
+            ok, msj = espejos.regenerar(fuente_ag, os.path.join(RAIZ, rel), dry_run=a.dry_run)
+            if ok:
+                print('  %s <- %s' % (rel, FUENTE_AGENTES))
+            else:
+                hallazgo('el espejo %s no se regenero' % rel, msj.replace(RAIZ + os.sep, ''))
 
     # 4. espejos de skills
     print('[4/7] espejos de skills == fuente')

@@ -74,7 +74,7 @@ function de arquitectura en el build. Estas reglas son las que el verificador ch
 **Qué falta decidir (⚠):** cómo se materializa en el stack elegido (`DEC-003`), el nombre del
 paquete/carpeta base y las subcarpetas de cada capa. Se documenta en [[esqueleto-proyectos]].
 
-_Últ. modif.: 2026-10-22 — @equipo — propuesta heredada del template_
+_Últ. modif.: 2026-11-13 — @equipo — confirmada (2026-11-02); cómo se materializa en el stack queda ⚠ hasta `DEC-003`_
 
 ## DEC-003 — Stack técnico del back, del front y del despliegue
 

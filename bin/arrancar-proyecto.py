@@ -6,7 +6,7 @@
         [--existente <ruta de la carpeta con codigo> --como back [--mover] [--importar-reglas]] \
         [--azure-org X --azure-proyecto Y --azure-team Z] [--sin-informe] [--dry-run]
 
-Tres estados, nunca dos:  0 = proyecto arrancado   1 = FRENA (un paso fallo; se dice cual y como seguir)   2 = SIN DATOS (esto no es un template)
+Tres estados, nunca dos:  0 = proyecto arrancado   1 = FRENA (un paso fallo; se dice cual y como seguir)   2 = SIN DATOS (esto no es un template, o instanciar no pudo regenerar los espejos)
 
 POR QUE EXISTE. Arrancar un proyecto eran seis pasos en tres scripts, y cada sesion los hacia en distinto orden. La
 skill arrancar-proyecto pregunta lo basico en un solo mensaje y, con el "si", corre ESTO. Orden fijo:
@@ -96,6 +96,15 @@ def main():
         for linea in salida_inst.splitlines():
             if linea.startswith('[2-ter]'):
                 print('    ' + linea)   # modo, tablero y DEC-005, tal como quedaron escritos
+        if rc == SIN_DATOS:
+            # quedo instanciado, pero algo no se pudo hacer (los espejos): el motivo puede no entrar en las ultimas lineas
+            for linea in salida_inst.splitlines():
+                if 'SIN DATOS' in linea or ('espejo' in linea and ':' in linea):
+                    print('    ' + linea.strip())
+            print('SIN DATOS -- instanciar no pudo terminar (arriba, que falto). El resto no se ejecuto: regenera los '
+                  'espejos (bin/sync-skills.* y bin/sync-agents.*) y volve a correr este comando, que saltea lo ya '
+                  'instanciado.')
+            return SIN_DATOS
         if rc != 0:
             print('FRENA -- instanciar fallo (codigo %d). Arreglalo y volve a correr: el resto no se ejecuto.' % rc)
             return FRENA

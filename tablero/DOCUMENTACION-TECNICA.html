@@ -255,7 +255,7 @@ Coordinación:             tomar-tarea · comentar-tarea</div>
   </ul>
 
   <h3>Cambios y desfase (drift)</h3>
-  <p>Cuando un documento cambia y la tarjeta ya existe: <code>consultar-backlog</code> (solo lectura) detecta el <b>desfase</b>; <code>sincronizar-backlog</code> propone el <b>DIFF antes de pisar</b> y, al aplicar, dispara el <b>aviso</b> (comentario con @mención + etiqueta <code>cambio-pendiente-lectura</code> + un query guardado "cambios pendientes de lectura", el "git pull" del backlog). Lo ya <b>entregado no se reabre</b>: la modificación nace como un Bug (si se desvió del contrato) o una Historia nueva (si cambió la regla). Detalle: <code>conocimiento/cambios-en-el-backlog.md</code>.</p>
+  <p>Cuando un documento cambia y la tarjeta ya existe: <code>consultar-backlog</code> (solo lectura) detecta el <b>desfase</b>; <code>sincronizar-backlog</code> propone el <b>DIFF antes de pisar</b> y, al aplicar, dispara el <b>aviso</b> (comentario con @mención, que la persona responde cuando lo leyó, + un query guardado "Mis items que cambiaron", el "git pull" del backlog). Lo ya <b>entregado no se reabre</b>: la modificación nace como un Bug (si se desvió del contrato) o una Historia nueva (si cambió la regla). Detalle: <code>conocimiento/cambios-en-el-backlog.md</code>.</p>
 
   <h3>Mapeo a campos de Azure (referencia rápida)</h3>
   <table>

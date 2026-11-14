@@ -192,10 +192,10 @@ Con el "sí" dado, ejecutar en orden padre→hijo:
   haga falta.
 - **Al actualizar una tarjeta que está asignada o seguida** (re-sincronización tras
   un cambio del doc), disparar el **protocolo de aviso**: comentario con @mención
-  de qué cambió + etiqueta `cambio-pendiente-lectura`, para que quien la trabaja no
+  de qué cambió, para que quien la trabaja no
   siga sobre una versión vieja. Detalle: [[cambios-en-el-backlog]].
 - **Una tarjeta congelada** (en un sprint y ya tomada) **sale del lote de ediciones**: no
-  lleva `update_work_item` ni etiqueta. Su DIFF va **como comentario** con @mención, y el
+  lleva `update_work_item`. Su DIFF va **como comentario** con @mención, y el
   preview del paso 4 ya la mostró marcada `CONGELADA` para que el "sí" no la incluya por
   error. Detalle: [[cambios-en-el-backlog]] §4.
 

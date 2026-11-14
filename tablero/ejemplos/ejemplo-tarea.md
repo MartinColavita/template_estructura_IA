@@ -75,7 +75,13 @@ En el tablero aparece una **Tarea** titulada *"Pantalla de inicio de sesión"* c
 **Diseño de apoyo (referencia, no alcance):**
 - Figma: `https://www.figma.com/file/XXXX/Login` — pantalla *Login* y sus estados (normal / cargando / error).
 
-> ⚠ El detalle exacto del flujo de autenticación (parámetros, endpoints del proveedor de identidad, comportamiento de refresh de token) debe confirmarse contra la documentación de autenticación del proyecto (`<doc-autenticacion>`). No inventar la configuración.
+**⚠ Datos a confirmar:**
+- ⚠ El detalle del flujo de autenticación (parámetros, direcciones del proveedor de identidad, renovación del token) · recomendación: tomarlo de la documentación de autenticación del proyecto (`<doc-autenticacion>`), sin inventar la configuración · lo define quien administra la autenticación. La subtarea de integración depende de esto.
+- ⚠ El Esfuerzo original · recomendación: estimarlo en el planning, por partes (maquetado e integración) · mientras
+  tanto el campo va en `0`, no vacío.
+- ⚠ La Historia padre · recomendación: enlazar la del acceso al sistema; si no existe, crearla antes o escribir acá el
+  objetivo funcional · lo confirma quien arma el backlog.
+- ⚠ El sprint · recomendación: el que fije el planning · lo define el planning.
 
 ### Subtareas (checklist de trabajo)
 
@@ -105,7 +111,7 @@ La pantalla de inicio de sesión funcionando en el ambiente objetivo: el operado
 
 ### Campo: Esfuerzo original
 
-`⚠ a estimar en horas por el equipo` (por ejemplo, maquetado ~X h + integración de la autenticación ~Y h). No se completa a ojo.
+`0` hasta que el equipo la estime en horas (por ejemplo, maquetado ~X h + integración de la autenticación ~Y h); la pregunta está en «⚠ Datos a confirmar». No se completa a ojo.
 
 ### Campo: Prioridad
 
@@ -113,7 +119,7 @@ La pantalla de inicio de sesión funcionando en el ambiente objetivo: el operado
 
 ### Campo: Enlace a Historia padre
 
-Enlace **Primario/Parent** a la Historia de usuario del alta de acceso/login del sistema (⚠ si no existe una historia padre, crearla o dejar el objetivo funcional escrito en esta tarea; una tarea no debería quedar huérfana).
+Enlace **Primario/Parent** a la Historia de usuario del alta de acceso/login del sistema (⚠ declarado en «Datos a confirmar»: una tarea no debería quedar huérfana).
 
 ### Campo: Etiquetas
 
@@ -121,7 +127,7 @@ Enlace **Primario/Parent** a la Historia de usuario del alta de acceso/login del
 
 ### Campo: Ruta de iteración
 
-`<Proyecto>\<Equipo> - Sprint NN` (⚠ el sprint objetivo lo define el planning).
+`<Proyecto>\<Equipo> - Sprint NN` (⚠ declarado en «Datos a confirmar»).
 
 ---
 
@@ -132,7 +138,7 @@ Enlace **Primario/Parent** a la Historia de usuario del alta de acceso/login del
 | Título | `System.Title` | `[Login] Implementar la pantalla de inicio de sesión (front) integrada con el inicio de sesión corporativo federado` |
 | Descripción | `System.Description` (HTML) | Objetivo + alcance escrito + fuera de alcance + Figma como apoyo + subtareas + entregable + DoD |
 | Actividad | `Microsoft.VSTS.Common.Activity` | `Development` |
-| Esfuerzo original | `Microsoft.VSTS.Scheduling.OriginalEstimate` | ⚠ a estimar en horas |
+| Esfuerzo original | `Microsoft.VSTS.Scheduling.OriginalEstimate` | `0` (⚠ declarado) |
 | Prioridad | `Microsoft.VSTS.Common.Priority` | `2` (Alta) |
 | Enlace Primario/Parent | `System.LinkTypes.Hierarchy-Reverse` | Historia padre del acceso/login ⚠ |
 | Etiquetas | `System.Tags` | `login` |

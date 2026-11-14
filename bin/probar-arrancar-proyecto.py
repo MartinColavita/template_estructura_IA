@@ -44,6 +44,64 @@ def probar_firma(tmp, plantilla):
     def dec(raiz):
         return open(os.path.join(raiz, 'cerebro-digital', 'm', 'arquitectura', 'decisiones.md'), encoding='utf-8').read()
 
+    ajeno = mini('con-proyecto-enchufado')
+    escribir(ajeno, 'back/mi-app/.git/HEAD', 'ref: refs/heads/main\n')
+    escribir(ajeno, 'back/mi-app/notas.md', 'del proyecto: {{PROYECTO}}\n')
+    escribir(ajeno, 'documentos/acta.md', 'recibido: {{PROYECTO}}\n')
+    escribir(ajeno, 'back/README.md', 'back de {{PROYECTO}}\n')
+    escribir(ajeno, 'tablero/documentos/guia.md', 'guia de {{PROYECTO}}\n')
+    instanciar(ajeno, '--modo', 'solo', '--autor', 'ana')
+    leido = lambda rel: open(os.path.join(ajeno, rel), encoding='utf-8').read()
+    caso('instanciar no toca un proyecto enchufado (otro repo en back/) ni documentos/; si el README del template',
+         '{{PROYECTO}}' in leido('back/mi-app/notas.md') and '{{PROYECTO}}' in leido('documentos/acta.md')
+         and leido('back/README.md') == 'back de X\n', leido('back/mi-app/notas.md') + leido('back/README.md'))
+    caso('documentos/ se saltea solo en la raiz: una carpeta del template con ese nombre, mas adentro, se instancia',
+         leido('tablero/documentos/guia.md') == 'guia de X\n', leido('tablero/documentos/guia.md'))
+    sin_sync = mini('sin-sync-espejos')
+    escribir(sin_sync, 'cerebro-digital/configuracion-ia/skills/una/SKILL.md', '---\nname: una\n---\n')
+    r = subprocess.run([sys.executable, '-I', os.path.join(sin_sync, 'bin', 'instanciar.py'), '--proyecto', 'X',
+                        '--producto', 'Y', '--organizacion', 'Z', '--modulo', 'm', '--tablero', 'local', '--modo', 'solo',
+                        '--autor', 'ana'], capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=tmp)
+    caso('si un espejo no se pudo regenerar, instanciar sale 2 (SIN DATOS) y lo dice',
+         r.returncode == 2 and 'SIN DATOS' in r.stdout, (r.stdout + r.stderr)[-300:])
+    solo_skills = mini('sin-fuente-de-agentes')
+    escribir(solo_skills, 'cerebro-digital/configuracion-ia/skills/una/SKILL.md', '---\nname: una\n---\n')
+    shutil.copy(os.path.join(AQUI, 'sync-espejos.py'), os.path.join(solo_skills, 'bin', 'sync-espejos.py'))
+    r = subprocess.run([sys.executable, '-I', os.path.join(solo_skills, 'bin', 'instanciar.py'), '--proyecto', 'X',
+                        '--producto', 'Y', '--organizacion', 'Z', '--modulo', 'm', '--tablero', 'local', '--modo', 'solo',
+                        '--autor', 'ana'], capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=tmp)
+    caso('sin la fuente de agentes: avisa y sale 0, como instalar.py; los espejos de skills se regeneran igual',
+         r.returncode == 0 and 'AVISO' in r.stdout and os.path.isfile(os.path.join(solo_skills, '.claude', 'skills', 'una', 'SKILL.md')),
+         (r.stdout + r.stderr)[-300:])
+    arr = mini('arrancar-sin-sync-espejos')
+    escribir(arr, 'cerebro-digital/configuracion-ia/skills/una/SKILL.md', '---\nname: una\n---\n')
+    escribir(arr, 'AGENTS.md', '# {{PROYECTO}}\n')
+    shutil.copy(os.path.join(AQUI, 'arrancar-proyecto.py'), os.path.join(arr, 'bin', 'arrancar-proyecto.py'))
+    r = subprocess.run([sys.executable, '-I', os.path.join(arr, 'bin', 'arrancar-proyecto.py'), '--proyecto', 'X', '--producto', 'Y',
+                        '--organizacion', 'Z', '--modulo', 'm', '--modo', 'solo', '--autor', 'ana', '--sin-informe'],
+                       capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=tmp)
+    caso('y arrancar-proyecto lo respeta: sale 2 (SIN DATOS, no FRENA) y no sigue con git ni el instalador',
+         r.returncode == 2 and '[2/5]' not in r.stdout, (r.stdout + r.stderr)[-300:])
+    enchufe = mini('con-enlace')
+    afuera = os.path.join(tmp, 'codigo-de-afuera')
+    escribir(afuera, 'notas.md', 'ajeno: {{PROYECTO}}\n')
+    os.makedirs(os.path.join(enchufe, 'back'), exist_ok=True)
+    try:
+        if os.name == 'nt':
+            import _winapi
+            _winapi.CreateJunction(afuera, os.path.join(enchufe, 'back', 'enchufado'))
+        else:
+            os.symlink(afuera, os.path.join(enchufe, 'back', 'enchufado'))
+        enlazado = True
+    except (OSError, ImportError, AttributeError):
+        enlazado = False
+    if enlazado:
+        instanciar(enchufe, '--modo', 'solo', '--autor', 'ana')
+        caso('un proyecto enchufado con un enlace (junction en Windows), sin .git propio: no se toca',
+             open(os.path.join(afuera, 'notas.md'), encoding='utf-8').read() == 'ajeno: {{PROYECTO}}\n')
+    else:
+        SALTEADOS.append('el proyecto enchufado con un enlace (este sistema no deja crear uno)')
+        print('  SALTEADO %s' % SALTEADOS[-1])
     t = open(plantilla, encoding='utf-8').read()
     caso('el template trae DEC-005 sin firmar', 'Sin firmar' in t and 'Confirmado para el modo solo' not in t)
     sin = mini('sin-marca')

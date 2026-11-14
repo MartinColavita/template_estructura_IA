@@ -37,7 +37,7 @@ Por qué existen: `AGENTS.md`, «Lo que se cuenta, lo cuenta un script». Cada s
 - `bin/instanciar.py`: instancia el template para un proyecto (placeholders, módulo, modo y tablero de `DEC-006`, la firma de `DEC-005` con `--desatendido`, stack de `DEC-003`, espejos); lo corre `arrancar-proyecto.py`.
 - `bin/verificar-sello.py`: si el sello de una auditoría pedida sigue vigente, en un tablero con historial de revisiones (Azure DevOps, Jira); con tablero local no aplica.
 - `bin/probar-*.py`: la prueba de cada script (OK o FALLA, caso por caso); `probar-reglas.py` mide a un modelo con su CLI y sin él es SIN DATOS. Las corren el CI y `generar-informe.py`.
-- `bin/sync-skills.*` y `bin/sync-agents.*`: regeneran los espejos de skills y de agentes desde la fuente.
+- `bin/sync-espejos.py` (y sus envoltorios `bin/sync-skills.*` y `bin/sync-agents.*`): regenera los espejos de skills y de agentes desde la fuente; arma el espejo aparte y recién al final reemplaza el viejo (si Windows no lo deja, archivo por archivo), y frena si en el espejo se editó o se agregó algo desde el último sync, según el manifiesto `<espejo>.sync.json` que deja al lado y git ignora (`--pisar` para regenerar igual). Lo usan también `instalar.py` e `instanciar.py`.
 - `bin/actualizar.*`: trae lo último del repo y corre el instalador, en un comando.
 - `bin/auditoria/`: el paquete común de `auditar-tarea.py`, `auditar-historia.py`, `analizar-tareas.py`, `derivar-arbol.py` y `lote.py`.
 - Un `bin/<nombre>.sh` o `.ps1` con el mismo nombre que un `.py`: envoltorio para correrlo desde bash o PowerShell. `bin/extraer-reunion.ps1` es un script propio (PowerShell).

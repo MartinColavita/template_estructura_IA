@@ -304,7 +304,7 @@ La lista va **en el primer aviso** del cierre:
 - Etiquetas HTML que acepta Azure, con los esqueletos de la Descripción: [[checklists/mapa-campos-azure]].
 - **Tarjeta congelada** (en un sprint y ya tomada): [[cambios-en-el-backlog]] §4.
 - **Pendientes a confirmar** y su revisión antes de cerrar: §«Pendientes a confirmar», arriba.
-- **Aviso de cambios (drift):** el protocolo de [[cambios-en-el-backlog]] usa esta skill para el comentario con @mención cuando un doc cambió y hay que avisar a quien trabaja la tarjeta (junto con la etiqueta `cambio-pendiente-lectura`, que en una tarjeta congelada no se pone).
+- **Aviso de cambios (drift):** el protocolo de [[cambios-en-el-backlog]] usa esta skill para el comentario con @mención cuando un doc cambió y hay que avisar a quien trabaja la tarjeta (el acuse: [[cambios-en-el-backlog]] §2).
 
 ---
 

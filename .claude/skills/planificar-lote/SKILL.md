@@ -74,7 +74,10 @@ un test o un Escenario**; (c) un choque entre dos fuentes del mismo rango.
 0. **Lo primero:** `python bin/lote.py preparar <tema> --ficha <ficha>` y `python bin/lote.py tiempos <carpeta> preparar inicio`, así la fase se mide entera (ver el paso 6).
 1. Verificar el tablero autorizado y leer las tarjetas involucradas (Estado, Ruta de iteración, Asignado).
 2. Leer las fuentes: la ficha y su bloque de derivación, la maqueta, las reglas, los contratos ya cargados.
-3. **Dedup por ítem** ([[deduplicacion-antes-de-crear]]: tag + documento fuente + objetivo).
+3. **Dedup por ítem** ([[deduplicacion-antes-de-crear]]: tag + documento fuente + objetivo). El resumen de cada fila va con
+   `lote.py item --dedup` y dice cuántas consultas corrieron, con el `#ID` y el veredicto de cada candidato:
+   `"3 consultas · 0 cand."` o `"3 consultas · #125100 distinto"`; en una fila que no es alta, `"no aplica"`. Un
+   candidato equivalente o que solapa bloquea el alta ([[deduplicacion-antes-de-crear]]): se pregunta en el arranque.
 4. **Tareas, sólo si se pidió auditoría:** correr [[auditar-historia]] sobre cada Historia padre, **un agente por Historia, en paralelo**. Si no se pidió, este paso no corre.
 5. Clasificar cada duda —propia o, si corrieron, de las auditorías— en **F** (la resuelve una fuente: se anota cuál y el arreglo exacto), **R** (recomendación técnica clara) o **P** (necesita a una persona).
 6. `python bin/lote.py preparar` (paso 0) crea `borrador/lote-<AAAAMMDD>-<tema>/` con el esqueleto de `CONTEXTO.md`, `items.json` y `tiempos.json`. Cada ítem se anota con `python bin/lote.py item <carpeta> --clave T-01 --tipo Tarea --accion ALTA --titulo "…" --padre "#NNNNN" …`. En `CONTEXTO.md` van el alcance, las fuentes leídas (rutas), lo decidido por F y R con su fuente, las P con su recomendación, la dedup por ítem y el estado de cada tarjeta a editar.
@@ -111,7 +114,7 @@ la tabla y va al cierre como pregunta.
 - Lo que todavía no existe se referencia con **`[T-nn]`** o **`[H-nn]`**: en la fase 5 se reemplaza por el `#ID`.
 - Las Tareas siguen el tamaño de [[plantillas/tarea]] §«Tamaño y forma»: **30 tests o menos** (si no alcanza, se parte la Tarea), **una línea por test**, sin repetir texto entre secciones.
 - **Si el lote también redacta o pisa la Historia**, sus Tareas se redactan **después** del borrador de la Historia (y, si se pidió auditoría, después de que [[auditar-historia]] corrió sobre él y se aplicaron sus F): las Tareas mapean sus Escenarios.
-- **Cada redactor corre el checklist de forma §2b** de [[cargar-a-azure]] sobre su borrador (`python bin/auditar-tarea.py` para una Tarea) y anota el resultado con `lote.py item <carpeta> --clave <clave> --gates "OK"` o `--gates "FRENA: <cuál>"`. No es la auditoría opcional: es el autochequeo de forma de quien escribe, y sin él la columna «GATES y §2b» sale SIN DATOS.
+- **Cada redactor corre el checklist de forma §2b** de [[cargar-a-azure]] sobre su borrador (`python bin/auditar-tarea.py` para una Tarea) y anota el resultado con `lote.py item <carpeta> --clave <clave> --gates "OK"`, `--gates "FRENA: <cuál>"`; `--gates "no aplica"`, sólo en una fila que no escribe contenido (RELACIÓN, EXISTE). No es la auditoría opcional: es el autochequeo de forma de quien escribe, y sin él la columna «GATES y §2b» sale SIN DATOS.
 - **Los agentes no le preguntan al humano.** Lo que no pueden resolver lo devuelven como P en su reporte.
 - Hasta 8 agentes a la vez. Un archivo, un solo escritor.
 - **Si la herramienta no tiene sub-agentes**, las fases 2 y 3 corren en serie, y cada auditoría con contexto propio, sin el de la redacción. Los F los corrige quien redactó o, si ya no está, otro agente que no auditó esa pieza.
@@ -136,13 +139,13 @@ dice *no se pidió* y ninguna fila se frena por eso. Si se pidió, corre así:
 
 ### Fase 4 — Cierre (UN turno humano)
 
-Un solo mensaje con lo que escribe `python bin/lote.py cierre <carpeta>` en `CIERRE.md`, mostrado tal cual. La tabla sale de los archivos y de las auditorías que se hayan pedido, no de la memoria. Una fila sin el ANTES de un PISA, o sin dedup en un ALTA, sale **FRENA** y no se escribe. La auditoría **nunca** frena: dice *no se pidió*, su veredicto, o **NO SE SELLA** si se pidió y no cierra. El mensaje trae:
+Un solo mensaje con lo que escribe `python bin/lote.py cierre <carpeta>` en `CIERRE.md`, mostrado tal cual. La tabla sale de los archivos y de las auditorías que se hayan pedido, no de la memoria. Una fila sin el ANTES de un PISA, sin dedup en un ALTA, con una dedup que no dice cuántas consultas corrieron o con unos GATES fuera de formato, sale **FRENA** y no se escribe. La auditoría **nunca** frena: dice *no se pidió*, su veredicto, o **NO SE SELLA** si se pidió y no cierra. El mensaje trae:
 
 1. **La tabla del lote:**
 
    | # | Acción | Ítem | Padre | Puntos | GATES y §2b | Auditoría | `⚠` abiertos | Dedup | Archivo |
    |---|---|---|---|---|---|---|---|---|---|
-   | 1 | ALTA / **PISA** / RELACIÓN | título | `#ID` o `[H-nn]` | n | OK / FRENA: cuál / SIN DATOS | no se pidió / COMPLETA / CON HUECOS / NO SE SELLA: por qué | P-nnn | N consultas · 0 cand. / `#ID` | ruta |
+   | 1 | ALTA / **PISA** / RELACIÓN | título | `#ID` o `[H-nn]` | n | OK / FRENA: cuál / no aplica / SIN DATOS | no se pidió / COMPLETA / CON HUECOS / NO SE SELLA: por qué | P-nnn | N consultas · 0 cand. / N consultas · `#ID` veredicto | ruta |
 
    «GATES y §2b» resume el Bloque de GATES y el checklist de cierre de [[cargar-a-azure]] de ese
    ítem; el detalle queda en su archivo. Una fila con FRENA o SIN DATOS no se escribe.

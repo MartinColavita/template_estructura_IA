@@ -21,6 +21,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(AQUI)
@@ -81,6 +82,15 @@ def leer_json(ruta):
 
 def item_de(L, clave):
     return [i for i in leer_json(os.path.join(L, 'items.json'))['items'] if i['clave'] == clave][0]
+
+
+def cargar_lote():
+    """lote.py como modulo, para probar una funcion suelta."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('lote_mod', LOTE_PY)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def fila(cierre, clave):
@@ -723,6 +733,88 @@ def probar(base):
             return True
         except UnicodeDecodeError:
             return False
+
+    # --- dedup y gates con forma, y redactores en paralelo (M-038) --------------------------
+    L3 = os.path.join(raiz, 'lote-20261003-paralelo')
+    correr('preparar', 'paralelo', '--ficha', ficha, '--fecha', '20261003', '--raiz-output', raiz)
+    correr('item', L3, '--clave', 'H-01', '--tipo', 'Historia', '--accion', 'ALTA', '--titulo', 'Una',
+           '--padre', '200051', '--flujo', 'F-01', '--gates', 'OK', '--dedup', 'OK')
+    correr('item', L3, '--clave', 'H-02', '--tipo', 'Historia', '--accion', 'ALTA', '--titulo', 'Dos',
+           '--padre', '200051', '--flujo', 'F-01', '--gates', 'listo', '--dedup', '2 consultas, 0 cand.')
+    altas = (('H-03', 'OK', '3 consultas ' + MEDIO + ' #125100 distinto'),
+             ('H-04', 'OK', 'no aplica'),
+             ('H-06', 'OK', '3 consultas ' + MEDIO + ' #125100 equivalente'),
+             ('H-07', 'OK', '3 consultas ' + MEDIO + ' #125100 solapa parcial'),
+             ('H-08', 'OK', '2 consultas ' + MEDIO + ' 3 cand.'),
+             ('H-09', 'OK', '2 consultas ' + MEDIO + ' #125100'),
+             ('H-10', 'no aplica', '1 consulta ' + MEDIO + ' 0 cand.'),
+             ('H-11', 'OK', '3 consultas ' + MEDIO + ' #125100 distinto, #125101 duplicado'),
+             ('H-12', 'OK', '3 consultas ' + MEDIO + ' #125100 distinto: no solapa, otro alcance'),
+             ('H-13', 'OK', '2 consultas ' + MEDIO + ' #125100 equivalente cerrado (va como evolutivo)'),
+             ('H-14', 'SIN DATOS: auditar-tarea.py no corrio', '1 consulta ' + MEDIO + ' 0 cand.'))
+    for clave, gates, dedup in altas:
+        correr('item', L3, '--clave', clave, '--tipo', 'Historia', '--accion', 'ALTA', '--titulo', clave,
+               '--padre', '200051', '--flujo', 'F-01', '--gates', gates, '--dedup', dedup)
+    correr('item', L3, '--clave', 'R-02', '--tipo', 'Tarea', '--accion', 'RELACION', '--titulo', 'Relacionar',
+           '--id', '125100', '--relacion', '[H-01]', '--gates', 'no aplica', '--dedup', 'no aplica')
+    _, cierre3, _ = correr('cierre', L3)
+    chequeo('cierre: un dedup que no dice cuantas consultas se corrieron ("OK") FRENA',
+            'FRENA' in ' '.join(fila(cierre3, 'H-01')) and 'consultas' in ' '.join(fila(cierre3, 'H-01')), True)
+    chequeo('cierre: un GATES que no es OK ni FRENA ("listo") FRENA', 'FRENA' in ' '.join(fila(cierre3, 'H-02')), True)
+    frena = lambda clave: 'FRENA' in ' '.join(fila(cierre3, clave) or ['FILA QUE NO ESTA'])
+    chequeo('cierre: un alta con "N consultas . #ID distinto" pasa, tambien con su por que ("distinto: no solapa") '
+            'y con un equivalente cerrado (deriva a un evolutivo)', [frena(c) for c in ('H-03', 'H-12', 'H-13')], [False] * 3)
+    chequeo('cierre: el veredicto es por candidato: uno distinto y otro duplicado en la misma celda FRENA',
+            frena('H-11'), True)
+    chequeo('cierre: GATES "SIN DATOS" se muestra como SIN DATOS, no como un formato invalido',
+            [c for c in (fila(cierre3, 'H-14') or []) if c.startswith(('SIN DATOS', 'FRENA: GATES'))][:1],
+            ['SIN DATOS: auditar-tarea.py no corrio'])
+    chequeo('cierre: en un alta FRENAN la dedup "no aplica", un candidato equivalente o que solapa, candidatos '
+            'sin #ID, un #ID sin veredicto y GATES "no aplica"',
+            [frena(c) for c in ('H-04', 'H-06', 'H-07', 'H-08', 'H-09', 'H-10')], [True] * 6)
+    chequeo('cierre: en una RELACION, dedup y GATES "no aplica" pasan', frena('R-02'), False)
+    procesos = [subprocess.Popen([sys.executable, '-B', LOTE_PY, 'item', L3, '--clave', 'T-%02d' % i, '--tipo', 'Tarea',
+                                  '--accion', 'ALTA', '--titulo', 'Tarea %d' % i, '--padre', '[H-01]'],
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=RAIZ) for i in range(1, 9)]
+    for p in procesos:
+        p.wait(timeout=300)
+    claves = sorted(i['clave'] for i in leer_json(os.path.join(L3, 'items.json'))['items'])
+    chequeo('item: ocho redactores a la vez no se pisan items.json (quedan los ocho)',
+            [c for c in claves if c.startswith('T-')], ['T-%02d' % i for i in range(1, 9)])
+    lock = os.path.join(L3, 'items.json.lock')
+    hace_rato = time.time() - 600
+    os.utime(lock, (hace_rato, hace_rato))
+    inicio = time.time()
+    c, _, _ = correr('item', L3, '--clave', 'T-09', '--tipo', 'Tarea', '--accion', 'ALTA', '--titulo', 'Tarea 9',
+                     '--padre', '[H-01]')
+    chequeo('item: el archivo de bloqueo que quedo (de una corrida anterior o de un proceso que murio) no traba',
+            (c, time.time() - inicio < 30), (0, True))
+    lote_mod = cargar_lote()
+    L4 = os.path.join(raiz, 'lote-guardar-bloqueado')
+    os.makedirs(L4)
+    reemplazo_real = os.replace
+
+    def reemplazo_bloqueado(a, b):
+        raise PermissionError(13, 'otro proceso tiene abierto el archivo')
+    lote_mod.os.replace = reemplazo_bloqueado
+    try:
+        lote_mod._guardar(L4, {'lote': {}, 'items': []})
+        guardado = (leer_json(os.path.join(L4, 'items.json')).get('items'), sorted(os.listdir(L4)))
+    except Exception as e:
+        guardado = 'se cayo: %s: %s' % (type(e).__name__, e)
+    finally:
+        lote_mod.os.replace = reemplazo_real
+    chequeo('guardar: si Windows no deja reemplazar items.json (otro proceso lo tiene abierto), lo escribe igual',
+            guardado, ([], ['items.json']))
+    correr('item', L3, '--clave', 'H-05', '--tipo', 'Historia', '--accion', 'ALTA', '--titulo', 'Cinco',
+           '--padre', '200051', '--flujo', 'F-01', '--gates', 'OK', '--dedup', 'FRENA: duplicado de #125063')
+    _, cierre4, _ = correr('cierre', L3)
+    chequeo('cierre: un dedup que ya dice FRENA (duplicado de #ID) se muestra tal cual, con su #ID',
+            '#125063' in ' '.join(fila(cierre4, 'H-05')), True)
+    c, out, _ = correr('item', os.path.join(raiz, 'lote-que-no-existe'), '--clave', 'T-01', '--tipo', 'Tarea',
+                       '--accion', 'ALTA', '--titulo', 'x', '--padre', '[H-01]')
+    chequeo('item: una carpeta de lote que no existe es SIN DATOS (sale 2) y lo dice',
+            (c, 'no existe la carpeta' in out), (2, True))
 
     chequeo('archivos: lote.py y probar-lote.py son ASCII puro',
             (ascii_ok(LOTE_PY), ascii_ok(os.path.abspath(__file__))), (True, True))
