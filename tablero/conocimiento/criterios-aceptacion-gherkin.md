@@ -230,7 +230,7 @@ Los bloques ```` ```gherkin ```` de arriba son para **leer**. El campo **Criteri
 - Nada de fences ```` ``` ````, markdown ni `<pre>` de código.
 
 ```html
-<p><b>Escenario:</b> Inicio de sesión exitoso <i>[RN-TEMA-01]</i><br>
+<p><b>Escenario:</b> Inicio de sesión exitoso <i>[RN-MOD-001]</i><br>
 &nbsp;&nbsp;<b>Dado</b> que el operador está en el formulario de alta<br>
 &nbsp;&nbsp;<b>Cuando</b> ingresa un &lt;identificador&gt; con formato válido y presiona Buscar<br>
 &nbsp;&nbsp;<b>Entonces</b> el sistema recupera y muestra los datos del &lt;persona&gt;<br>

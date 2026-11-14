@@ -135,7 +135,7 @@ aunque alguna diga «nada»: así se ve que se revisó.
 
 > **Ejemplo lleno** del renglón de la @mención y de una línea: *«@‹persona›, cambió el
 > documento funcional. Revisalo antes de seguir trabajando sobre esta tarjeta.»* · *«Se
-> modifica: código por defecto 02 → 03 [RN-…-13]»*.
+> modifica: código por defecto 02 → 03 [RN-RES-013]»*.
 
 ## Comentario de cierre de desarrollo
 

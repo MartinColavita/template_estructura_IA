@@ -35,7 +35,7 @@ Si `DEC-003` no fijó el tipo, **se pregunta** y se escribe ahí; la skill no el
 
 ## Dónde viven
 
-`qa/<app>-e2e/` (o dentro del repo de código si `DEC-003` lo decide): `tests/` (un archivo por
+`qa/e2e/` (o `qa/<app>-e2e/` con varias aplicaciones), versionadas en este repositorio (M-045): `tests/` (un archivo por
 Historia), `objetos/` (un objeto por pantalla o por recurso, con los identificadores estables),
 `datos/` (fábricas, sin datos de personas). El plan de [[disenar-pruebas]] es un comentario en la Historia, no un archivo acá. Las
 dependencias se instalan **por proyecto, con la persona** (Playwright, Appium…), nunca se

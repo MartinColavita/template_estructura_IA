@@ -449,7 +449,7 @@ def generar(rapido):
     H.append('<div class="nota"><b>Principios que sostienen todo.</b> Fuente única de verdad en <code>cerebro-digital/</code>. Nada se inventa: lo que no está es pendiente. Lo que se cuenta lo cuenta un script y un script que no corrió es <code>SIN DATOS</code>, no OK. Quien verifica no es quien produce. Nada se escribe en el tablero, en el Cerebro ni afuera sin un «sí» sobre lo ya mostrado. Sin PHI, nunca. Todo en español (Argentina).</div></section>')
 
     # 2 mapa
-    H.append('<section id="mapa"><h2>02 · Mapa del esqueleto</h2><p class="lead">Un repositorio de conocimiento y reglas; el código de la aplicación vive en repositorios propios que se clonan adentro de <code>back/</code>, <code>front/</code> y <code>qa/</code> (DEC-001).</p>')
+    H.append('<section id="mapa"><h2>02 · Mapa del esqueleto</h2><p class="lead">Un repositorio de conocimiento y reglas; el código de la aplicación vive en repositorios propios que se clonan adentro de <code>back/</code> y <code>front/</code> (DEC-001); las pruebas de punta a punta, en <code>qa/</code>, versionadas acá.</p>')
     H.append('<table><tr><th>Carpeta</th><th>Qué es</th></tr>')
     for c, q in (('AGENTS.md · CLAUDE.md · GEMINI.md · opencode.json', 'Las reglas y las barreras, una sola fuente; los otros tres la importan para Claude Code, Gemini CLI y opencode. Antigravity la lee nativa.'),
                  ('cerebro-digital/', 'El Cerebro Digital (OKF): contexto, fuentes, roadmap, log, el módulo con sus cuatro pilares, la configuración de IA (agentes, skills, orquestador, mejoras, integraciones MCP).'),
@@ -457,7 +457,7 @@ def generar(rapido):
                  ('bin/', 'Scripts determinísticos (Python, biblioteca estándar, exit 0/1/2) y sus pruebas; instalador, instanciador, sincronizadores.'),
                  ('doctor/', 'El Doctor: 23 sondas sobre el repositorio y, si hay código clonado, sobre el código.'),
                  ('tablero/', 'El toolkit de tickets: método, plantillas, checklists, ejemplos neutros, guías HTML.'),
-                 ('back/ · front/ · qa/', 'Dónde se clonan los repositorios de código y de pruebas de aceptación; traen sus skills scoped (back 6, front 5).'),
+                 ('back/ · front/ · qa/', 'Dónde se clonan los repositorios de código, que traen sus skills scoped (back 6, front 5); en qa/, las pruebas de punta a punta, versionadas acá.'),
                  ('documentos/ · borrador/ · entregables/', 'Lo que se recibe del equipo funcional; el borrador de trabajo (no se versiona); lo promovido.'),
                  ('.githooks/ · .gitlab-ci.yml', 'El hook pre-commit (espejos, conteos, BOM, control chars, especificación de skills) y el pipeline opcional del propio Cerebro.')):
         H.append('<tr><td><code>%s</code></td><td>%s</td></tr>' % (html.escape(c), q))
@@ -494,7 +494,7 @@ def generar(rapido):
 
     # 5 pruebas
     H.append('<section id="pruebas"><h2>05 · Pruebas: tres capas, ninguna redundante</h2>' + piramide())
-    H.append('<p>Las dos primeras prueban <b>piezas</b> y viven en los repositorios de código; la tercera prueba <b>el sistema desplegado</b> contra los Escenarios de la Historia, trazada al <code>#ID</code>, y vive en <code>qa/</code> o donde decida <code>DEC-003</code>. Un repositorio de QA existente se absorbe con <code>absorber-aplicacion</code>. Método: <code>pruebas-de-aceptacion.md</code>.</p></section>')
+    H.append('<p>Las dos primeras prueban <b>piezas</b> y viven en los repositorios de código; la tercera prueba <b>el sistema desplegado</b> contra los Escenarios de la Historia, trazada al <code>#ID</code>, y vive en <code>qa/</code>, versionada acá. Un repositorio de QA existente se copia a <code>qa/</code> sin su <code>.git</code>. Método: <code>pruebas-de-aceptacion.md</code>.</p></section>')
 
     # 6 inversa
     H.append('<section id="inversa"><h2>06 · Ingeniería inversa, refactor y migración</h2><p class="lead">La skill <code>absorber-aplicacion</code> lee una aplicación existente, la vuelca al Cerebro ítem por ítem con su marca de confianza, y recién después, si se quiere, decide con una persona si se refactoriza o se migra. También sirve <b>sólo para documentar</b>.</p>' + absorber())

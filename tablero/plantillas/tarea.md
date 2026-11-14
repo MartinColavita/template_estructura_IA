@@ -368,19 +368,19 @@ Ninguno.
 > ```
 >
 > **Validaciones:**
-> - `reservaId`: obligatorio, entero, debe existir y estar en estado `pendiente` `[RN-RES-0x]` ⚠ número a confirmar
+> - `reservaId`: obligatorio, entero, debe existir y estar en estado `pendiente` ⚠ regla a confirmar en el Cerebro (`P-nnn`)
 > - `recursoId`: obligatorio, entero, debe existir y estar disponible en el horario de la reserva
 >
 > **Casos de error:**
 > | Condición | Código | Payload | Regla |
 > |---|---|---|---|
 > | `reservaId` inexistente | `404` | `{ "error": "RESERVA_NO_ENCONTRADA" }` | — |
-> | `recursoId` ya no disponible | `409` | `{ "error": "RECURSO_NO_DISPONIBLE" }` | `[RN-RES-0x]` |
+> | `recursoId` ya no disponible | `409` | `{ "error": "RECURSO_NO_DISPONIBLE" }` | ⚠ regla a confirmar en el Cerebro (`P-nnn`) |
 >
 > **Dependencias:** depende de la tabla `reservas` y `recursos` ya existentes · **de esto depende la Tarea de front `Reservas - Mostrar el resultado de la confirmación` #`<ID>` (Related)**, que es la que cubre la otra mitad del Escenario "Intento de confirmar con un recurso ya tomado" (el mensaje al usuario).
 >
 > **Especificación cerrada (SDD):**
-> - Comportamiento exacto: confirmar una reserva en estado `pendiente` la pasa a `confirmada` y reserva el recurso; si el recurso dejó de estar disponible entre el alta y la confirmación, no se confirma nada `[RN-RES-0x]` ⚠ número a confirmar.
+> - Comportamiento exacto: confirmar una reserva en estado `pendiente` la pasa a `confirmada` y reserva el recurso; si el recurso dejó de estar disponible entre el alta y la confirmación, no se confirma nada ⚠ regla a confirmar en el Cerebro (`P-nnn`).
 >
 > *Escenarios de la Historia que esta Tarea cubre* — la bisagra entre BDD y TDD:
 >
@@ -394,7 +394,7 @@ Ninguno.
 > 1. Caso feliz: reserva pendiente + recurso disponible → `200` + `estado: "confirmada"`
 > 2. `reservaId` inexistente → `404` + `RESERVA_NO_ENCONTRADA`
 > 3. Recurso ya no disponible → `409` + `RECURSO_NO_DISPONIBLE`
-> 4. Invariante de negocio protegida: "una reserva ya confirmada no puede volver a confirmarse" `[RN-RES-0x]` ⚠ número a confirmar
+> 4. Invariante de negocio protegida: "una reserva ya confirmada no puede volver a confirmarse" ⚠ regla a confirmar en el Cerebro (`P-nnn`)
 >
 > **Modos de falla evaluados:**
 > - **Estado:** cubierto por el test 4 — una reserva ya confirmada no vuelve a confirmarse.

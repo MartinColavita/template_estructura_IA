@@ -73,17 +73,17 @@ Cuando el ticket sale de un documento funcional (una ficha del OKF, una spec), s
 
 ## 4. Códigos de regla de negocio `[RN-…]`
 
-Para que la tarjeta sea trazable **por dentro**, las reglas de negocio se **numeran** y se **referencian** en los criterios de aceptación.
+Para que la tarjeta sea trazable **por dentro**, cada regla de negocio lleva **su código del Cerebro** y se **referencia** en los criterios de aceptación: se ve en el ticket la misma regla que define la ficha.
 
-- En **Descripción → Reglas de negocio**, numerá cada regla: `[RN-<TEMA>-01]`, `[RN-<TEMA>-02]`… (el `<TEMA>` es una sigla corta del tema, coherente con el tag de §1).
+- En **Descripción → Reglas de negocio**, cada regla con el código que tiene en el Cerebro: `[RN-<MODULO>-nnn]` (por ejemplo `[RN-MOD-001]`), y al lado su ruta en el OKF. **El ticket no numera reglas propias**: una regla que el Cerebro no tiene no lleva código; va `⚠` y se pregunta (regla de oro 3, en [[AGENTS]]).
 - En **Criterios de aceptación (Gherkin)**, referenciá la regla que cada escenario verifica (en el nombre del escenario o como comentario `# [RN-…]`).
-- En un **Bug**, indicá **qué RN se rompe** (si el tema las tiene numeradas): conecta el defecto con la regla violada.
+- En un **Bug**, indicá **qué RN se rompe**, con su código del Cerebro (si la regla está ahí): conecta el defecto con la regla violada.
 
 Así se puede rastrear: regla → escenario que la prueba → (si falla) bug que la rompe.
 
 > **Ejemplo (genérico):**
-> Regla `[RN-MOD-01] Solo el rol solicitante puede iniciar la solicitud de reserva.`
-> Escenario: `Solicitar la reserva de una sala [RN-MOD-01]` — Dado soy asistente de recepción con rol solicitante, Cuando presiono "Reservar", Entonces se genera aviso al rol aprobador.
+> Regla `[RN-MOD-001] Solo el rol solicitante puede iniciar la solicitud de reserva.` *(OKF: `modulo/funcional/reservas.md#rn-mod-001`)*
+> Escenario: `Solicitar la reserva de una sala [RN-MOD-001]` — Dado soy asistente de recepción con rol solicitante, Cuando presiono "Reservar", Entonces se genera aviso al rol aprobador.
 
 ---
 

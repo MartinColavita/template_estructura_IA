@@ -1,9 +1,8 @@
 # Pruebas de aceptación — la capa que prueba el sistema, no las piezas
 
 > Método propio. Complementa [armar-la-suite.md](armar-la-suite.md) (la pirámide) y
-> [tdd-ciclo-y-evidencia.md](tdd-ciclo-y-evidencia.md) (el ciclo por Tarea). Dónde viven estas
-> pruebas y con qué herramienta lo decide el equipo (`DEC-003`); la carpeta `qa/` de este
-> repositorio es el lugar donde se enchufa el repo de QA si está aparte.
+> [tdd-ciclo-y-evidencia.md](tdd-ciclo-y-evidencia.md) (el ciclo por Tarea). Viven en la carpeta `qa/` de este
+> repositorio, versionadas acá (M-045); con qué herramienta, lo fija `DEC-003`.
 
 ## La pregunta que contesta esta capa
 

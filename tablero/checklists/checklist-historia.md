@@ -58,7 +58,7 @@ Relacionados: [[historia-de-usuario]] · [[tarea]] · [[habilitador-tecnico]] ·
 ## 5. Reglas de negocio
 
 - [ ] Lista las **reglas de negocio** que aplican, con el vocabulario del dominio.
-- [ ] Cada regla está **numerada `[RN-<TEMA>-NN]`** para poder referenciarla en los criterios (ver [[organizacion-y-trazabilidad]] §4).
+- [ ] Cada regla lleva **su código del Cerebro `[RN-<MODULO>-nnn]`** para poder referenciarla en los criterios (ver [[organizacion-y-trazabilidad]] §4).
 - [ ] Cada `[RN-…]` indica su **referencia al OKF** (ruta#ancla del Cerebro Digital) para poder consultarla — enlazar, no copiar.
 - [ ] Cubre **casos de excepción** y validaciones (qué pasa si falta un dato, si el registro no existe, si el estado no aplica, permisos por rol).
 - [ ] No contradice las specs; si hay desvío observado, se anota **(pendiente) spec dice X / observado Y**.
@@ -70,7 +70,7 @@ Relacionados: [[historia-de-usuario]] · [[tarea]] · [[habilitador-tecnico]] ·
 - [ ] Cada escenario es **verificable objetivamente** (QA puede decir "pasa/no pasa" sin interpretar).
 - [ ] Cubren: **camino feliz**, **casos borde** y al menos un **caso de error/negativo**.
 - [ ] Los datos de ejemplo usan **marcadores** (`<persona>`, `<documento>`, `<identificador>`, `<dato-sensible>`), nunca PHI real.
-- [ ] Cada escenario **referencia la regla que verifica** (`[RN-<TEMA>-NN]` en el nombre o como comentario).
+- [ ] Cada escenario **referencia la regla que verifica** (`[RN-<MODULO>-nnn]` en el nombre o como comentario).
 - [ ] Definen implícita o explícitamente el **"Hecho" (DoD)**: cuándo la historia se considera terminada.
 
 Ejemplo de forma correcta (dominio genérico):

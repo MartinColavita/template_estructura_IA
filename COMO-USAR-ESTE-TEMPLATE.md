@@ -198,9 +198,9 @@ El orden:
 |---|---|---|---|
 | Unitaria y de contrato | `back/`, `front/`, con `guiar-tdd` (TDD por defecto) | ¿Cada pieza cumple su contrato y sus `[RN-…]`? | En cada commit y Merge Request |
 | Integración | `back/`, `front/`, sólo si la Tarea lo declara | ¿La dependencia externa real responde como el contrato dice? | En el Merge Request |
-| Aceptación (punta a punta) | `qa/` o el repo de código (`DEC-003`) | ¿La aplicación **desplegada** cumple los Escenarios de la Historia, de afuera? | Al desplegar a prueba, por día, antes de cortar a producción |
+| Aceptación (punta a punta) | `qa/`, versionadas acá | ¿La aplicación **desplegada** cumple los Escenarios de la Historia, de afuera? | Al desplegar a prueba, por día, antes de cortar a producción |
 
-Un repositorio de QA aparte **no es redundante**: el back y el front se prueban cada uno
+Esta capa **no es redundante**: el back y el front se prueban cada uno
 simulando al otro, y la costura entre los dos sólo la ve la capa de aceptación. Lo que sí tiene que
 cumplir es la **trazabilidad**: cada prueba nombra la Historia (`#ID`) y el Escenario que automatiza,
 y el Gherkin es la fuente. Si ya hay un repositorio de pruebas de aceptación, se absorbe con `absorber-aplicacion` y se

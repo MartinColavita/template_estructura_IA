@@ -89,7 +89,7 @@ que la materialice. Si sobra una RN sin UI, se reporta como hueco.
 
 ```
 ⚠️ [Componente] viola el guardarraíl [anti-patrón]:
-- Regla esperada: RN-MOD-00X (wikilink a la nota)
+- Regla esperada: RN-MOD-000X (wikilink a la nota)
 - Estado actual: [descripción]
 - Corrección sugerida: [acción]
 ```

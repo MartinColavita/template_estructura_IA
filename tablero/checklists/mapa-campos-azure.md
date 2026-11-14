@@ -163,7 +163,7 @@ La IA **propone** las relaciones por título/tema; el **`#ID` es dato duro** (se
 
 ### Documento fuente y códigos de regla `[RN-…]`
 - **Documento fuente**: dentro de la Descripción (o Pasos para reproducir, en Bug), una **línea con el link/ruta** al `.md` de origen — **referencia, nunca el contenido copiado**. El `historial/` registra ID + ruta, no el cuerpo del doc (no crece la memoria). Ver [[organizacion-y-trazabilidad]] §3.
-- **Códigos `[RN-<TEMA>-NN]`**: numerar las reglas de negocio en la Descripción y **referenciarlas** en los escenarios Gherkin; en un Bug, indicar qué `[RN-…]` se rompe. Ver [[organizacion-y-trazabilidad]] §4.
+- **Códigos `[RN-<MODULO>-nnn]`**: las reglas de negocio con su código del Cerebro en la Descripción y **referenciarlas** en los escenarios Gherkin; en un Bug, indicar qué `[RN-…]` se rompe. Ver [[organizacion-y-trazabilidad]] §4.
 
 ### Mapeo → jerarquía de Azure (por vertical slices)
 Para bajar un documento/módulo entero al board (este proyecto): **Vertical slice/dominio → Épica · Capacidad → Feature · Flujo → Historia · Desglose técnico (capas `api`/`application`/`domain`/`infra`) → Tarea.** Todos con la **misma etiqueta temática** y enlazados. Alta en lote por MCP **solo con confirmación** del plan propuesto. Detalle y equivalencia con el mapeo genérico: [[organizacion-y-trazabilidad]] §5.
@@ -203,9 +203,9 @@ El campo **Descripción** de Azure (`System.Description`) y **Pasos para reprodu
 <p><b>Como</b> &lt;rol&gt;<br><b>quiero</b> &lt;necesidad&gt;<br><b>para</b> &lt;beneficio&gt;.</p>
 <h3>Alcance</h3><ul><li>...</li></ul>
 <h3>Fuera de alcance</h3><ul><li>...</li></ul>
-<h3>Datos y estados</h3><ul><li><b>Campo:</b> &lt;campo&gt; (obligatorio, del catálogo X; default ...) <i>[RN-TEMA-01]</i></li><li><b>Estado:</b> &lt;Estado A&gt; → &lt;Estado B&gt; (permitida / bloqueada) <i>[RN-TEMA-02]</i></li></ul>
-<h3>Reglas de negocio</h3><ul><li><b>[RN-TEMA-01]</b> ... <i>(OKF: ruta/al/doc.md#ancla)</i></li></ul>
-<h3>Casos de uso (alcance de pruebas)</h3><ul><li><b>CU-01</b> ... <i>[RN-TEMA-01]</i></li></ul>
+<h3>Datos y estados</h3><ul><li><b>Campo:</b> &lt;campo&gt; (obligatorio, del catálogo X; default ...) <i>[RN-MOD-001]</i></li><li><b>Estado:</b> &lt;Estado A&gt; → &lt;Estado B&gt; (permitida / bloqueada) <i>[RN-MOD-002]</i></li></ul>
+<h3>Reglas de negocio</h3><ul><li><b>[RN-MOD-001]</b> ... <i>(OKF: ruta/al/doc.md#ancla)</i></li></ul>
+<h3>Casos de uso (alcance de pruebas)</h3><ul><li><b>CU-01</b> ... <i>[RN-MOD-001]</i></li></ul>
 <h3>Documento fuente</h3><p><a href="ruta/al/doc.md">ruta/al/doc.md</a> — referencia, no contenido</p>
 ```
 > Los **Criterios de aceptación** (Bloque 2) van en Gherkin al campo `AcceptanceCriteria` (esqueleto propio abajo); cada **Caso de uso** de arriba se cubre con ≥1 escenario.
@@ -216,12 +216,12 @@ El campo **Descripción** de Azure (`System.Description`) y **Pasos para reprodu
 <p><b>Antecedentes:</b><br>
 &nbsp;&nbsp;<b>Dado</b> que ...<br>
 &nbsp;&nbsp;<b>Y</b> ...</p>
-<p><b>Escenario:</b> ... <i>[RN-TEMA-01]</i><br>
+<p><b>Escenario:</b> ... <i>[RN-MOD-001]</i><br>
 &nbsp;&nbsp;<b>Dado</b> que ...<br>
 &nbsp;&nbsp;<b>Cuando</b> ...<br>
 &nbsp;&nbsp;<b>Entonces</b> ...<br>
 &nbsp;&nbsp;<b>Y</b> ...</p>
-<p><b>Escenario:</b> ... <i>[RN-TEMA-02]</i><br>
+<p><b>Escenario:</b> ... <i>[RN-MOD-002]</i><br>
 &nbsp;&nbsp;<b>Dado</b> ...<br>
 &nbsp;&nbsp;<b>Cuando</b> ...<br>
 &nbsp;&nbsp;<b>Entonces</b> ...</p>
@@ -243,18 +243,18 @@ El campo **Descripción** de Azure (`System.Description`) y **Pasos para reprodu
         '200': { description: ... }
         '409': { description: CODIGO_ERROR }</pre>
 <hr>
-<h3>Validaciones</h3><ul><li><b>&lt;campo&gt;:</b> regla exacta <i>[RN-TEMA-01]</i></li></ul>
+<h3>Validaciones</h3><ul><li><b>&lt;campo&gt;:</b> regla exacta <i>[RN-MOD-001]</i></li></ul>
 <hr>
 <h3>Casos de error</h3>
 <table>
 <tr><th>Condición</th><th>Código</th><th>Payload</th><th>Regla</th></tr>
-<tr><td>&lt;condición&gt;</td><td>404</td><td>{ "error": "CODIGO" }</td><td><i>[RN-TEMA-01]</i></td></tr>
+<tr><td>&lt;condición&gt;</td><td>404</td><td>{ "error": "CODIGO" }</td><td><i>[RN-MOD-001]</i></td></tr>
 </table>
 <hr>
 <h3>Dependencias</h3><ul><li><b>Depende de:</b> ...</li><li><b>De esto depende:</b> ...</li></ul>
 <hr>
 <h3>Especificación cerrada (SDD)</h3>
-<p><b>Comportamiento exacto:</b> ... <i>[RN-TEMA-01]</i></p>
+<p><b>Comportamiento exacto:</b> ... <i>[RN-MOD-001]</i></p>
 <p><b>Escenarios de la Historia que esta Tarea cubre</b> (mapeo al Gherkin del padre):</p>
 <table>
 <tr><th>Escenario de la Historia #NNNN</th><th>Qué parte cubre esta Tarea</th><th>Tests que lo verifican</th></tr>
@@ -262,7 +262,7 @@ El campo **Descripción** de Azure (`System.Description`) y **Pasos para reprodu
 </table>
 <p><b>No cubre:</b> &lt;título del Escenario, textual&gt; (#NNNN) · &lt;título&gt; (#NNNN)</p>
 <hr>
-<h3>Tests a escribir PRIMERO</h3><p><b>Datos base:</b> &lt;datos de prueba comunes; cada test dice sólo lo que cambia&gt;</p><ol><li>Caso feliz: ... → 200 + ...</li><li>&lt;validación&gt; → 400 + ... <i>[RN-TEMA-01]</i></li><li>Invariante de negocio protegida: ... <i>[RN-TEMA-02]</i></li><li>Esquema — &lt;condición común&gt;:<ul><li>&lt;entrada 1&gt; → &lt;resultado esperado 1&gt;</li><li>&lt;entrada 2&gt; → &lt;resultado esperado 2&gt;</li></ul></li><li><b>Guardarraíl (nace verde, EXENTO del rojo previo):</b> ... — <b>se pone en rojo si</b> &lt;el cambio concreto que lo haría fallar&gt; <i>[RN-TEMA-03]</i> (si no se puede escribir esa frase no es guardarraíl: borrá este renglón)</li><li>Integración: ... (obligatorio si arriba decís «Requiere test de integración: sí»)</li></ol>
+<h3>Tests a escribir PRIMERO</h3><p><b>Datos base:</b> &lt;datos de prueba comunes; cada test dice sólo lo que cambia&gt;</p><ol><li>Caso feliz: ... → 200 + ...</li><li>&lt;validación&gt; → 400 + ... <i>[RN-MOD-001]</i></li><li>Invariante de negocio protegida: ... <i>[RN-MOD-002]</i></li><li>Esquema — &lt;condición común&gt;:<ul><li>&lt;entrada 1&gt; → &lt;resultado esperado 1&gt;</li><li>&lt;entrada 2&gt; → &lt;resultado esperado 2&gt;</li></ul></li><li><b>Guardarraíl (nace verde, EXENTO del rojo previo):</b> ... — <b>se pone en rojo si</b> &lt;el cambio concreto que lo haría fallar&gt; <i>[RN-MOD-003]</i> (si no se puede escribir esa frase no es guardarraíl: borrá este renglón)</li><li>Integración: ... (obligatorio si arriba decís «Requiere test de integración: sí»)</li></ol>
 <hr>
 <h3>Modos de falla evaluados</h3><ul><li><b>Estado:</b> ... / no aplica porque ...</li><li><b>Concurrencia:</b> ... / no aplica porque ...</li><li><b>Autorización:</b> ... / no aplica porque ...</li><li><b>Dependencia caída:</b> ... / no aplica porque ...</li><li><b>Límites:</b> ... / no aplica porque ...</li><li><b>Idempotencia:</b> ... / no aplica porque ...</li></ul>
 <hr>
@@ -288,7 +288,7 @@ El campo **Descripción** de Azure (`System.Description`) y **Pasos para reprodu
 <h3>Pasos</h3><ol><li>...</li><li>...</li></ol>
 <h3>Resultado esperado</h3><p>...</p>
 <h3>Resultado obtenido</h3><p>...</p>
-<h3>Por qué es un error</h3><p>... <b>Regla violada:</b> [RN-TEMA-NN]</p>
+<h3>Por qué es un error</h3><p>... <b>Regla violada:</b> [RN-MOD-nnn]</p>
 ```
 
 ---

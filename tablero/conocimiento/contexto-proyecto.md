@@ -20,7 +20,7 @@ last_updated: 2026-08-26
 - Ubicación: `../../cerebro-digital/` — Bundle OKF, fuente única de verdad del negocio.
 - Índice / punto de entrada: `../../cerebro-digital/index.md`.
 - Documentación funcional en bruto: `../../documentos/`.
-- Provenance (jerarquía de fuentes): observado > minado > spec > derivado.
+- Provenance (jerarquía de fuentes): manda el Cerebro; si lo observado en la aplicación choca con él, decide la persona (M-045).
 
 ## Qué lee la IA del Cerebro (mínimos)
 La IA no reescribe el dominio: lo **LEE** del Cerebro y referencia la ficha por ruta (enlazar, no copiar). Necesita poder encontrar ahí cuatro grupos:

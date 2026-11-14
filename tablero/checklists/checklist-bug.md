@@ -68,7 +68,7 @@ Relacionados: [[bug]] · [[mapa-campos-azure]] · [[ejemplo-bug]]
 - [ ] Hay un bloque **Resultado esperado** claro (qué debería pasar, según la spec / comportamiento correcto).
 - [ ] Hay un bloque **Resultado obtenido** claro (qué pasa realmente).
 - [ ] Hay un bloque **Por qué es un error (motivo / impacto)**: por qué lo obtenido está mal y a quién/qué afecta — no solo el síntoma.
-- [ ] Si el tema tiene reglas numeradas, indica **qué `[RN-<TEMA>-NN]` se rompe** (ver [[organizacion-y-trazabilidad]] §4).
+- [ ] Si la regla está en el Cerebro, indica **qué `[RN-<MODULO>-nnn]` se rompe** (ver [[organizacion-y-trazabilidad]] §4).
 - [ ] Los tres están **separados y etiquetados**, no mezclados en un párrafo.
 - [ ] El "por qué" funcional no se confunde con la **causa técnica** (esa, si va, es hipótesis **(pendiente)** en Observaciones).
 - [ ] El esperado se apoya, si se puede, en la spec funcional o en el comportamiento previo.

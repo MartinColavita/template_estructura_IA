@@ -63,19 +63,19 @@ Relacionados: [[checklist-historia]] · [[mapa-campos-azure]] · [[ejemplo-histo
 
 ### Datos y estados (funcional)
 > Inventario **funcional** (no técnico) de lo que la historia toca: los **campos/datos** con su regla (obligatorio, catálogo, default, formato/rango) y los **estados y transiciones** permitidas/bloqueadas. Es el **qué** del dato, no el **cómo** (tipos, columnas, endpoints, JSON van en la **Tarea** — Contrato técnico). Da la última precisión para codear sin abrir preguntas. Borralo si la historia no toca datos ni estados (p. ej. solo un texto de UI).
-- **Campos / datos:** `<campo>` (`<obligatorio | opcional>`, `<catálogo / default / formato / rango>`) — `<qué representa>` `[RN-<TEMA>-NN]`
-- **Estados y transiciones:** `<Estado A>` → `<Estado B>` (`<permitida | bloqueada>`; `<condición>`) `[RN-<TEMA>-NN]`
+- **Campos / datos:** `<campo>` (`<obligatorio | opcional>`, `<catálogo / default / formato / rango>`) — `<qué representa>` `[RN-<MODULO>-nnn]`
+- **Estados y transiciones:** `<Estado A>` → `<Estado B>` (`<permitida | bloqueada>`; `<condición>`) `[RN-<MODULO>-nnn]`
 
 ### Reglas de negocio (con referencia al OKF) · *Bloque 3*
-> Numerá cada regla `[RN-<TEMA>-NN]` y, al lado, la **referencia para consultarla en el OKF** (ruta#ancla del Cerebro Digital) — **enlazar, no copiar** (ver [[organizacion-y-trazabilidad]] §4). Así Desarrollo y Testing van a la fuente. El `<TEMA>` es una sigla corta del tema, coherente con la etiqueta temática.
-- `[RN-<TEMA>-01] <regla 1>` — *(OKF: `<ruta/al/doc.md#ancla>`)*
-- `[RN-<TEMA>-02] <regla 2>` — *(OKF: `<ruta/al/doc.md#ancla>`)*
+> Cada regla con su código del Cerebro `[RN-<MODULO>-nnn]` (no se numeran reglas propias) y, al lado, la **referencia para consultarla en el OKF** (ruta#ancla del Cerebro Digital) — **enlazar, no copiar** (ver [[organizacion-y-trazabilidad]] §4). Así Desarrollo y Testing van a la fuente.
+- `[RN-<MODULO>-001] <regla 1>` — *(OKF: `<ruta/al/doc.md#ancla>`)*
+- `[RN-<MODULO>-002] <regla 2>` — *(OKF: `<ruta/al/doc.md#ancla>`)*
 
 ### Casos de uso (alcance de pruebas) · *Bloque 4*
 > Inventario de **flujos/casos que Testing debe cubrir**: delimita el **alcance de las pruebas**. **No** son los Criterios de aceptación (esos son el pass/fail en Gherkin); son la **lista de casos**, cada uno cubierto por ≥1 escenario Gherkin. Incluí feliz + alternativos + borde/negativos + permisos por rol, y mapeá cada caso a su `[RN-…]`.
 > *(Ojo con el término: "caso de uso" acá = **caso de prueba/flujo de esta Historia**, distinto del "caso de uso = Feature" del mapeo OKF→ADO.)*
-- `CU-01` `<flujo feliz>` — `[RN-<TEMA>-01]`
-- `CU-02` `<caso alternativo / borde / negativo / permiso por rol>` — `[RN-<TEMA>-NN]`
+- `CU-01` `<flujo feliz>` — `[RN-<MODULO>-001]`
+- `CU-02` `<caso alternativo / borde / negativo / permiso por rol>` — `[RN-<MODULO>-nnn]`
 
 ### Dependencias
 - `<otras historias, servicios/micros, integraciones externas, datos de otro sistema, features en curso>`
@@ -101,8 +101,8 @@ Característica: <nombre corto de la funcionalidad>
     Dado que el <rol> inició sesión en el sistema
     Y está posicionado en <pantalla / modulo>
 
-  # Referenciá la regla que verifica cada escenario: [RN-<TEMA>-NN] (ver organizacion-y-trazabilidad §4)
-  Escenario: <camino feliz — nombre descriptivo> [RN-<TEMA>-01]
+  # Referenciá la regla que verifica cada escenario: [RN-<MODULO>-nnn] (ver organizacion-y-trazabilidad §4)
+  Escenario: <camino feliz — nombre descriptivo> [RN-<MODULO>-001]
     Dado <estado o precondicion>
     Cuando <accion del usuario>
     Entonces <resultado observable en pantalla o en el estado del dato>
@@ -201,7 +201,7 @@ Característica: <nombre corto de la funcionalidad>
 >
 > - **Título:** `Reservas: mostrar el recurso disponible mas cercano al confirmar una solicitud`
 > - **Como** operador **quiero** ver el recurso disponible más cercano **para** reducir el tiempo de asignación.
-> - **Reglas de negocio (dominio):** `[RN-RES-01]` solo aplica a solicitudes de tipo `<tipo1>`/`<tipo2>`; `[RN-RES-02]` el estado `<Estado2>` (confirmado) solo puede setearse después de `<Estado1>`.
+> - **Reglas de negocio (dominio):** `[RN-RES-001]` *(OKF: `reservas/funcional/solicitudes.md#rn-res-001`)* solo aplica a solicitudes de tipo `<tipo1>`/`<tipo2>`; `[RN-RES-002]` *(OKF: `reservas/funcional/estados.md#rn-res-002`)* el estado `<Estado2>` (confirmado) solo puede setearse después de `<Estado1>`.
 > - **Área de valor:** Business · **Etiquetas:** `reservas` (una sola).
 > - **Relaciones:** Primario/Parent: Feature "Asignación de recursos" · Relacionadas: UH "Registrar la confirmación del recurso".
 > - **Documento fuente:** `conocimiento/funcional/asignacion-de-recursos.md` (link al repo) — referencia, no contenido.

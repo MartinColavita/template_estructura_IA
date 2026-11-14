@@ -26,7 +26,7 @@ Este repositorio es **solo conocimiento y agentes**: el Cerebro Digital, las reg
 los scripts. El código de la aplicación vive en **repositorios propios** (uno de back, uno o más
 de front, uno por aplicación), que se **clonan adentro** de `back/<repo>` y `front/<app>` para que
 un asistente lea en una sola sesión el Cerebro, las reglas, la Tarea y el código. Lo clonado no se
-versiona acá (`.gitignore`).
+versiona acá (`.gitignore`). **Excepción:** las pruebas de punta a punta viven en `qa/` y se versionan acá (M-045).
 
 **Por qué:** separa el ciclo de vida del conocimiento (fichas, decisiones, el «sí» por ítem)
 del ciclo de vida del código (ramas `task/*`, Merge Requests). Y evita que el repositorio del
@@ -94,7 +94,7 @@ reporta `SIN DATOS` en lo que no pueda verificar.
 | Observabilidad (métricas, trazas, logs estructurados, chequeos de salud) | — | ⚠ a definir |
 | Plataforma de despliegue | — | ⚠ a definir |
 | Tipo de aplicación (web, Electron, escritorio con webview, escritorio nativo, móvil, línea de comandos, API) y el motor de pruebas de punta a punta que le corresponde (Playwright, WebDriver, Appium o Maestro, proceso, HTTP), con el atributo de identificación estable (`data-testid` o `automation-id`) | — | ⚠ a definir |
-| Pruebas de aceptación: dónde viven (`qa/<app>-e2e/` o en el repo de código), ambiente contra el que corren y si frenan la entrega | — | ⚠ a definir |
+| Pruebas de aceptación: herramienta, ambiente contra el que corren y si frenan la entrega (viven en `qa/`, M-045) | — | ⚠ a definir |
 
 **Al decidirlo:** se completa esta tabla, se escribe [[esqueleto-proyectos]] y se completan
 `tdd-stack-back.md` y `tdd-stack-front.md` de la skill `desarrollo`, y las tablas «Stack» de

@@ -149,7 +149,7 @@ retoma [[sincronizar-backlog]] con las respuestas del humano ya incorporadas.
 > Se partió la Historia "Suspender una serie" en 3 Tareas: (api) `POST
 > /series/{id}/suspender`, (application) caso de uso `SuspendSerie`, (domain) invariante
 > "una serie suspendida no admite servicios con fecha >= hoy". `analizar-tareas`
-> reporta: la `[RN-MOD-03]` está cubierta por la Tarea de domain (ok); pero el `409
+> reporta: la `[RN-MOD-003]` está cubierta por la Tarea de domain (ok); pero el `409
 > SERIE_YA_SUSPENDIDA` aparece en el contrato de la Tarea api y **no** hay test que lo
 > cubra en la lista test-first → **pregunta**: "¿agrego el caso 409 a los tests de la
 > Tarea api, o queda fuera de alcance?". No crea nada; deja la pregunta para la reunión.

@@ -102,8 +102,8 @@ Frontend: <<versión>>   ·   Backend: <<versión>>
 
 **Por qué es un error (motivo / impacto)**
 <!-- SIEMPRE presente. Una o dos frases: por qué el resultado obtenido está mal (qué regla/expectativa rompe) y a quién/qué impacta. NO es la causa técnica: esa, si la hay, va como hipótesis en Observaciones.
-     Si el tema tiene reglas de negocio numeradas, indicá cuál se rompe: [RN-<TEMA>-NN] (ver organizacion-y-trazabilidad §4). -->
-<por que esta mal + a quien/que afecta> — Regla violada: [RN-<TEMA>-NN] (si aplica)
+     Si la regla está en el Cerebro, indicá cuál se rompe, con su código: [RN-<MODULO>-nnn] (ver organizacion-y-trazabilidad §4). -->
+<por que esta mal + a quien/que afecta> — Regla violada: [RN-<MODULO>-nnn] (si aplica)
 
 **Observaciones**
 <!-- Datos extra: frecuencia (siempre/intermitente), si afecta a un solo perfil, solución alternativa, correlación con un cambio reciente, si también se ve en otro ambiente. -->
@@ -161,7 +161,7 @@ Frontend: <<versión>>   ·   Backend: <<versión>>
 > **Precondiciones:** operador `<perfil>`, registro en estado `<Estado1>`, solicitud de tipo `<tipo>`.
 > **Resultado esperado:** el botón permanece habilitado para poder cancelar la solicitud.
 > **Resultado obtenido:** el botón queda deshabilitado (gris); no hay mensaje de error.
-> **Por qué es un error:** la cancelación no depende del recurso seleccionado; al bloquearse, el operador queda trabado. Regla violada: `[RN-RES-04]`.
+> **Por qué es un error:** la cancelación no depende del recurso seleccionado; al bloquearse, el operador queda trabado. Regla violada: `[RN-RES-004]`.
 > **Gravedad:** 2 - High (alta) · **Prioridad:** 2.
 > **Etiquetas:** `reservas` (una sola; la versión ya quedó en el campo "Versión" de arriba).
 > **Relaciones:** Related: UH "Cancelar una solicitud de reserva" · **Documento fuente:** `conocimiento/funcional/cancelacion-de-reserva.md` (link al repo).

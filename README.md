@@ -42,7 +42,7 @@ Acá viven el **Cerebro Digital** (la fuente única de verdad del negocio, en fo
 | `bin/` | Scripts: sincronizar espejos, integración semanal, enviar notas, auditorías mecánicas de tickets, modo lote, pruebas de reglas, instanciación del template | Sí |
 | `doctor/` | 🩺 El Doctor: diagnóstico de salud del repositorio (y del código clonado), sólo lectura, informe HTML | Sí (menos `salida/`) |
 | `back/` · `front/` | Carpetas donde se **clonan** los repos de código. Sólo aportan su README y las skills scoped de desarrollo | Sólo README y skills |
-| `qa/` | Carpeta donde se **clona** el repositorio de pruebas de aceptación, si está aparte del código. Sólo aporta su README | Sólo README |
+| `qa/` | Las **pruebas de punta a punta** del proyecto (`qa/e2e/`, o `qa/<app>-e2e/` con varias aplicaciones), versionadas acá (M-045) | Sí |
 | `.gitlab-ci.yml` y `.github/workflows/verificar.yml` | Pipeline del propio repositorio del Cerebro, en GitLab o en GitHub: espejos, conteos, pruebas de `bin/` y el Doctor | Sí |
 | `.githooks/` | Hook pre-commit: espejos de skills, conteos, BOM y caracteres de control | Sí |
 

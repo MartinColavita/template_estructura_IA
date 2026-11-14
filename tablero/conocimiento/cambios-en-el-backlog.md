@@ -49,8 +49,8 @@ aviso, para que el que la trabaja no siga sobre lo viejo:
    `System.History`) diciendo **qué cambió** y la **fuente**:
 
    > @persona Esta historia se actualizó tras un cambio en el doc funcional.
-   > QUÉ CAMBIÓ: + criterio "reserva parcial permitida" [RN-…-06] · ~ código por
-   > defecto 02→03 [RN-…-13]. FUENTE: `<ruta-del-doc>` (v2). Si venías trabajando
+   > QUÉ CAMBIÓ: + criterio "reserva parcial permitida" [RN-RES-006] · ~ código por
+   > defecto 02→03 [RN-RES-013]. FUENTE: `<ruta-del-doc>` (v2). Si venías trabajando
    > una versión anterior, refrescá antes de seguir.
 
 2. **Acuse de lectura: la persona responde el comentario** («Leído»). No se agrega una

@@ -53,6 +53,6 @@ El **método** es agnóstico de dominio y reutilizable entre los proyectos del e
 ## Reglas culturales que atraviesan todo el paquete
 
 - **No inventar.** Lo que no está confirmado se marca "(pendiente)" y se pregunta; nunca se rellena con supuestos.
-- **Respetar la provenance.** Cuando hay varias fuentes (spec, observado, derivado), gana la de mayor autoridad y se anota el desvío.
+- **Respetar la provenance.** Manda el Cerebro. Si lo observado en la aplicación choca con él, no decide la IA: se le muestran a la persona las dos cosas y decide ella ([[pipeline-doc-a-tickets]]).
 - **PHI prohibido.** Los datos personales reales (nombre, documento, identificador, teléfono, dato sensible del dominio) nunca van en un ticket: se usan marcadores como `<persona>`, `<documento>`, `<dato-sensible>`.
 - **Silencio al entregar.** El resultado se entrega al grano, sin narrar el proceso ni pedir aplausos.

@@ -92,9 +92,13 @@ front/*
 !front/README.md
 !front/.claude/
 !front/.agents/
-# Idem para el repositorio de pruebas de aceptacion, si esta aparte (ver qa/README.md).
-qa/*
-!qa/README.md
+# qa/ se versiona: las pruebas de punta a punta viven aca (qa/README.md, M-045). Lo que generan al correr, no.
+qa/**/node_modules/
+qa/**/test-results/
+qa/**/playwright-report/
+qa/**/blob-report/
+qa/**/playwright/.auth/
+qa/**/.env
 
 # Config local de Gemini CLI: por maquina, puede llevar credenciales
 .gemini/*
