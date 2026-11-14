@@ -20,10 +20,11 @@ distintos. Usa los campos nativos de Azure **Assigned To** (quién la tiene) y
 **State** (New → Active…) para dejar claro que está tomada y **avisar si ya lo está**.
 
 ## Regla de oro
-- **GATE de TABLERO (duro).** La tarjeta debe pertenecer al tablero autorizado (org `{{AZURE_ORG}}` · proyecto `{{AZURE_PROYECTO}}` · team `{{AZURE_TEAM}}`); antes de cambiar `AssignedTo`/`State` verificá el destino y, si es otro tablero, **no escribas** y mostrá la advertencia ([[tablero-autorizado]]).
+- **Las barreras de escritura son las de [[AGENTS]]** («Automatización por MCP — barreras»): antes de cambiar
+  `AssignedTo`/`State` se verifica que la tarjeta sea del tablero autorizado ([[tablero-autorizado]]).
 - **Chequear ANTES de tomar.** Si ya está Assigned a otra persona o en Active, AVISAR (quién y desde cuándo) y **no pisarla** sin tu confirmación explícita.
 - **Escritura con confirmación.** Cambiar Assigned To / State es una acción con efecto: mostrás qué vas a cambiar y se hace con tu OK — no en el mismo impulso. Con `DEC-005` confirmada, ese OK lo da ella ([[AGENTS]], «Autorización permanente»).
-- **GATE de TARJETA CONGELADA (duro).** Una tarjeta **en un sprint y ya tomada** (Estado distinto de `New`) no se reasigna ni se le cambia el Estado: sólo se comenta. Tomar una tarjeta que está en `New` sí se puede —todavía no está congelada—, y es justamente la escritura que la congela. Detalle: [[cambios-en-el-backlog]] §4.
+- **Tarjeta congelada (en modo equipo):** una tarjeta en un sprint y ya tomada no se reasigna ni se le cambia el Estado: sólo se comenta. Tomar una que está en `New` sí se puede —todavía no está congelada—, y es justamente la escritura que la congela ([[cambios-en-el-backlog]] §4).
 - **No inventar · sin PHI · español (Argentina).**
 
 ## Flujo
@@ -32,7 +33,7 @@ distintos. Usa los campos nativos de Azure **Assigned To** (quién la tiene) y
    - **Libre** (sin asignar / New) → paso 3.
    - **Ya tomada** (Assigned a otra persona o en Active) → **AVISAR**: "ya la tiene `<persona>` desde `<fecha>`, en estado `<estado>`" y **esperar tu decisión** (¿la tomás igual?, ¿coordinás?). No escribir sin confirmación. *(«¿La tomás igual?» vale sólo si **no** está en un sprint: ver el caso siguiente.)*
    - **Ya es tuya y está en Active** → no hay nada que escribir.
-   - **Ya tomada, en un sprint y con Estado distinto de `New`** → está **congelada**: la IA **no la reasigna**, ni con confirmación. Avisa quién la tiene y ofrece dejar un comentario con @mención para coordinar; si hay que reasignarla, lo hace una persona desde Azure.
+   - **Ya tomada, en un sprint y con Estado distinto de `New`** (en modo equipo) → está **congelada**: la IA **no la reasigna**, ni con confirmación. Avisa quién la tiene y ofrece dejar un comentario con @mención para coordinar; si hay que reasignarla, lo hace una persona desde Azure.
 3. **Tomarla** (con tu OK): `update_work_item` → `AssignedTo` = vos, `State` = Active.
    Si está en un sprint, el preview lo avisa: *«Al tomarla queda congelada: desde ahí sólo se
    puede comentar.»*

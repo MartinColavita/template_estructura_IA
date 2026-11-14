@@ -43,7 +43,7 @@ Determinar si es **alta** (nuevo) o **edición** (existe `#ID`):
 - Alta → `create_work_item` (proyecto, tipo, título, campos).
 - Edición → `update_work_item` (ID + campos a cambiar). Antes de editar, leer el
   estado actual con `get_work_item` para armar el diff real y no pisar datos.
-  **Si está en un sprint y ya tomada, está congelada: no se edita.** Se frena, se avisa en
+  **Si está en un sprint y ya tomada, está congelada (en modo equipo): no se edita.** Se frena, se avisa en
   criollo y se ofrece dejar el DIFF como comentario ([[cambios-en-el-backlog]] §4).
 
 ### 1b. Buscar duplicados (obligatorio, en toda alta) — con evidencia
@@ -99,7 +99,7 @@ preview es inválido y **no se escribe**, igual que sin el Bloque de dedup.
 | Gate | Estado | Evidencia (una línea, concreta) |
 |---|---|---|
 | **Tablero autorizado** | OK / FRENA / SIN DATOS | org · proyecto · team verificados contra [[tablero-autorizado]] |
-| **Tarjeta congelada (solo ediciones)** | OK / FRENA / SIN DATOS | **Ruta de iteración** y **Estado** leídos de la tarjeta. En un sprint y distinto de `New` → FRENA. Sin poder leerlos → SIN DATOS: se trata como congelada y no se edita |
+| **Tarjeta congelada (solo ediciones)** | OK / FRENA / SIN DATOS / no aplica | **Ruta de iteración** y **Estado** leídos de la tarjeta. En un sprint y distinto de `New` → FRENA. Sin poder leerlos → SIN DATOS: se trata como congelada y no se edita. Con `DEC-006` fijada en modo solo, **no aplica** |
 | **NIVEL (solo Tareas)** | OK / FRENA | **La frase textual del humano**, de esta conversación y sobre esta Historia, que declara contexto dev/planning (en modo lote: la respuesta del arranque a la pregunta que nombró esta Historia) |
 | **Dedup** | OK / FRENA / SIN DATOS | Consultas corridas · candidatos `#ID` · veredicto por candidato (ver §1b) |
 | **Confirmación** | PENDIENTE | Se marca OK recién con el "sí" sobre **el contenido mostrado abajo**, no sobre la propuesta |
@@ -230,22 +230,27 @@ detallado solo si se promueve a `gold`.
 
 ## Barreras (no negociables)
 
-- **GATE de TABLERO (duro).** Solo se escribe en el tablero autorizado (org `{{AZURE_ORG}}` · proyecto `{{AZURE_PROYECTO}}` · team `{{AZURE_TEAM}}`). Antes de `create_work_item`/`update_work_item`, verificá el destino; si es otro tablero o no se puede determinar, **no escribas** y mostrá la advertencia. Detalle: [[tablero-autorizado]].
-- **GATE de TARJETA CONGELADA (duro) — se chequea antes que los demás.** Antes de cualquier `update_work_item`, leer `System.IterationPath` y `System.State`. Si la tarjeta está **en un sprint y ya tomada** (Estado distinto de `New`), **no se edita**: ni con uno ni con dos "sí". Lo que se quería cambiar se ofrece **como comentario** con el DIFF, vía [[comentar-tarea]], y aplicarlo lo decide una persona. **Si no se puede leer el sprint o el estado, está congelada.** Detalle: [[cambios-en-el-backlog]] §4.
+Las barreras de escritura son las de [[AGENTS]] («Automatización por MCP — barreras»), que se cargan en cada
+sesión: TABLERO, TARJETA CONGELADA (en modo equipo, y se chequea antes que las demás), deduplicación,
+confirmación, NIVEL y BORRADO / EDICIÓN DESTRUCTIVA. Valen como están escritas ahí; esta skill no las repite,
+dice cómo las aplica.
+
+- **Tablero y tarjeta congelada, antes de escribir.** Antes de `create_work_item`/`update_work_item` se verifica el
+  destino ([[tablero-autorizado]]); antes de un `update_work_item` (en modo equipo) se leen `System.IterationPath` y
+  `System.State`, y **si no se pueden leer, la tarjeta está congelada**. Lo que se quería cambiar en una congelada se
+  ofrece como comentario con el DIFF, vía [[comentar-tarea]] ([[cambios-en-el-backlog]] §4).
 - **Un solo work item.** Esta skill crea/edita **el** ítem pedido. Para bajar un
   árbol entero (Épica→Features→Historias) es [[sincronizar-backlog]]; para las Tareas de
   una o más Historias, [[planificar-lote]], que aplica esta skill ítem por ítem con un solo
   cierre. Nunca expandir un pedido de un ítem a varios.
-- **GATE de deduplicación (duro).** Antes de `create_work_item` se busca por tag + doc fuente + objetivo (comparando **objetivo/alcance, no título**) y el preview lleva el **Bloque de dedup** obligatorio (consultas · candidatos · veredicto); **sin ese bloque no se escribe**. **Ante la duda, es duplicado:** solapa plausible → preguntar, nunca crear. **Nunca** se crea un repetido. Detalle: [[deduplicacion-antes-de-crear]].
+- **Dedup: el Bloque va en el preview**, con el formato de [[deduplicacion-antes-de-crear]] (consultas · candidatos ·
+  veredicto).
 - **GATE de EXISTENCIA (bloqueante — encontrar ≠ crear igual).** Si la búsqueda arroja un ticket **equivalente o solapado**, encontrarlo **obliga a frenar**, no a seguir: (1) queda **PROHIBIDO `create_work_item`** para ese ítem; (2) se presenta la lista de existentes (`#ID` + link + estado); (3) se **pregunta explícitamente** si ACTUALIZAR (`update_work_item`) el existente o modificar algo, y se **espera el "sí"**. Jamás se crea un ítem nuevo en paralelo a uno que ya existe. Esta barrera es distinta de "buscar": buscar y encontrar sin frenar es la falla que este gate prohíbe.
-- **GATE de NIVEL (bloqueante en modo equipo;** con `DEC-006` fijada en modo solo no se pregunta, porque quien pide la Tarea es quien la desarrolla; con la DEC en `⚠`, se pregunta). El **tipo** ya viene decidido en [[redactar-tarea]]
+- **NIVEL: el tipo y la plantilla.** El **tipo** ya viene decidido en [[redactar-tarea]]
   por su tabla **SELECCIÓN DE TIPO (señal objetiva)**; acá se **verifica que sea
-  coherente** y no se cambia en silencio. Crear un work item tipo **Tarea** obliga a
-  **frenar y confirmar en su propio turno** (en modo lote, el turno de arranque de
-  [[planificar-lote]], con la pregunta que nombra las Historias): *«¿esto es contexto dev/planning y esta
-  Tarea es técnica, para un dev?»* — un "creá la tarea" **no** alcanza por sí solo como
-  declaración. Sin ese "sí" explícito sobre el nivel, **no se crea**: se retiene y se
-  pide la declaración (o se propone la Historia que la engloba). Toda Tarea que se cree
+  coherente** y no se cambia en silencio. En modo equipo, la pregunta del GATE es *«¿esto es contexto
+  dev/planning y esta Tarea es técnica, para un dev?»* (en modo lote, en el arranque de [[planificar-lote]]);
+  sin el «sí», la Tarea se retiene y se propone la Historia que la engloba. Toda Tarea que se cree
   usa la **plantilla detallada** ([[plantillas/tarea]]) con **Contrato técnico**,
   validaciones, casos de error, **Especificación cerrada (SDD)** —con la tabla que mapea
   los **Escenarios del Gherkin de la Historia padre** a los tests— y la lista numerada de
@@ -260,28 +265,12 @@ detallado solo si se promueve a `gold`.
   pregunta**, y si no se contesta queda como pendiente a confirmar en la tarjeta (en modo
   lote: lo que resuelve una fuente se corrige con la fuente a la vista, y el resto va al
   cierre).
-- **GATE de confirmación — proponer y crear son turnos distintos.** Mostrás el
-  preview y esperás; **nunca** proponés y escribís en el mismo turno. El "sí" es por
-  operación y por sesión (o por el lote mostrado en el cierre de [[planificar-lote]]); no se
-  generaliza una aprobación a la siguiente carga.
-- **GATE de BORRADO y EDICIÓN DESTRUCTIVA (duro) — el nivel lo fija el daño.**
-  - *Aditivo* (agregar contrato, comentar, pasar a Active, sumar relación): **un** "sí".
-  - *Destructivo* (pisar una Descripción/Criterios ya escritos, **vaciar** un campo con
-    contenido, Estado terminal *Closed*/*Resolved*): **DOS** "sí" en turnos distintos,
-    con el **ANTES y el DESPUÉS** a la vista entre uno y otro. `update_work_item` que
-    reemplaza contenido existente **no** es aditivo: cae acá. *Excepción del modo lote:*
-    pisar la Descripción o los Criterios de una tarjeta en `New`, sin asignar o asignada a
-    quien confirma, con el ANTES guardado y la fila marcada **PISA**, se confirma con el "sí"
-    del cierre ([[AGENTS]]). Vaciar un campo y el Estado terminal, nunca en el lote. La excepción
-    de `DEC-005` confirmada, en [[AGENTS]].
-  - *Cerrar una Tarea* (*Resolved*/*Closed*): el **primer** aviso lleva los pendientes sin
-    resolver de sus comentarios y de su «Datos a confirmar» ([[comentar-tarea]] §«Antes de
-    cerrar una Tarea»). Si está congelada, no se cierra desde acá: la cierra una persona.
-  - *Borrado* (mover a *Removed* / `delete`): **DOS** "sí", mostrando **qué se borra**
-    (título, estado, hijos, relaciones). Solo borrado **reversible** (papelera). El
-    **destroy permanente NO lo hace esta skill nunca**: se le pasan los pasos al humano.
-  - Las preguntas, **siempre en criollo entendible para funcional o dev** — nunca una
-    confirmación técnica que el lector no pueda evaluar (ver el GATE de BORRADO en AGENTS.md).
+- **Edición destructiva y borrado: cómo caen acá.** Un `update_work_item` que reemplaza contenido ya escrito
+  **no** es aditivo: lleva los dos «sí» con el ANTES y el DESPUÉS. *Cerrar una Tarea* (*Resolved*/*Closed*): el
+  **primer** aviso lleva los pendientes sin resolver de sus comentarios y de su «Datos a confirmar»
+  ([[comentar-tarea]] §«Antes de cerrar una Tarea»); si está congelada, la cierra una persona. *Borrar* es sólo
+  el reversible (a *Removed* o a la papelera): el permanente no lo hace esta skill nunca, se le pasan los pasos
+  al humano.
 - **PHI prohibido.** No subir datos personales sensibles/personales reales; van con marcadores
   (`<persona>`, `<documento>`, …).
 - **Provenance / autoría.** La escritura queda auditada por el dueño del PAT; no

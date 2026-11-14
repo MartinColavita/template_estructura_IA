@@ -24,7 +24,8 @@ comentario de una tarjeta se escribe en el campo **Historial / Discusión**
 (`System.History`).
 
 ## Regla de oro
-- **GATE de TABLERO (duro).** La tarjeta debe pertenecer al tablero autorizado (org `{{AZURE_ORG}}` · proyecto `{{AZURE_PROYECTO}}` · team `{{AZURE_TEAM}}`); antes de postear en `System.History` verificá el destino y, si es otro tablero, **no escribas** y mostrá la advertencia ([[tablero-autorizado]]).
+- **Las barreras de escritura son las de [[AGENTS]]** («Automatización por MCP — barreras»): antes de postear en
+  `System.History` se verifica que la tarjeta sea del tablero autorizado ([[tablero-autorizado]]).
 - **Leer es libre; escribir con confirmación.** Antes de postear, mostrar el texto y a qué `#ID` va, y esperar tu OK — mostrar y postear son pasos distintos, no el mismo turno. **Los sellos de auditoría de un lote** ([[planificar-lote]]) se publican con el "sí" del cierre del lote: la tabla del cierre muestra el veredicto de cada tarjeta, y el sello es el molde fijo de abajo con esos valores.
 - **Sin PHI** en el comentario (marcadores `<persona>`, `<identificador>`… en su lugar). **Español.**
 - **No inventar:** si el comentario afirma un dato duro sin confirmar, marcarlo `⚠`.
