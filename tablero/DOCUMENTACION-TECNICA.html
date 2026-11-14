@@ -161,7 +161,7 @@ Coordinación:             tomar-tarea · comentar-tarea</div>
   <div class="head"><div class="chip">📁</div><h2><span class="n">5.</span>Estructura de carpetas</h2></div>
   <p>Resumen de qué hay en cada carpeta (el detalle vive en el <code>00-index.md</code> de cada una).</p>
   <div class="tree"><span class="d">tablero/</span>
-├─ <span class="cm">(las reglas del redactor + las 4 barreras viven en el AGENTS.md de la RAÍZ, sección «Redacción y carga de tickets en Azure DevOps»)</span>
+├─ <span class="cm">(las barreras viven en el AGENTS.md de la RAÍZ; las reglas del redactor, en conocimiento/redaccion-de-tickets.md)</span>
 ├─ <span class="d">conocimiento/</span>                               <span class="cm">El método: historias, Gherkin, estimación, bugs, antipatrones, trazabilidad, contexto + el puente doc→tickets</span>
 ├─ <span class="d">plantillas/</span>                                 <span class="cm">Moldes de salida por tipo (historia, tarea, bug, habilitador, feature, épica)</span>
 ├─ <span class="d">checklists/</span>                                 <span class="cm">Control de calidad por tipo + el mapa de campos de Azure</span>
@@ -172,7 +172,7 @@ Coordinación:             tomar-tarea · comentar-tarea</div>
 <span class="cm">En el Cerebro (cerebro-digital/configuracion-ia/): las 14 skills del pipeline (skills/ — §3, junto a las 11 del Cerebro y las 3 de desarrollo y evolución; fuente única, 28 en total) y el setup del MCP (integracion-azure-mcp/: token, config, seguridad, troubleshooting + .mcp.json.example).</span>
 
 <span class="cm">Además, en la RAÍZ: .agents/skills/ (espejo para Antigravity/opencode) y .claude/skills/ (espejo para Claude Code, project-scoped), ambos versionados; .githooks/ (hook anti-drift), bin/sync-skills.* y bin/actualizar.*, opencode.json — detalle completo en §6.</span></div>
-  <div class="callout regla"><span class="t">Reglas del redactor (fuente única)</span> <code>AGENTS.md</code> tiene 9 reglas de oro (español y Gherkin, datos personales sensibles prohibidos, no inventar, decidir el tipo primero, criterios verificables, respetar la intención del autor, esperar confirmación, entregar sin relato, dejar el backlog trazable). Viven en el <code>AGENTS.md</code> de la <b>raíz</b> (sección «Redacción y carga de tickets en Azure DevOps»): opencode/Antigravity lo leen nativo y Claude Code lo carga vía el <code>CLAUDE.md</code> de la raíz — un único AGENTS con el núcleo + Azure.</div>
+  <div class="callout regla"><span class="t">Reglas del redactor (fuente única)</span> <code>conocimiento/redaccion-de-tickets.md</code> tiene 9 reglas de oro (español y Gherkin, datos personales sensibles prohibidos, no inventar, decidir el tipo primero, criterios verificables, respetar la intención del autor, esperar confirmación, entregar sin relato, dejar el backlog trazable). Las cargan las skills que redactan o derivan tickets. En el <code>AGENTS.md</code> de la <b>raíz</b> quedan las barreras de escritura y las reglas 2 (datos personales) y 3 (no inventar), que valen siempre: opencode/Antigravity lo leen nativo y Claude Code lo carga vía el <code>CLAUDE.md</code> de la raíz.</div>
 </div>
 
 <!-- 6 -->

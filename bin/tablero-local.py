@@ -226,7 +226,7 @@ def main():
         return OK
     if a.accion == 'estado':
         if a.nuevo in TERMINALES and not a.confirmado:
-            print('FRENA -- pasar #%d a %s es terminal: exige --confirmado (el segundo "si" de la persona).' % (a.id, a.nuevo))
+            print('FRENA -- pasar #%d a %s es terminal: exige --confirmado (el "si" de la persona).' % (a.id, a.nuevo))
             return FRENA
         if a.nuevo == 'Resolved' and not a.confirmado and not (d.get('tipo') == 'Tarea' and dec005_firmada(dir_)):
             print('FRENA -- pasar #%d a Resolved es cerrar: exige --confirmado, salvo una Tarea con DEC-005 (modo '

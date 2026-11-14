@@ -299,7 +299,7 @@ def main():
         else:
             L.append('5-quinquies paridad     : N/A (la Tarea no es de un slice en modernización; ya resuelto, no hay que fundamentarlo)')
         L.append('BLOQUEANTES: <n>   SIN DATOS (no se pudo mirar): <n>   SIN DATOS (pendiente declarado): <n>')
-        L.append('Verificado por: %s · <modelo> · sub-agente de sólo lectura, contexto limpio' % version_motor(a.motor))
+        L.append('Verificado por: %s · <modelo> · sólo lectura, contexto limpio' % version_motor(a.motor))
         L.append('VEREDICTO-FIN')
         L.append('```')
         L.append('Debajo, un hallazgo por línea: `archivo:línea — qué — por qué frena o no`, y para el control 5 una línea por ítem de la lista con la aserción citada (`archivo:línea`). Sin piso de hallazgos: un informe vacío es válido.')

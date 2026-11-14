@@ -23,7 +23,7 @@ distintos. Usa los campos nativos de Azure **Assigned To** (quién la tiene) y
 - **Las barreras de escritura son las de [[AGENTS]]** («Automatización por MCP — barreras»): antes de cambiar
   `AssignedTo`/`State` se verifica que la tarjeta sea del tablero autorizado ([[tablero-autorizado]]).
 - **Chequear ANTES de tomar.** Si ya está Assigned a otra persona o en Active, AVISAR (quién y desde cuándo) y **no pisarla** sin tu confirmación explícita.
-- **Escritura con confirmación.** Cambiar Assigned To / State es una acción con efecto: mostrás qué vas a cambiar y se hace con tu OK — no en el mismo impulso. Con `DEC-005` confirmada, ese OK lo da ella ([[AGENTS]], «Autorización permanente»).
+- **Escritura con confirmación.** Cambiar Assigned To / State es una acción con efecto: mostrás qué vas a cambiar y se hace con tu OK — no en el mismo impulso. Ese OK es el «sí» del plan de [[desarrollar-asignadas]] cuando el plan lista la tarjeta, o lo da `DEC-005` confirmada ([[AGENTS]], «Autorización permanente»).
 - **Tarjeta congelada (en modo equipo):** una tarjeta en un sprint y ya tomada no se reasigna ni se le cambia el Estado: sólo se comenta. Tomar una que está en `New` sí se puede —todavía no está congelada—, y es justamente la escritura que la congela ([[cambios-en-el-backlog]] §4).
 - **No inventar · sin PHI · español (Argentina).**
 

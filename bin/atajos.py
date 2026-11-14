@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Las marcas `atajo:` del codigo de uno o mas repos: que se simplifico a proposito, hasta donde aguanta y cuando
+"""Las marcas `atajo:` del codigo de un repo: que se simplifico a proposito, hasta donde aguanta y cuando
 se mejora. SOLO LECTURA.
 
-    python -I bin/atajos.py --repo <carpeta> [--repo <otra> ...] [--deuda <cerebro-digital/<modulo>/aplicacion/deuda.md>] [--json]
+    python -I bin/atajos.py --repo <carpeta> [--deuda <cerebro-digital/<modulo>/aplicacion/deuda.md>] [--json]
     python -I bin/atajos.py --repo <worktree> --base <rama o sha de base> [...]   (solo lo que agrega el cambio)
 
 Tres estados, nunca dos:  0 = OK (cada atajo dice cuando se mejora; o no hay atajos en los archivos leidos)
                           1 = HALLAZGO (un atajo sin `cuando ...` o sin limite, o que cita una DT-nnn que no esta
                               abierta en deuda.md)
                           2 = SIN DATOS (la carpeta no existe o no es la raiz de su repo, git no pudo listar, cero
-                              archivos de codigo leidos en alguno de los repos, o deuda.md ilegible; con --base: la
+                              archivos de codigo leidos, mas de un --repo, o deuda.md ilegible; con --base: la
                               base no existe o git no pudo leer el diff. Un diff leido que no agrega codigo es OK
                               con aviso: no hay marca nueva posible)
 
-CON --base (un solo repo, con git) se miran solo las lineas que agrega el cambio: el diff desde el punto donde la rama
+CON --base (con git) se miran solo las lineas que agrega el cambio: el diff desde el punto donde la rama
 salio de la base (merge-base) hasta el arbol de trabajo, mas los archivos nuevos sin agregar. Es lo que chequea la
 convencion C4 en una Tarea; sin --base se cuenta el repo entero.
 
@@ -37,6 +37,9 @@ import os
 import re
 import subprocess
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from auditoria import diff as lector  # noqa: E402  el mismo lector de diff que auditar-diff
 
 OK, HALLAZGO, SIN_DATOS = 0, 1, 2
 MAX_BYTES = 2 * 1024 * 1024
@@ -99,19 +102,9 @@ def lineas_agregadas(repo, base):
     rc, diff, err = git('diff', '--no-color', '--no-ext-diff', '-M', '--src-prefix=a/', '--dst-prefix=b/', '--unified=0', mb.strip(), '--')
     if rc != 0:
         raise SinDatos('git no pudo leer el diff de %s: %s' % (repo, err))
-    res, rel, nro, previa = {}, None, 0, ''
-    for l in diff.splitlines():
-        anterior, previa = previa, l
-        # La cabecera +++ va siempre justo despues de la ---: una linea agregada que empieza con "++ " no es cabecera.
-        if l.startswith('+++ ') and anterior.startswith('--- '):
-            destino = l[4:].strip()
-            rel = None if destino == '/dev/null' else (destino[2:] if destino.startswith('b/') else destino)
-        elif l.startswith('@@'):
-            m = re.search(r'\+(\d+)', l)
-            nro = int(m.group(1)) - 1 if m else 0
-        elif l.startswith('+') and rel is not None:
-            nro += 1
-            res.setdefault(rel, []).append((nro, l[1:]))
+    res = {}
+    for rel, nro, texto in lector.lineas_agregadas(diff):
+        res.setdefault(rel, []).append((nro, texto))
     rc, nuevos, err = git('ls-files', '-z', '--others', '--exclude-standard')
     if rc != 0:
         raise SinDatos('git no pudo listar los archivos nuevos de %s: %s' % (repo, err))
@@ -184,14 +177,11 @@ def deudas(ruta):
 
 def main():
     ap = argparse.ArgumentParser(description='Las marcas atajo: del codigo, con su limite y su disparador.')
-    ap.add_argument('--repo', action='append', required=True, help='carpeta del repo de codigo (se puede repetir)')
+    ap.add_argument('--repo', action='append', required=True, help='carpeta del repo de codigo (uno solo)')
     ap.add_argument('--deuda', help='aplicacion/deuda.md del modulo, para chequear los DT-nnn citados')
-    ap.add_argument('--base', help='rama o sha de base: solo las lineas que agrega el cambio (un solo --repo, con git)')
+    ap.add_argument('--base', help='rama o sha de base: solo las lineas que agrega el cambio (con git)')
     ap.add_argument('--json', action='store_true')
     a = ap.parse_args()
-    if a.base and len(a.repo) != 1:
-        print('SIN DATOS -- --base mira el cambio de UN repo: pasa un solo --repo')
-        return SIN_DATOS
 
     abiertas = pagadas = None
     if a.deuda:
@@ -200,55 +190,55 @@ def main():
             return SIN_DATOS
         abiertas, pagadas = deudas(a.deuda)
 
+    if len(a.repo) != 1:
+        print('SIN DATOS -- atajos.py mira UN repo: pasa un solo --repo (antes se aceptaban varios)')
+        return SIN_DATOS
+    repo = a.repo[0]
+    if not os.path.isdir(repo):
+        print('SIN DATOS -- no existe la carpeta %s' % repo)
+        return SIN_DATOS
     leidos, atajos, en_string, avisos = 0, [], [], []
-    for repo in a.repo:
-        if not os.path.isdir(repo):
-            print('SIN DATOS -- no existe la carpeta %s' % repo)
-            return SIN_DATOS
-        etiqueta = os.path.basename(os.path.abspath(repo))
-        leidos_repo = 0
+    etiqueta = os.path.basename(os.path.abspath(repo))
+    if a.base:
+        listar(repo)   # la misma barrera: con git y en la raiz del repo, o SIN DATOS
+        agregadas = lineas_agregadas(repo, a.base)
+    for rel in sorted(agregadas if a.base else listar(repo)):
+        if rel.lower().endswith(DOCS) or set(rel.replace('\\', '/').split('/')[:-1]) & SALTEAR:
+            continue
         if a.base:
-            listar(repo)   # la misma barrera: con git y en la raiz del repo, o SIN DATOS
-            agregadas = lineas_agregadas(repo, a.base)
-        for rel in sorted(agregadas if a.base else listar(repo)):
-            if rel.lower().endswith(DOCS) or set(rel.replace('\\', '/').split('/')[:-1]) & SALTEAR:
+            lineas = agregadas[rel]
+        else:
+            texto = leer_texto(os.path.join(repo, rel))
+            if texto is None:
                 continue
-            if a.base:
-                lineas = agregadas[rel]
-            else:
-                texto = leer_texto(os.path.join(repo, rel))
-                if texto is None:
-                    continue
-                lineas = list(enumerate(texto.splitlines(), 1))
-            leidos_repo += 1
-            for n, linea in lineas:
-                resto, descartadas = buscar_marca(linea)
-                if descartadas:
-                    en_string.append('%s/%s:%d' % (etiqueta, rel, n))
-                if resto is None:
-                    continue
-                limite, disparador, refs = interpretar(resto)
-                problemas = []
-                if not limite:
-                    problemas.append('sin limite')
-                if not disparador:
-                    problemas.append('sin disparador (cuando ...)')
-                if abiertas is not None:
-                    for r in refs:
-                        if r.startswith('DT-') and r in pagadas:
-                            problemas.append('%s figura como pagada y la marca sigue' % r)
-                        elif r.startswith('DT-') and r not in abiertas:
-                            problemas.append('%s no esta abierta en deuda.md' % r)
-                atajos.append({'archivo': '%s/%s' % (etiqueta, rel), 'linea': n, 'limite': limite,
-                               'disparador': disparador, 'refs': refs, 'problemas': problemas})
-        # La regla del cero, por repo: un repo sin codigo leido no queda tapado por otro que si lo tiene.
-        if leidos_repo == 0 and a.base:
-            # El diff se leyo entero y no agrega codigo (solo borra, o es un renombre): no hay marca nueva posible.
-            avisos.append('el cambio desde %s no agrega lineas de codigo en %s: no hay marcas nuevas que contar' % (a.base, repo))
-        elif leidos_repo == 0:
-            print('SIN DATOS -- cero archivos de codigo leidos en %s: no hay nada que contar' % repo)
-            return SIN_DATOS
-        leidos += leidos_repo
+            lineas = list(enumerate(texto.splitlines(), 1))
+        leidos += 1
+        for n, linea in lineas:
+            resto, descartadas = buscar_marca(linea)
+            if descartadas:
+                en_string.append('%s/%s:%d' % (etiqueta, rel, n))
+            if resto is None:
+                continue
+            limite, disparador, refs = interpretar(resto)
+            problemas = []
+            if not limite:
+                problemas.append('sin limite')
+            if not disparador:
+                problemas.append('sin disparador (cuando ...)')
+            if abiertas is not None:
+                for r in refs:
+                    if r.startswith('DT-') and r in pagadas:
+                        problemas.append('%s figura como pagada y la marca sigue' % r)
+                    elif r.startswith('DT-') and r not in abiertas:
+                        problemas.append('%s no esta abierta en deuda.md' % r)
+            atajos.append({'archivo': '%s/%s' % (etiqueta, rel), 'linea': n, 'limite': limite,
+                           'disparador': disparador, 'refs': refs, 'problemas': problemas})
+    if leidos == 0 and a.base:
+        # El diff se leyo entero y no agrega codigo (solo borra, o es un renombre): no hay marca nueva posible.
+        avisos.append('el cambio desde %s no agrega lineas de codigo en %s: no hay marcas nuevas que contar' % (a.base, repo))
+    elif leidos == 0:
+        print('SIN DATOS -- cero archivos de codigo leidos en %s: no hay nada que contar' % repo)
+        return SIN_DATOS
 
     con_problema = [x for x in atajos if x['problemas']]
     sin_ref = [x for x in atajos if not x['refs']]
@@ -260,8 +250,8 @@ def main():
                          ensure_ascii=False, indent=1))
         return rc
 
-    print('Atajos -- %d archivo(s) de codigo leido(s) en %d repo(s)%s: %d marca(s)' % (
-        leidos, len(a.repo), (', solo las lineas que agrega el cambio desde %s' % a.base) if a.base else '', len(atajos)))
+    print('Atajos -- %d archivo(s) de codigo leido(s) en %s%s: %d marca(s)' % (
+        leidos, etiqueta, (', solo las lineas que agrega el cambio desde %s' % a.base) if a.base else '', len(atajos)))
     for x in atajos:
         print('  %s:%d  %s | cuando: %s | %s%s' % (
             x['archivo'], x['linea'], x['limite'] or '-', x['disparador'] or '-', ' '.join(x['refs']) or 'sin ref',

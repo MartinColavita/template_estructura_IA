@@ -8,7 +8,7 @@
 Tres estados, nunca dos:  0 = arbol listo   1 = la ficha no se deriva (sin bloque, con la marca de advertencia (el triangulo), o incoherente)
 2 = SIN DATOS (no se pudo leer)
 
-POR QUE EXISTE. La Regla de cardinalidad de AGENTS.md dice que el conteo lo fija la ficha, no el
+POR QUE EXISTE. La Regla de cardinalidad (tablero/conocimiento/redaccion-de-tickets.md) dice que el conteo lo fija la ficha, no el
 modelo: 1 Epica por [S-nn], 1 Feature por [C-nn], 1 Historia por [F-nn], 0 Tareas. Si lo cuenta un
 script, dos modelos distintos producen el mismo arbol. sincronizar-backlog lo corre primero y
 recien despues redacta cada nodo; si este script dice que no se deriva, no se deriva.

@@ -120,7 +120,7 @@ def main():
     for r in reutilizados:
         print('  ya existia %s -> #%d (no se duplica)' % (r['titulo'], r['id']))
     print('  Etiqueta tematica: %s | Documento fuente: %s' % (etiqueta or '(sin etiqueta: HALLAZGO de la ficha)', fuente))
-    print('  Lo que este script NO hace: redactar cada nodo (redactar-tarea), ni crear Tareas (se confirma el nivel en su propio turno).')
+    print('  Lo que este script NO hace: redactar cada nodo (redactar-tarea), ni crear Tareas (el nivel lo declara el humano en la conversacion: GATE de NIVEL).')
     return OK
 
 

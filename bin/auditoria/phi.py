@@ -1,5 +1,6 @@
 """Datos personales (PHI) en el texto de una tarjeta, para auditar-tarea y auditar-historia; auditar-diff usa el mismo
-reconocimiento de emails (cada script con su severidad).
+reconocimiento de emails, de lo ambiguo (ambiguos) y de los CUIT (cuits) en los archivos de datos, cada script con su
+severidad.
 
 Lo INEQUIVOCO frena (HALLAZGO): un email de un dominio real o un CUIT/CUIL de persona (prefijo 20, 23, 24 o 27) con su
 digito verificador valido, escrito con guiones (sin guiones puede ser una fecha u otro numero: avisa). Lo AMBIGUO avisa (AVISO), porque la heuristica no distingue un dato
@@ -18,10 +19,10 @@ _EMAIL = re.compile(r'(?<![\w.+\-/@])([\w.+\-]+)@((?:[\w\-]+\.)+[A-Za-z]{2,})(?!
 # logo@2x.png o foo@next.js no son emails: el "dominio" termina en una extension de archivo
 _EXTENSION = re.compile(r'\.(png|jpe?g|gif|svg|webp|ico|bmp|js|mjs|cjs|ts|tsx|jsx|css|scss|less|map|json|ya?ml|xml|txt|md|html?|py|java|kt|cs)$', re.I)
 _CUIT = re.compile(r'(?<![\w\-.])(\d{2})-?(\d{8})-?(\d)(?![\w\-]|\.\d)')   # un punto final de oracion no lo corta
-_AMBIGUOS = [
-    ('un DNI con puntos', re.compile(r'(?<![\w.])\d{1,2}\.\d{3}\.\d{3}(?![\w]|\.\d)')),
-    ('un numero de 7 u 8 cifras (documento?)', re.compile(r'(?<![\w#/.\-:])\d{7,8}(?![\w/.\-])')),
-    ('un telefono', re.compile(r'(?<![\w\-])(?:\+?54[\s\-]?)?(?:\(?\d{2,4}\)?[\s\-])?'
+_AMBIGUOS = [   # (clave, nombre, patron)
+    ('dni', 'un DNI con puntos', re.compile(r'(?<![\w.])\d{1,2}\.\d{3}\.\d{3}(?![\w]|\.\d)')),
+    ('cifras', 'un numero de 7 u 8 cifras (documento?)', re.compile(r'(?<![\w#/.\-:])\d{7,8}(?![\w/.\-])')),
+    ('telefono', 'un telefono', re.compile(r'(?<![\w\-])(?:\+?54[\s\-]?)?(?:\(?\d{2,4}\)?[\s\-])?'
                                r'(?:15[\s\-]?)?\d{4}-\d{4}(?![\w\-])')),
 ]
 
@@ -62,6 +63,26 @@ def _unicos(xs):
     return res
 
 
+def cuits(fragmento):
+    """Lo que tiene forma de CUIT o CUIL (con o sin guiones), de persona o no."""
+    return [m.group(0) for m in _CUIT.finditer(fragmento or '')]
+
+
+def ambiguos(fragmento, solo=None):
+    """[(nombre, [valores])] de lo AMBIGUO: un DNI con puntos, un numero de 7 u 8 cifras, un telefono (sin los CUIT,
+    que se miran aparte). Lo usan revisar() y auditar-diff.py: un solo criterio para lo mismo."""
+    sin_cuit = _CUIT.sub(' ', fragmento or '')
+    res = []
+    for clave, nombre, rx in _AMBIGUOS:
+        if solo is not None and clave not in solo:
+            continue
+        hall = _unicos(x for x in rx.findall(sin_cuit)
+                       if not (nombre == 'un telefono' and re.match(r'^(19|20)\d\d-(19|20)\d\d$', x.strip())))
+        if hall:
+            res.append((nombre, hall))
+    return res
+
+
 def revisar(rep, chequeo, fragmento, donde=''):
     """Agrega al reporte lo que encuentra; devuelve cuantos hallazgos y avisos dejo. `donde` dice que se miro."""
     plano = texto.texto_plano(fragmento or '')
@@ -88,14 +109,10 @@ def revisar(rep, chequeo, fragmento, donde=''):
         rep.aviso(chequeo, 'posible PHI: un numero con forma de CUIT', ', '.join(_unicos(otros_cuit)[:5]) +
                   ' -- de empresa o con el verificador mal; si es de una persona, va <documento>')
         marcados += 1
-    sin_cuit = _CUIT.sub(' ', plano)
-    for nombre, rx in _AMBIGUOS:
-        hall = _unicos(x for x in rx.findall(sin_cuit)
-                       if not (nombre == 'un telefono' and re.match(r'^(19|20)\d\d-(19|20)\d\d$', x.strip())))
-        if hall:
-            rep.aviso(chequeo, 'posible PHI: %s' % nombre, ', '.join(hall[:5]) +
-                      ' -- revisar; si es un dato real, va un marcador (<documento>, <telefono>)')
-            marcados += 1
+    for nombre, hall in ambiguos(plano):
+        rep.aviso(chequeo, 'posible PHI: %s' % nombre, ', '.join(hall[:5]) +
+                  ' -- revisar; si es un dato real, va un marcador (<documento>, <telefono>)')
+        marcados += 1
     if not marcados:
         rep.ok(chequeo, 'sin emails, CUIT ni numeros con forma de documento o telefono (heuristica)' + (' en ' + donde if donde else ''))
     return marcados

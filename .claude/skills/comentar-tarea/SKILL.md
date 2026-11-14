@@ -292,8 +292,8 @@ La lista va **en el primer aviso** del cierre:
 > ‹otro›. ¿Querés cerrarla igual?»*
 
 - **No frena el cierre**: lo decide la persona, pero con los pendientes a la vista.
-- **El cierre sigue el GATE de edición destructiva de [[AGENTS]]** (con su excepción de
-  `DEC-005`), y la lista de pendientes va en el primer aviso. Si la Tarea está **congelada**
+- **El cierre sigue el GATE de edición destructiva de [[AGENTS]]** (con sus excepciones: `DEC-005`, y en modo
+  solo un «sí» para cerrar la propia Tarea), y la lista de pendientes va en el primer aviso. Si la Tarea está **congelada**
   (en un sprint y ya tomada), la cierra una persona ([[cambios-en-el-backlog]] §4).
 - **Sin pendientes**, se dice: *«No quedan pendientes en los comentarios.»*
 - **Si no se pudieron leer los comentarios**, es **SIN DATOS**, y se dice: no es «no hay

@@ -17,6 +17,9 @@ description: >-
 > y se opera con `bin/tablero-local.py`, con los mismos GATEs y sin MCP (detalle: `backlog/README.md` del módulo).
 > Con Azure DevOps, Jira u otro tablero, las operaciones se traducen con la tabla de `integracion-azure-mcp/00-index.md`.
 
+> **El método de redacción** —las reglas de oro, «Fuentes que deciden», el modo lote y la regla de cardinalidad— está en
+> [[redaccion-de-tickets]]: se lee antes de redactar o derivar. Las barreras de escritura, en [[AGENTS]].
+
 Toma el ticket ya redactado (por [[redactar-tarea]]) y lo **crea o actualiza** en
 el board vía el MCP de Azure DevOps: **un** work item, nunca un árbol. Escribir en el board
 no se deshace solo; por eso el control humano es obligatorio.
@@ -266,7 +269,7 @@ dice cómo las aplica.
   lote: lo que resuelve una fuente se corrige con la fuente a la vista, y el resto va al
   cierre).
 - **Edición destructiva y borrado: cómo caen acá.** Un `update_work_item` que reemplaza contenido ya escrito
-  **no** es aditivo: lleva los dos «sí» con el ANTES y el DESPUÉS. *Cerrar una Tarea* (*Resolved*/*Closed*): el
+  **no** es aditivo: lleva los dos «sí» con el ANTES y el DESPUÉS. *Cerrar una Tarea* (*Resolved*/*Closed*; en modo solo, la propia, con un «sí»): el
   **primer** aviso lleva los pendientes sin resolver de sus comentarios y de su «Datos a confirmar»
   ([[comentar-tarea]] §«Antes de cerrar una Tarea»); si está congelada, la cierra una persona. *Borrar* es sólo
   el reversible (a *Removed* o a la papelera): el permanente no lo hace esta skill nunca, se le pasan los pasos

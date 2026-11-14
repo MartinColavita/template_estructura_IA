@@ -2,7 +2,7 @@
 
 Gemini CLI lee `GEMINI.md` por defecto, y `AGENTS.md` sólo si cada persona lo agrega a `context.fileName` en su `settings.json`; por eso se importa desde acá, con el **mismo patrón** que usa `CLAUDE.md`. Sin este archivo, la herramienta trabaja sin las reglas del proyecto y tiende a **duplicar el conocimiento** en vez de apuntar a la fuente única.
 
-El `AGENTS.md` de la raíz ya incluye el **núcleo** + las **reglas de redacción/carga de tickets Azure**, así que con este único import quedan cargadas todas las **reglas**.
+El `AGENTS.md` de la raíz ya incluye el **núcleo** y las **barreras de escritura en el tablero**, así que con este único import quedan cargadas las **reglas** que valen siempre; el método de redacción de tickets (`tablero/conocimiento/redaccion-de-tickets.md`) lo cargan las skills que redactan.
 
 @AGENTS.md
 

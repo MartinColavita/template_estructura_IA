@@ -205,6 +205,39 @@ def main():
     caso('correo real: aviso', any('correo' in v for v in d['avisos']))
     caso('el marcador <persona> no es hallazgo', not any('config.properties:3' in h for h in d['hallazgos']))
     with open(diff, 'w', encoding='utf-8') as h:
+        h.write('--- a/src/contador.c\n+++ b/src/contador.c\n@@ -1 +1,3 @@\n int x;\n+++ contador;\n'
+                '+token = "abcdefghij123456"\n'
+                '--- a/datos/clientes.csv\n+++ b/datos/clientes.csv\n@@ -0,0 +1,2 @@\n'
+                '+Ana,11 4567-8901\n+4111111111111111\n')
+    rc, out = script('auditar-diff.py', '--archivo', diff, '--json')
+    d = json.loads(out)
+    caso('una linea agregada que empieza con "++" no se toma por cabecera: el secreto sigue en su archivo y linea',
+         any(h.startswith('src/contador.c:3') for h in d['hallazgos']), out[:400])
+    caso('en un archivo de datos avisan el telefono argentino (el criterio de phi.py) y la tarjeta',
+         any('clientes.csv:1' in v and 'telefono' in v for v in d['avisos'])
+         and any('clientes.csv:2' in v and 'tarjeta' in v for v in d['avisos']), out[:500])
+    with open(diff, 'w', encoding='utf-8') as h:
+        h.write('--- a/datos/semilla.json\n+++ b/datos/semilla.json\n@@ -0,0 +1,5 @@\n'
+                '+{"tel":"+54 11 4567 8901"}\n+{"cuil":"20301234563"}\n+{"dni":30123456}\n'
+                '+{"cuit":"20-30123456-3"}\n+{"dni":"30.123.456"}\n'
+                '--- a/src/rangos.py\n+++ b/src/rangos.py\n@@ -0,0 +1,3 @@\n+RANGO = "1000-2000"\n+VERSION = "1.234.567"\n+ID = 123456789\n'
+                '--- a/db/v2.sql\n+++ b/db/v2.sql\n@@ -1,2 +1,2 @@\n--- comentario viejo\n+++ comentario nuevo\n'
+                ' select 1;\n')
+    rc, out = script('auditar-diff.py', '--archivo', diff, '--json')
+    d = json.loads(out)
+    caso('en datos: telefono con espacios, CUIL sin guiones, DNI en JSON compacto, CUIT con guiones y DNI con puntos, cada uno avisa',
+         all(any('semilla.json:%d' % i in v for v in d['avisos']) for i in range(1, 6)), out[:700])
+    caso('en el codigo, un rango, una version con puntos o un numero suelto no avisan como telefono o documento',
+         not any('rangos.py' in v for v in d['avisos']), out[:700])
+    with open(diff + '.ff', 'w', encoding='utf-8', newline='') as h:
+        h.write('--- a/src/ff.py\n+++ b/src/ff.py\n@@ -0,0 +1,3 @@\n+a = 1\x0cb = 2\n+c = "x y"\n'
+                '+token = "abcdefghij123456"\n')
+    rc_ff, out_ff = script('auditar-diff.py', '--archivo', diff + '.ff', '--json')
+    caso('un salto de pagina o un U+2028 en una linea no descuadra el bloque: el secreto de la linea 3 se ve',
+         rc_ff == 1 and any(h.startswith('src/ff.py:3') for h in json.loads(out_ff)['hallazgos']), out_ff[:400])
+    caso('un comentario SQL borrado ("--- ...") no se toma por cabecera: la linea agregada queda en db/v2.sql:1',
+         d['lineas_agregadas'] == 9 and 'db/v2.sql' in d['archivos'], out[:400])
+    with open(diff, 'w', encoding='utf-8') as h:
         h.write('--- a/docs/guia.md\n+++ b/docs/guia.md\n@@ -1 +1,2 @@\n hola\n+una linea mas de documentacion\n')
     rc, out = script('auditar-diff.py', '--archivo', diff, '--json')
     d = json.loads(out)

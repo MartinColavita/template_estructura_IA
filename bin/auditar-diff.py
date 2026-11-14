@@ -28,7 +28,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from auditoria import phi  # noqa: E402  el mismo reconocimiento de emails que auditar-tarea
+from auditoria import diff as lector, phi  # noqa: E402  el mismo lector de diff que atajos y el mismo criterio de PHI que auditar-tarea
 
 OK, HALLAZGO, SIN_DATOS = 0, 1, 2
 
@@ -39,40 +39,24 @@ SECRETOS = [
     ('clave de proveedor de nube', re.compile(r'\b(AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{30,}|glpat-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|sk-[A-Za-z0-9]{32,})\b')),
     ('URL con usuario y clave', re.compile(r'[a-z][a-z0-9+.-]*://[^/\s:@]+:[^/\s@]{3,}@')),
 ]
+# Lo propio del codigo y de los archivos de datos. En los de datos se suma lo de auditoria/phi.py (el mismo criterio
+# que en las tarjetas: CUIT o CUIL con guiones, DNI con puntos, telefono argentino); en el codigo no, porque ahi un
+# 1000-2000 o un 1.234.567 son casi siempre otra cosa.
 PHI = [
-    ('telefono', re.compile(r'(?<![\w/])\+?\d{2,4}[\s.-]\d{3,4}[\s.-]\d{3,4}\b')),
-    ('numero de documento o tarjeta', re.compile(r'(?<![\w./-])\d{7,16}(?![\w.-])')),
+    ('un telefono', re.compile(r'(?<![\w/])\+?\d{2,4}[\s.-]\d{3,4}[\s.-]\d{3,4}\b')),
+    ('numero de documento, CUIL o tarjeta', re.compile(r'(?<![\w./-])\d{7,16}(?![\w.-])')),
     ('nombre de persona asignado', re.compile(r'(?i)\b(nombre|apellido|name|surname|first_?name|last_?name)\b\s*[:=]\s*["\'][A-Z][a-z]+(\s[A-Z][a-z]+)?["\']')),
 ]
+SOLO_EN_DATOS = ('numero de documento, CUIL o tarjeta',)
 MARCADOR = re.compile(r'<[a-z][a-z_-]{2,30}>|&lt;[a-z][a-z_-]{2,30}&gt;')
 DOCS = re.compile(r'\.(md|txt|rst|adoc|html)$|(^|/)docs?/')
 DATOS = re.compile(r'(^|/)(test|tests|spec|__tests__|fixtures?|datos?|data|seed|mocks?|samples?)(/|$)|\.(json|csv|sql|ya?ml|xml)$')
 
 
 def git(repo, *args):
-    r = subprocess.run(['git', '-C', repo] + list(args), capture_output=True, text=True,
-                       encoding='utf-8', errors='replace')
-    return r.returncode, r.stdout
-
-
-def lineas_agregadas(diff):
-    """[(archivo, nro, texto)] de las lineas '+' del diff unificado."""
-    res, archivo, nro = [], None, 0
-    for l in diff.splitlines():
-        if l.startswith('+++ '):
-            archivo = l[4:].strip()
-            archivo = archivo[2:] if archivo.startswith('b/') else archivo
-            continue
-        if l.startswith('@@'):
-            m = re.search(r'\+(\d+)', l)
-            nro = int(m.group(1)) - 1 if m else 0
-            continue
-        if l.startswith('+') and not l.startswith('+++'):
-            nro += 1
-            res.append((archivo or '?', nro, l[1:]))
-        elif not l.startswith('-') and not l.startswith('\\'):
-            nro += 1
-    return res
+    # bytes y despues texto: en modo texto, una \r suelta del contenido se volveria un fin de linea
+    r = subprocess.run(['git', '-C', repo] + list(args), capture_output=True)
+    return r.returncode, r.stdout.decode('utf-8', 'replace')
 
 
 def main():
@@ -86,7 +70,7 @@ def main():
 
     rama = None
     if a.archivo:
-        with open(a.archivo, 'r', encoding='utf-8', errors='replace') as h:
+        with open(a.archivo, 'r', encoding='utf-8', errors='replace', newline='') as h:
             diff = h.read()
     elif a.repo:
         # la cascada de auditar-codigo: la primera que devuelva algo, mas lo no commiteado
@@ -104,7 +88,7 @@ def main():
         print('SIN DATOS -- falta --repo o --archivo.')
         return SIN_DATOS
 
-    agregadas = lineas_agregadas(diff)
+    agregadas = lector.lineas_agregadas(diff)
     if not agregadas:
         print('SIN DATOS -- el diff no tiene lineas agregadas: no hay que auditar (o no se pudo leer).')
         return SIN_DATOS
@@ -120,11 +104,14 @@ def main():
         if DATOS.search(f) or not f.endswith(('.md', '.txt')):
             if any(real for _, real in phi.emails(t)):
                 avisos.append('%s:%d: posible correo electronico (leerlo: si es un dato real, es PHI)' % (f, n))
-            for nombre, rx in PHI:
-                if nombre == 'numero de documento o tarjeta' and not DATOS.search(f):
-                    continue
-                if rx.search(t):
-                    avisos.append('%s:%d: posible %s (leerlo: si es un dato real, es PHI)' % (f, n, nombre))
+            datos = bool(DATOS.search(f))
+            vistos = [nombre for nombre, rx in PHI if (datos or nombre not in SOLO_EN_DATOS) and rx.search(t)]
+            if datos:
+                # el numero de 7 u 8 cifras de phi.py ya lo cubre el patron de 7 a 16 de aca: no se avisa dos veces
+                vistos += [nombre for nombre, _ in phi.ambiguos(t, solo=('dni', 'telefono'))]
+                vistos += ['un CUIT o CUIL'] if phi.cuits(t) else []
+            for nombre in dict.fromkeys(vistos):
+                avisos.append('%s:%d: posible %s (leerlo: si es un dato real, es PHI)' % (f, n, nombre))
     if all(DOCS.search(f) for f in archivos):
         avisos.append('el diff solo toca documentacion: revisar si corresponde la auditoria de entrega')
     if a.id and rama is not None and a.id not in rama:
@@ -137,8 +124,9 @@ def main():
     if a.json:
         print(json.dumps(salida, ensure_ascii=True, indent=1))
     else:
-        print('AUDITAR DIFF (mecanico) -- %s  [%d archivo(s), %d linea(s) agregada(s); secretos: %d patron(es) mirados, %d hallazgo(s); datos personales: %d patron(es), %d aviso(s)]' % (
-            salida['estado'], len(archivos), len(agregadas), len(SECRETOS), len(hallazgos), len(PHI) + 1, sum(1 for v in avisos if 'posible' in v)))
+        print('AUDITAR DIFF (mecanico) -- %s  [%d archivo(s), %d linea(s) agregada(s); secretos: %d patron(es) mirados, %d hallazgo(s); datos personales: %d patron(es) en el codigo y %d en los archivos de datos, %d aviso(s)]' % (
+            salida['estado'], len(archivos), len(agregadas), len(SECRETOS), len(hallazgos), len(PHI) - len(SOLO_EN_DATOS) + 1,
+            len(PHI) + 4, sum(1 for v in avisos if 'posible' in v)))
         for h in hallazgos:
             print('  HALLAZGO: ' + h)
         for v in avisos[:50]:

@@ -181,6 +181,7 @@ _SK = 'cerebro-digital/configuracion-ia/skills/'
 _AZ = 'tablero/'
 SKILLS = {
     'redactar-tarea': _SK + 'redactar-tarea/SKILL.md',
+    'redaccion-de-tickets': _AZ + 'conocimiento/redaccion-de-tickets.md',
     'plantillas/tarea': _AZ + 'plantillas/tarea.md',
     'plantillas/historia-de-usuario': _AZ + 'plantillas/historia-de-usuario.md',
     'checklists/mapa-campos-azure': _AZ + 'checklists/mapa-campos-azure.md',
@@ -190,15 +191,15 @@ SKILLS = {
     'analizar-tareas': _SK + 'analizar-tareas/SKILL.md',
 }
 SKILLS_DE = {
-    ('redactar', 'Tarea'): ('redactar-tarea', 'plantillas/tarea', 'checklists/mapa-campos-azure',
+    ('redactar', 'Tarea'): ('redactar-tarea', 'redaccion-de-tickets', 'plantillas/tarea', 'checklists/mapa-campos-azure',
                             'estimar-story-points'),
-    ('redactar', 'Historia'): ('redactar-tarea', 'plantillas/historia-de-usuario',
+    ('redactar', 'Historia'): ('redactar-tarea', 'redaccion-de-tickets', 'plantillas/historia-de-usuario',
                                'checklists/mapa-campos-azure', 'estimar-story-points'),
     ('auditar', 'Tarea'): ('auditar-tarea',),
     ('auditar', 'Historia'): ('auditar-historia',),
     ('auditar', 'set'): ('analizar-tareas',),
-    ('corregir', 'Tarea'): ('redactar-tarea', 'plantillas/tarea', 'checklists/mapa-campos-azure'),
-    ('corregir', 'Historia'): ('redactar-tarea', 'plantillas/historia-de-usuario',
+    ('corregir', 'Tarea'): ('redactar-tarea', 'redaccion-de-tickets', 'plantillas/tarea', 'checklists/mapa-campos-azure'),
+    ('corregir', 'Historia'): ('redactar-tarea', 'redaccion-de-tickets', 'plantillas/historia-de-usuario',
                                'checklists/mapa-campos-azure'),
 }
 

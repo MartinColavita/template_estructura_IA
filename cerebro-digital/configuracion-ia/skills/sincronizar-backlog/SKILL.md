@@ -21,6 +21,9 @@ description: >-
 > La bajada 1:1 del árbol la hace `bin/derivar-a-tablero-local.py <ficha>` (idempotente; sin Tareas); esta skill
 > redacta cada nodo después, con `redactar-tarea`.
 
+> **El método de redacción** —las reglas de oro, «Fuentes que deciden», el modo lote y la regla de cardinalidad— está en
+> [[redaccion-de-tickets]]: se lee antes de redactar o derivar. Las barreras de escritura, en [[AGENTS]].
+
 Toma una **ficha del Cerebro Digital** (`cerebro-digital/`) y baja
 de ella el **árbol de work items** al board de Azure DevOps. Es la skill que
 **conecta la documentación con el backlog**: doc → tickets → historial.

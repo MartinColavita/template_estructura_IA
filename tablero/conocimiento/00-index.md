@@ -21,6 +21,7 @@ El **método** es agnóstico de dominio y reutilizable entre los proyectos del e
 
 | Archivo | Qué contiene | Cuándo consultarlo |
 |---|---|---|
+| [[redaccion-de-tickets]] | Las **reglas de oro** de la redacción, **«Fuentes que deciden»** (qué no se pregunta), el **modo lote**, las auditorías a pedido y la **regla de cardinalidad** (el árbol sale 1:1 de la ficha). | **Antes de redactar o derivar** cualquier ticket. |
 | [[historias-de-usuario]] | Cómo convertir un pedido pobre en una historia con rol, necesidad y valor; formato "Como/quiero/para", criterios INVEST, cuándo algo NO debería ser historia, técnicas de división. | Al redactar o auditar una **Historia de usuario**. |
 | [[criterios-aceptacion-gherkin]] | Cómo escribir el campo Criterios de aceptación: Gherkin en español (Dado/Cuando/Entonces) vs. lista de reglas, verificables y sin PHI, incluyendo el camino no feliz. | Al escribir los **Criterios de aceptación** de una historia. |
 | [[definicion-preparado-terminado]] | Definición de Preparado (DoR) y de Terminado (DoD): las dos listas de control para que un ítem entre a un sprint y para poder cerrarlo. | Para decidir si una historia **está lista para el sprint** o cuándo está terminada. |

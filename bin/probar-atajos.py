@@ -135,7 +135,7 @@ def main():
          'AVISO: 1 linea(s) con algo que parece una marca dentro de un string' in out and 'app2/src/h.js:1' in out,
          out[-700:])
     rc, out = correr('--repo', app2, '--repo', vacio)
-    caso('dos repos y uno sin codigo: SIN DATOS (2); el otro no lo tapa', rc == 2 and 'vacio' in out, out[:300])
+    caso('dos --repo: SIN DATOS (2), no se queda con el ultimo en silencio', rc == 2 and 'UN repo' in out, out[:300])
 
     # con git: respeta el .gitignore y cuenta lo que todavia no se agrego
     repo = os.path.join(tmp, 'repo')
@@ -200,8 +200,6 @@ def main():
         g('mv', 'src/viejo.py', 'src/renombrado.py')
         rc, out = correr('--repo', repo, '--base', 'base')
         caso('--base con diff.renames=false y mnemonicPrefix: un renombre no vuelve nueva la marca vieja', rc == 0 and 'sin disparador viejo' not in out, out[:400])
-        rc, out = correr('--repo', repo, '--repo', app, '--base', 'base')
-        caso('--base con dos repos: SIN DATOS (2)', rc == 2 and 'UN repo' in out, out[:300])
 
     shutil.rmtree(tmp, ignore_errors=True)
     fallas = [n for n, ok, _ in ESPERADOS if not ok]

@@ -322,8 +322,8 @@ def probar(base):
             (rel_lote + '/CONTEXTO.md' in m1, rel_lote + '/H-01-criterios.html' in m1,
              'Tarea hermana T-02' in m1, 'Tarea ya cargada #125200' in m1,
              '**plantillas/tarea**' in m1, '**estimar-story-points**' in m1,
-             rel_lote + '/T-01.json' in m1),
-            (True, True, True, True, True, True, True))
+             rel_lote + '/T-01.json' in m1, '**redaccion-de-tickets**' in m1),
+            (True, True, True, True, True, True, True, True))
     chequeo('mision redactar: no queda ningun {marcador} sin reemplazar',
             re.findall(r'\{[a-z_]+\}', m1), [])
     c, ma, _ = correr('mision', L, 'auditar', 'T-01')
@@ -341,8 +341,8 @@ def probar(base):
     _, _, bc2 = correr('mision', L, 'corregir', 'H-01')
     chequeo('mision corregir (Historia): sus Criterios y el informe del auditor, siempre igual',
             (c, rel_lote + '/H-01-criterios.html' in mc, rel_lote + '/auditorias/H-01-auditor.md'
-             in mc, '**plantillas/historia-de-usuario**' in mc, bc1 == bc2,
-             re.findall(r'\{[a-z_]+\}', mc)), (0, True, True, True, True, []))
+             in mc, '**plantillas/historia-de-usuario**' in mc, '**redaccion-de-tickets**' in mc, bc1 == bc2,
+             re.findall(r'\{[a-z_]+\}', mc)), (0, True, True, True, True, True, []))
     c, mp, _ = correr('mision', L, 'redactar', 'T-04')
     chequeo('mision redactar (PISA): le pasa el ANTES de la tarjeta', (c, rel_lote +
             '/antes/125280.html' in mp), (0, True))

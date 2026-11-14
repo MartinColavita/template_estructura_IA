@@ -9,7 +9,7 @@ description: >-
   references/sin-orca.md). Verifica siempre otro agente en sólo lectura: otro motor si hay, o
   uno del mismo motor con contexto limpio (DEC-005). El orquestador queda atento hasta que la
   última termina. Con DEC-005 confirmada las respuestas del plan salen de la decisión; si no,
-  se piden: el plan, tomar la tarjeta y un "Aprobar" por Tarea. Usar cuando se pida "desarrollá
+  se piden: el plan (que cubre tomar las tarjetas) y un "Aprobar" por Tarea. Usar cuando se pida "desarrollá
   mis tareas asignadas", "arrancá con lo que tengo asignado", "poné a trabajar el tablero",
   "/desarrollar-asignadas". Español (Argentina); no inventa: #ID, estados y dependencias son
   dato duro.
@@ -29,7 +29,8 @@ link del MR).
 Sin la variable `ORCA_APP_VERSION` el flujo es **el mismo** con otro lanzador: los worktrees se abren con `git
 worktree add` después del `bin/gate-worktree.py`; cada worker se lanza con `claude -p "Leé y seguí la misión de
 <archivo>" --add-dir <núcleo>` (o `gemini -p … --include-directories`) parado en su worktree, y se reanuda con
-`--resume`; el verificador igual, en sólo lectura (Claude: sub-agente sin herramientas de escritura; Gemini:
+`--resume`; el verificador igual, en sólo lectura (Claude: `claude -p` con `--disallowedTools "Edit" "Write"
+"NotebookEdit"`; Gemini:
 `--approval-mode plan --policy bin/gemini-verificador-solo-lectura.toml`). Los diffs se miran en el IDE. Lo
 operativo, paso a paso, y las decisiones abiertas de ese modo están en `references/sin-orca.md`.
 
@@ -38,7 +39,7 @@ y se opera con `bin/tablero-local.py`, mismos GATEs, sin MCP (detalle: `backlog/
 
 **Motor único (`DEC-005`, modo solo).** Si el proyecto desarrolla con un solo motor, verifica **otro agente del
 mismo motor, con contexto limpio y sólo lectura**, y el veredicto lo declara («Verificado por: Claude Code ·
-sub-agente de sólo lectura»). Si hay otro motor instalado, se prefiere.
+sólo lectura, contexto limpio»). Si hay otro motor instalado, se prefiere.
 
 ## 0. Elegir el modo de lanzamiento (antes que nada)
 
@@ -158,15 +159,17 @@ que estar conectado (`/mcp` lo muestra activo); si no lo está, avisar y derivar
      comandos para que el humano los apruebe en la pestaña;
    - que los workers hacen **commits locales de trabajo** (la evidencia
      TDD) y no pushean: entra en el mismo "sí" del plan;
+   - **qué tarjetas se toman** (pasan a Asignada a vos y Active; en un sprint, quedan
+     congeladas): entra en el mismo "sí" del plan (paso 5);
    - **avisos**, sin pregunta aparte: el Cerebro de `develop` atrasado
      respecto de `main`, un el `ARCHITECTURE.md` de la carpeta `docs` del repo que contradice
      al Cerebro, Tareas que tocan los mismos archivos (van en serie) y
      Tareas que van a superar los 20 archivos ([[orquestador-desarrollo]]
      §«Convenciones del Cerebro: reglas que se chequean»).
 
-5. **Tomar cada tarjeta libre.** Delegar en [[tomar-tarea]] para cada una
-   (respeta su gate de "ya la tiene otra persona" y pasa a Assigned+Active
-   con confirmación).
+5. **Tomar cada tarjeta libre.** Delegar en [[tomar-tarea]] para cada una, con el «sí» del plan, que
+   ya las lista (pasa a Assigned+Active). Una que ya tiene otra persona sí se pregunta aparte: es su
+   gate.
 
 6. **Orquestar en Orca.** Se usa la guía de la versión instalada (`orca
    skills get orchestration`) y el mismo ejecutable `orca` para toda la
@@ -259,7 +262,7 @@ que estar conectado (`/mcp` lo muestra activo); si no lo está, avisar y derivar
        archivo), la contesta el orquestador (`orca orchestration reply --id
        <message_id> --body "<respuesta>" --json`, o `terminal send` si es
        Gemini) y se la lista al humano para que la vete (fuente 5 de
-       [[AGENTS]]). Si es un dato duro o una regla de negocio sin fuente,
+       [[redaccion-de-tickets]]). Si es un dato duro o una regla de negocio sin fuente,
        se le trae al humano **en ese momento** y su respuesta vuelve
        después. Ningún worker queda más de unos minutos sin respuesta sin
        que el humano lo sepa.
@@ -424,9 +427,10 @@ que estar conectado (`/mcp` lo muestra activo); si no lo está, avisar y derivar
 - **No asumir dependencias ni repo destino.** Si el texto de la tarjeta no
   deja claro de qué depende, o el Area Path no permite inferir el repo, se
   pregunta — nunca se completa el hueco por cuenta propia.
-- **Tres confirmaciones, ni una más:** el plan (paso 4), tomar la tarjeta
-  (paso 5) y el "Aprobar" de cada Tarea (6.3), que cubre todo lo que se
-  escribe después: reorganizar, pushear y el comentario de cierre. Con `DEC-005`
+- **Dos confirmaciones, ni una más:** el plan (paso 4), que cubre tomar las
+  tarjetas que lista (paso 5), y el "Aprobar" de cada Tarea (6.3), que cubre todo lo que se
+  escribe después: reorganizar, pushear y el comentario de cierre. Una tarjeta que ya tiene otra
+  persona se pregunta aparte. Con `DEC-005`
   confirmada, sólo las que ella no fija.
 - **Quien verifica no es quien programó** (`DEC-005`): el otro motor si hay dos; otro
   agente del mismo motor, con contexto limpio, si hay uno.

@@ -98,7 +98,7 @@ Cuando el pedido toca Azure DevOps, el **objeto del pedido** decide la skill (no
 - **Ejecutar un slice** ("migrá el slice X", "seguí con la migración", "refactorizá el módulo X", "cortá el tráfico de X") → **`modernizar-slice`**: contrato, construcción por el pipeline normal, `bin/paridad.py comparar`, corte sólo con `bin/mapa-modernizacion.py corte` en OK.
 - **Los hallazgos del Doctor** («atendé los hallazgos», «arreglá lo que marcó el Doctor») → **`atender-hallazgos`**.
 - **Mejoras al propio ecosistema** ("¿qué mejorarías?", una señal repetida del Doctor o de los cierres) → **`mejorar-ecosistema`**: una propuesta por vez, registrada en `configuracion-ia/mejoras.md`, nunca aplicada sin el "sí".
-- **Desempate:** si el pedido nombra una ficha/módulo/documento del Cerebro → árbol; si nombra o describe **un** work item / `#ID` → 1 ítem. **Ante ambigüedad, preguntar** cuál — nunca asumir árbol ni ítem. Las barreras de escritura (tablero, dedup, confirmación, nivel/cardinalidad) las aplican las skills del pipeline (ver [[AGENTS]] §«Redacción y carga de tickets en Azure DevOps»).
+- **Desempate:** si el pedido nombra una ficha/módulo/documento del Cerebro → árbol; si nombra o describe **un** work item / `#ID` → 1 ítem. **Ante ambigüedad, preguntar** cuál — nunca asumir árbol ni ítem. Las barreras de escritura (tablero, dedup, confirmación, nivel/cardinalidad) las aplican las skills del pipeline (ver [[AGENTS]] §«Redacción y carga de tickets en Azure DevOps» (las barreras) y [[redaccion-de-tickets]] (el método)).
 
 ## 🤖 Orquestación de sub-agentes — umbrales objetivos
 
@@ -183,5 +183,5 @@ Al entregar el resultado final del sub-agente al usuario, evitá reportes, tabla
 ## 🛡️ Barandas de Calidad (Guardrails)
 1. **Bloqueo por Contradicción**: Si la solicitud contradice el OKF, detener el flujo, advertir y pedir confirmación antes de delegar.
 2. **Validación de Checklists (DoD)**: Cotejar entregables contra `configuracion-ia/agentes.md` antes de avanzar.
-3. **Cero Suposiciones**: Si falta información en los documentos, marcar como `Pendiente` y preguntar al usuario. Antes de preguntar, buscar si lo define una fuente ([[AGENTS]] §«Fuentes que deciden»); lo que queda se pregunta **todo junto**, con una recomendación por pregunta.
+3. **Cero Suposiciones**: Si falta información en los documentos, marcar como `Pendiente` y preguntar al usuario. Antes de preguntar, buscar si lo define una fuente ([[redaccion-de-tickets]] §«Fuentes que deciden»); lo que queda se pregunta **todo junto**, con una recomendación por pregunta.
 4. **Firma del Historial**: Registrar cambios en `cerebro-digital/log.md`.

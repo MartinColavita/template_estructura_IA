@@ -19,6 +19,9 @@ description: >-
 > y se opera con `bin/tablero-local.py`, con los mismos GATEs y sin MCP (detalle: `backlog/README.md` del módulo).
 > Con Azure DevOps, Jira u otro tablero, las operaciones se traducen con la tabla de `integracion-azure-mcp/00-index.md`.
 
+> **El método de redacción** —las reglas de oro, «Fuentes que deciden», el modo lote y la regla de cardinalidad— está en
+> [[redaccion-de-tickets]]: se lee antes de redactar o derivar. Las barreras de escritura, en [[AGENTS]].
+
 Convierte una entrada pobre en un work item profesional, en español, listo para
 pegar campo por campo en el board. Esta skill **solo redacta**: deja el texto
 pegable. Escribir en el board es otra skill: [[cargar-a-azure]].
@@ -37,7 +40,7 @@ pegable. Escribir en el board es otra skill: [[cargar-a-azure]].
   mayor jerarquía; ante conflicto, se anota el desvío, no se elige en silencio.
 - **Lo definido no se pregunta.** Lo que ya definen el Cerebro, la maqueta vigente o una
   respuesta anterior del humano se aplica y se lista; una recomendación técnica clara, también
-  ([[AGENTS]] §«Fuentes que deciden»). Lo que queda se pregunta **todo junto**, numerado y con
+  ([[redaccion-de-tickets]] §«Fuentes que deciden»). Lo que queda se pregunta **todo junto**, numerado y con
   una recomendación por pregunta.
 - **Un solo tag temático, techo duro.** El campo Etiquetas lleva **una** etiqueta
   (el tema, sin prefijo, kebab-case) — nunca el nombre del producto/repo (`<producto>`,

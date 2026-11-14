@@ -21,6 +21,9 @@ description: >-
 > y se opera con `bin/tablero-local.py`, con los mismos GATEs y sin MCP (detalle: `backlog/README.md` del módulo).
 > Con Azure DevOps, Jira u otro tablero, las operaciones se traducen con la tabla de `integracion-azure-mcp/00-index.md`.
 
+> **El método de redacción** —las reglas de oro, «Fuentes que deciden», el modo lote y la regla de cardinalidad— está en
+> [[redaccion-de-tickets]]: se lee antes de redactar o derivar. Las barreras de escritura, en [[AGENTS]].
+
 Baja **muchos ítems de una vez** —las Historias de una ficha, las Tareas de varias
 Historias, o las dos cosas— con dos turnos humanos en lugar de decenas.
 
@@ -49,7 +52,7 @@ Historias, o las dos cosas— con dos turnos humanos en lugar de decenas.
 - **Dedup por ítem.** Un equivalente **bloquea el alta** de ese ítem; un candidato dudoso es pregunta del arranque.
 - **Tarjeta congelada** (en un sprint y distinta de `New`): sólo comentario.
 - **PHI prohibido**, un solo tag temático, HTML.
-- **El lote no borra ni cierra** tarjetas. Eso sigue con dos "sí" y fuera del lote.
+- **El lote no borra ni cierra** tarjetas. Eso va fuera del lote, con el GATE de [[AGENTS]] (dos «sí»; en modo solo, cerrar la propia Tarea, uno).
 - **Las auditorías son opcionales** (decisión de diseño del template): [[auditar-historia]], [[auditar-tarea]] y [[analizar-tareas]] corren **sólo si se piden** —en el pedido o en la respuesta del arranque—, y entonces las corre un agente distinto del que redactó. **Nunca frenan una fila**: lo que encuentren va como **pendiente a confirmar** en la tarjeta ([[comentar-tarea]] §«Pendientes a confirmar»), y el sello no es requisito para desarrollar.
 - **No inventar.** Lo que ninguna fuente define se pregunta en el arranque o queda como `⚠` declarado.
 

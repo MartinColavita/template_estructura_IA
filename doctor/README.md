@@ -180,19 +180,19 @@ Cada una devuelve **uno** de tres estados:
 
 | # | Sonda | Qué mira |
 |---|---|---|
-| 1 | **Guardarraíles** | Que el hook esté activo en este clone, guardado como ejecutable en git (100755: si no, Linux y macOS lo ignoran en silencio), y que tenga sus cuatro guardas; y que los `.sh` de `bin/` y `doctor/bin/` también sean ejecutables. La guarda de BOM **exime a los `.ps1`**: PowerShell 5.1 necesita el BOM para leer UTF-8, así que ahí no es un descuido |
-| 2 | **Espejos de skills** | Que `.agents/skills/` y `.claude/skills/` sean idénticos a la fuente, archivo por archivo (`references/` incluidas) |
-| 3 | **Conteos declarados** | Que cuando un documento dice "23 skills" haya 23, **y que las nombre a todas**; los patrones son los de `bin/verificar-skills.py`, el mismo control que corren el hook y el CI |
-| 4 | **Referencias a archivos** | Rutas que las skills citan en su texto y que no existen |
-| 5 | **Wikilinks** | Enlaces `[[x]]` que no resuelven a ningún archivo |
-| 6 | **Estructura** | Qué existe hoy del árbol prometido en los README |
-| 7 | **Asimetría back/front** | Qué skill **existe** de un lado y no del otro |
-| 8 | **Gemelas back vs. front** | De las que existen en los dos, si **divergieron en estructura** — una perdió una sección que la otra tiene |
-| 9 | **Andamiaje obsoleto** | `.gitkeep` en carpetas que ya tienen contenido |
-| 10 | **Costo de contexto** | Tokens por skill, en dos cifras (ver abajo) |
-| 11 | **Deuda declarada** | Marcas de pendiente, y qué archivos con pendientes nadie toca hace meses |
-| 12 | **Cómo venimos** | Si los hallazgos **subieron o bajaron** respecto de la corrida anterior. Sale del histórico, y no corre con `--solo` |
-| 13 | **Autocontrol del informe** | El Doctor revisándose a sí mismo (ver abajo) |
+| 1 | **Guardarraíles** `guardarrailes` | Que el hook esté activo en este clone, guardado como ejecutable en git (100755: si no, Linux y macOS lo ignoran en silencio), y que tenga sus cuatro guardas; y que los `.sh` de `bin/` y `doctor/bin/` también sean ejecutables. La guarda de BOM **exime a los `.ps1`**: PowerShell 5.1 necesita el BOM para leer UTF-8, así que ahí no es un descuido |
+| 2 | **Espejos de skills** `espejos` | Que `.agents/skills/` y `.claude/skills/` sean idénticos a la fuente, archivo por archivo (`references/` incluidas) |
+| 3 | **Conteos declarados** `conteos` | Que cuando un documento dice "23 skills" haya 23, **y que las nombre a todas**; los patrones son los de `bin/verificar-skills.py`, el mismo control que corren el hook y el CI |
+| 4 | **Referencias a archivos** `referencias` | Rutas que las skills citan en su texto y que no existen |
+| 5 | **Wikilinks** `wikilinks` | Enlaces `[[x]]` que no resuelven a ningún archivo |
+| 6 | **Estructura** `estructura` | Qué existe hoy del árbol prometido en los README |
+| 7 | **Asimetría back/front** `asimetria` | Qué skill **existe** de un lado y no del otro |
+| 8 | **Gemelas back vs. front** `gemelas` | De las que existen en los dos, si **divergieron en estructura** — una perdió una sección que la otra tiene |
+| 9 | **Andamiaje obsoleto** `andamiaje` | `.gitkeep` en carpetas que ya tienen contenido |
+| 10 | **Costo de contexto** `tamano` | Tokens por skill, en dos cifras (ver abajo) |
+| 11 | **Deuda declarada** `deuda` | Marcas de pendiente, y qué archivos con pendientes nadie toca hace meses |
+| 12 | **Cómo venimos** `tendencia` | Si los hallazgos **subieron o bajaron** respecto de la corrida anterior. Sale del histórico, y no corre con `--solo` |
+| 13 | **Autocontrol del informe** `autocontrol` | El Doctor revisándose a sí mismo (ver abajo) |
 
 > **Asimetría y Gemelas contestan preguntas distintas.** La primera: *¿la skill existe de los
 > dos lados?*. La segunda: *¿dicen lo mismo?*. La segunda es la que muerde, porque el defecto
@@ -216,16 +216,16 @@ fronts, el Doctor no se entera de nada.
 
 | # | Sonda | Qué mira | Stack |
 |---|---|---|---|
-| 14 | **Repos conectados** | Qué repositorios están clonados hoy, con qué stack y qué slices. Corre **siempre**: es la que explica a las otras ocho | ambos |
-| 15 | **Límites del diseño** | En el back, las reglas de dependencia del monolito modular (DEC-002): adentro del módulo `api → application, domain` · `application → domain` · `infra → application, domain` · `domain →` nada · `exceptions/` la usan todas y solo depende de `shared.exceptions`. Entre módulos se llama a la `application` del otro y se usan sus tipos de `domain` y `exceptions`; entrar a su `api` o su `infra` es HALLAZGO. `shared` lo usa cualquiera y no depende de ningún módulo. En el front, que ningún slice entre a otro salvo por su `index` o su `api/` | ambos |
-| 16 | **Contrato vs. código** | Que los endpoints del `openapi.yaml` y los del código digan lo mismo | back |
-| 17 | **La costura back ↔ front** | Que los mocks del front y los tests de API del back estén hablando del **mismo** `openapi.yaml`. Es el único punto donde los dos repositorios se tocan | ambos |
-| 18 | **Trazabilidad test ↔ Tarea** | Que cada archivo de test diga a qué Tarea del tablero pertenece. El cruce completo contra la lista de «Tests a escribir PRIMERO» lo hace el **pedido** del panel, porque esa lista vive en Azure y el Doctor no sale de la máquina | ambos |
-| 19 | **Duplicación entre slices** | Bloques de 10 líneas repetidos en dos slices distintos | ambos |
-| 20 | **Dependencias sin usar** | Paquetes declarados que ningún archivo importa | ambos |
-| 21 | **Puerta de seguridad** | Que SAST esté en el pipeline, que **frene** la entrega, que las supresiones traigan su motivo, y que no haya credenciales escritas | ambos |
-| 22 | **Puerta de calidad** | Linter, análisis estático y cobertura: **declarados** y, sobre todo, **exigidos por el build** | ambos |
-| 23 | **Prácticas y patrones** | Un puñado corto de cosas que el linter no mira y cuestan caro | ambos |
+| 14 | **Repos conectados** `repos` | Qué repositorios están clonados hoy, con qué stack y qué slices. Corre **siempre**: es la que explica a las otras ocho | ambos |
+| 15 | **Límites del diseño** `limites` | En el back, las reglas de dependencia del monolito modular (DEC-002): adentro del módulo `api → application, domain` · `application → domain` · `infra → application, domain` · `domain →` nada · `exceptions/` la usan todas y solo depende de `shared.exceptions`. Entre módulos se llama a la `application` del otro y se usan sus tipos de `domain` y `exceptions`; entrar a su `api` o su `infra` es HALLAZGO. `shared` lo usa cualquiera y no depende de ningún módulo. En el front, que ningún slice entre a otro salvo por su `index` o su `api/` | ambos |
+| 16 | **Contrato vs. código** `contrato` | Que los endpoints del `openapi.yaml` y los del código digan lo mismo | back |
+| 17 | **La costura back ↔ front** `costura` | Que los mocks del front y los tests de API del back estén hablando del **mismo** `openapi.yaml`. Es el único punto donde los dos repositorios se tocan | ambos |
+| 18 | **Trazabilidad test ↔ Tarea** `trazabilidad` | Que cada archivo de test diga a qué Tarea del tablero pertenece. El cruce completo contra la lista de «Tests a escribir PRIMERO» lo hace el **pedido** del panel, porque esa lista vive en Azure y el Doctor no sale de la máquina | ambos |
+| 19 | **Duplicación entre slices** `duplicacion` | Bloques de 10 líneas repetidos en dos slices distintos | ambos |
+| 20 | **Dependencias sin usar** `dependencias` | Paquetes declarados que ningún archivo importa | ambos |
+| 21 | **Puerta de seguridad** `seguridad` | Que SAST esté en el pipeline, que **frene** la entrega, que las supresiones traigan su motivo, y que no haya credenciales escritas | ambos |
+| 22 | **Puerta de calidad** `calidad` | Linter, análisis estático y cobertura: **declarados** y, sobre todo, **exigidos por el build** | ambos |
+| 23 | **Prácticas y patrones** `practicas` | Un puñado corto de cosas que el linter no mira y cuestan caro | ambos |
 
 > **Ninguna de las diez aprueba sobre cero mediciones.** Un repositorio clonado pero vacío,
 > o todavía sin ordenar en módulos y capas, devuelve **SIN DATOS**, no OK. Es la regla del

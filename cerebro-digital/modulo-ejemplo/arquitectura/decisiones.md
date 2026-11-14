@@ -136,7 +136,7 @@ confirmar por el equipo. Con la columna que aplique **confirmada**, vale como el
 | Techo de worktrees por máquina | El del GATE de WORKTREE (`AGENTS.md`: 10) | Igual |
 | Carpeta de los worktrees | `<carpeta padre del repositorio>/worktrees/<ID>-<slug>` | Igual |
 | Motor que programa | **Claude Code** | Lo elige quien despacha, por lote |
-| Quién verifica | **Otro agente de Claude Code, contexto limpio, sólo lectura**, declarado en el veredicto («Verificado por: Claude Code · sub-agente de sólo lectura»). Si hay otro motor instalado, se prefiere | El otro motor; sin él, esa Tarea no se despacha |
+| Quién verifica | **Otro agente de Claude Code, contexto limpio, sólo lectura**, declarado en el veredicto («Verificado por: Claude Code · sólo lectura, contexto limpio»). Si hay otro motor instalado, se prefiere | El otro motor; sin él, esa Tarea no se despacha |
 | Permisos del worker | Claude: el modo de la sesión del orquestador; Gemini (si se usa): `auto_edit` | Igual |
 | Commits locales de trabajo | Autorizados en la rama de la Tarea; nunca push sin el Aprobar | Igual |
 | Tomar la tarjeta | Automático: `bin/tablero-local.py tomar` (o `tomar-tarea` en Azure) sin preguntar | Con el plan |

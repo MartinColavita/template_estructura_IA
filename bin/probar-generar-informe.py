@@ -75,21 +75,19 @@ def main():
     spec.loader.exec_module(gi)
     hoy = [{'id': 'repos', 'titulo': 'Repos de codigo conectados', 'estado': 'SIN DATOS'},
            {'id': 'tendencia', 'titulo': 'Como venimos', 'estado': 'OK'},
-           {'id': 'gemelas', 'titulo': 'Gemelas: back vs. front', 'estado': 'HALLAZGO'}]
-    caso('la fila «Cómo venimos» muestra la sonda tendencia, no la que está en su misma posición',
-         (gi.sonda_de_hoy('Cómo venimos', hoy) or {}).get('id') == 'tendencia')
-    caso('«Gemelas back vs. front» encuentra «Gemelas: back vs. front»', (gi.sonda_de_hoy('Gemelas back vs. front', hoy) or {}).get('id') == 'gemelas')
-    caso('una sonda que hoy no corrió no toma el estado de otra', gi.sonda_de_hoy('Contrato vs. código', hoy) is None)
-    puertas = [{'id': 'seguridad', 'titulo': 'Puerta de seguridad (SAST)'}, {'id': 'calidad', 'titulo': 'Puerta de calidad'},
-               {'id': 'contrato', 'titulo': 'Contrato declarado vs implementado'}]
-    caso('«Puerta de seguridad» y «Puerta de calidad» no se confunden',
-         (gi.sonda_de_hoy('Puerta de seguridad', puertas) or {}).get('id') == 'seguridad' and
-         (gi.sonda_de_hoy('Puerta de calidad', puertas) or {}).get('id') == 'calidad')
-    explotada = [{'id': 'seguridad', 'titulo': 'seguridad'}, {'id': 'calidad', 'titulo': 'Puerta de calidad'}]
-    caso('una sonda que exploto (titulada con su id) no toma el estado de la otra «Puerta»',
-         (gi.sonda_de_hoy('Puerta de seguridad', explotada) or {}).get('id') == 'seguridad')
-    caso('«Contrato vs. código» encuentra «Contrato declarado vs implementado» por la primera palabra',
-         (gi.sonda_de_hoy('Contrato vs. código', puertas) or {}).get('id') == 'contrato')
+           {'id': 'seguridad', 'titulo': 'seguridad', 'estado': 'SIN DATOS'},   # una sonda que exploto
+           {'id': 'calidad', 'titulo': 'Puerta de calidad', 'estado': 'OK'}]
+    caso('cada fila muestra SU sonda, por id (aunque el README y el Doctor las listen en otro orden)',
+         [(gi.sonda_de_hoy(i, hoy) or {}).get('id') for i in ('tendencia', 'seguridad', 'calidad')] == ['tendencia', 'seguridad', 'calidad'])
+    caso('una sonda que hoy no corrio no toma el estado de otra', gi.sonda_de_hoy('contrato', hoy) is None)
+    sys.path.insert(0, os.path.join(os.path.dirname(AQUI), 'doctor'))
+    import doctor as _doc  # noqa: E402
+    import codigo as _cod  # noqa: E402  las sondas de los repos de codigo (doctor/codigo.py)
+    validos = {f.__name__.replace('sonda_', '') for f in _doc.SONDAS + _cod.SONDAS} | {'tendencia', 'autocontrol'}
+    filas = gi.sondas_readme()
+    caso('cada fila del README del Doctor tiene el id de una sonda que existe, y estan todas',
+         all(f[3] in validos for f in filas) and {f[3] for f in filas} == validos,
+         str(sorted({f[3] for f in filas} ^ validos)))
 
     fallas = [n for n, ok, _ in ESPERADOS if not ok]
     print()

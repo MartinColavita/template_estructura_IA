@@ -117,6 +117,8 @@ Junto con la tabla:
 - **Por cada repo destino:** si tiene el árbol sucio (qué hay) y si la rama propuesta ya existe
   o ya tiene un worktree (cuál). Se muestra **acá**, antes del "sí" y antes de tocar el
   tablero: una Tarea que no se va a poder abrir no se toma.
+- **Qué tarjetas se toman** (pasan a Asignada y Active; en un sprint, quedan congeladas): entran en el
+  mismo "sí" de la tabla (paso 6).
 - Las bloqueadas, con su dependencia.
 - Lo que quedó `SIN DATOS` en los prerrequisitos.
 - Las preguntas de «Decisiones abiertas» que hoy se resuelven acá: **autorización de commits
@@ -126,8 +128,8 @@ Sin un "sí" explícito sobre esta tabla, no se toca nada. Con `DEC-005` confirm
 pregunta: se cita en el plan ([[AGENTS]], «Autorización permanente»).
 
 ### 6. Tomar cada Tarea
-[[tomar-tarea]], con sus barreras (otra persona, tarjeta congelada). Es escritura en el
-tablero: confirmación propia, salvo que la dé `DEC-005`.
+[[tomar-tarea]], con sus barreras (otra persona, tarjeta congelada). Va con el «sí» del plan del paso 5, que
+lista las tarjetas; una que ya tiene otra persona se pregunta aparte.
 
 ### 7. Abrir el worktree — GATE de WORKTREE
 Por cada Tarea libre, con el "sí" del paso 5 sobre la base de **esa** Tarea:
@@ -228,7 +230,7 @@ mismo motor con contexto limpio, `DEC-005`), en el mismo worktree (por eso, ante
 después de verificar se mira `git -C <worktree> status --porcelain`: si el verificador dejó algo
 —por ejemplo, un test que reescribió un archivo—, se frena y decide el humano), con el modo de
 permisos elegido para verificar en el paso 5. **Si verifica Claude**, además con `--disallowedTools "Edit"
-"Write" "NotebookEdit"`: sin herramientas de edición, como el sub-agente de la skill (Bash queda para los
+"Write" "NotebookEdit"`: sin herramientas de edición (Bash queda para los
 tests y el git de lectura; lo que igual escriba lo muestra el `status` de después). **Si verifica Gemini**, siempre con
 `--approval-mode plan --policy <núcleo>/bin/gemini-verificador-solo-lectura.toml`: el modo
 `plan` solo no es de sólo lectura (sin interacción pasa solo a modo automático, y deja escribir
