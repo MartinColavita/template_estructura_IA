@@ -180,9 +180,9 @@ Cada una devuelve **uno** de tres estados:
 
 | # | Sonda | Qué mira |
 |---|---|---|
-| 1 | **Guardarraíles** | Que el hook esté activo en este clone y que tenga sus cinco guardas. La guarda de BOM **exime a los `.ps1`**: PowerShell 5.1 necesita el BOM para leer UTF-8, así que ahí no es un descuido |
-| 2 | **Espejos de skills** | Que `.agents/skills/` y `.claude/skills/` sean idénticos a la fuente |
-| 3 | **Conteos declarados** | Que cuando un documento dice "23 skills" haya 23, **y que las nombre a todas** |
+| 1 | **Guardarraíles** | Que el hook esté activo en este clone, guardado como ejecutable en git (100755: si no, Linux y macOS lo ignoran en silencio), y que tenga sus cuatro guardas; y que los `.sh` de `bin/` y `doctor/bin/` también sean ejecutables. La guarda de BOM **exime a los `.ps1`**: PowerShell 5.1 necesita el BOM para leer UTF-8, así que ahí no es un descuido |
+| 2 | **Espejos de skills** | Que `.agents/skills/` y `.claude/skills/` sean idénticos a la fuente, archivo por archivo (`references/` incluidas) |
+| 3 | **Conteos declarados** | Que cuando un documento dice "23 skills" haya 23, **y que las nombre a todas**; los patrones son los de `bin/verificar-skills.py`, el mismo control que corren el hook y el CI |
 | 4 | **Referencias a archivos** | Rutas que las skills citan en su texto y que no existen |
 | 5 | **Wikilinks** | Enlaces `[[x]]` que no resuelven a ningún archivo |
 | 6 | **Estructura** | Qué existe hoy del árbol prometido en los README |
@@ -411,9 +411,11 @@ cuántas empeoraron, cuántas quedaron igual) y abajo el detalle de cada una que
 **Funciona igual si el arreglo lo hizo una persona a mano o un comando**: compara estados, no le
 importa quién los produjo.
 
-> **Una sonda cuenta como mejorada también si bajó la cantidad de hallazgos sin llegar a OK.**
-> Ir de doce enlaces rotos a tres es progreso, y un informe que solo mira el color no lo
-> muestra. Y *"sin cambios"* no quiere decir que esté bien: quiere decir que ahí no se tocó nada.
+> **Una sonda cuenta como mejorada si se fueron hallazgos y no apareció ninguno nuevo.** Ir de
+> doce enlaces rotos a tres es progreso; pero si de esos tres uno es nuevo, la sonda **empeoró**
+> aunque la cantidad haya bajado: se compara hallazgo por hallazgo (la huella de cada fila), no
+> el número (M-026). Y *"sin cambios"* no quiere decir que esté bien: quiere decir que ahí no se
+> tocó nada.
 
 Para poder comparar **dos corridas del mismo día**, además del archivo fechado se guarda el par
 `ultimo.json` / `previo.json`, que conserva los dos últimos estados sea cuando sea.

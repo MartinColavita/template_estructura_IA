@@ -234,12 +234,12 @@ def probar_plan_b(base):
     caso('si la fuente cambia durante el sync: SIN DATOS, y la corrida siguiente no frena de mas (el manifiesto se renueva)',
          not ok and ok2 and leer(os.path.join(espejo, 'B', 'SKILL.md')) == 'b v5, guardada durante el sync\n', msj + ' / ' + msj2)
 
-    huella_real = sync._huella
-    sync._huella = lambda p: (_ for _ in ()).throw(OSError('OneDrive tiene abierto el manifiesto'))
+    volcar_real = sync.json.dump
+    sync.json.dump = lambda *a, **k: (_ for _ in ()).throw(OSError('OneDrive tiene abierto el manifiesto'))
     try:
         ok, msj = sync.regenerar(fuente, espejo, pisar=True)
     finally:
-        sync._huella = huella_real
+        sync.json.dump = volcar_real
     caso('si no se puede escribir el manifiesto, saca el viejo (que ya no dice como quedo el espejo)',
          ok and not os.path.exists(espejo + '.sync.json'), msj)
 

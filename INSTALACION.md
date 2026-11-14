@@ -68,13 +68,13 @@ Tras editar cualquier `.md` en `cerebro-digital/configuracion-ia/agentes/`, mism
 git config core.hooksPath .githooks
 ```
 
-A partir de ahí, si intentás commitear con algún espejo desincronizado, con un conteo de skills desactualizado, con un archivo con BOM o con caracteres de control invisibles, el commit se frena y te dice qué corregir. Quien solo clona no necesita nada — los hooks no viajan activados en el clone.
+A partir de ahí, si lo que vas a commitear deja algún espejo de skills distinto de su fuente, un conteo de skills desactualizado, un archivo con BOM o con caracteres de control invisibles, el commit se frena y te dice qué corregir. Mira lo que entra al commit, no el disco: un cambio sin `git add` en otra parte no lo frena. Los espejos de agentes no se versionan: si están viejos, avisa y no frena. Quien solo clona no necesita nada — los hooks no viajan activados en el clone.
 
 **Atajo:** `bin/actualizar.sh` (o `.ps1`) hace `git pull` y corre el instalador (hook, espejos, agentes, especificación de skills). Corrélo después de traer cambios.
 
 **Especificación de skills:** `bin/verificar-skills.py` exige lo que piden la [especificación abierta de Agent Skills](https://agentskills.io/specification) y Claude Code: `name` igual a la carpeta, en minúsculas con guiones y hasta 64 caracteres; `description` no vacía y de hasta 1024 caracteres (Claude Code la corta en 1536, Gemini CLI y opencode siguen la especificación); y avisa si un `SKILL.md` pasa de 500 líneas. Lo corre el hook, el instalador y el pipeline.
 
-**En el servidor:** `.gitlab-ci.yml` (GitLab) y `.github/workflows/verificar.yml` (GitHub) corren en cada push los espejos, la especificación y el conteo de skills, el BOM y los caracteres de control (`bin/verificar-staged.py --todo`), las pruebas de `bin/` y el Doctor, con sólo Python y git: el hook es local y se saltea con `--no-verify`, el servidor no. Las listas de `README.md` e `index.md` siguen sólo en el hook. En otra plataforma se traducen esos tres pasos.
+**En el servidor:** `.gitlab-ci.yml` (GitLab) y `.github/workflows/verificar.yml` (GitHub) corren en cada push los espejos, la especificación, el conteo y las listas de skills, el BOM y los caracteres de control (`bin/verificar-staged.py --todo`), las pruebas de `bin/` y el Doctor, con sólo Python y git: el hook es local y se saltea con `--no-verify`, el servidor no. En otra plataforma se traducen esos tres pasos.
 
 > `opencode` puede reportar la ubicación de una skill de forma inconsistente entre sesiones (tiene el mismo contenido en dos rutas) — no afecta el comportamiento y puede degradar su cacheo de prompt; es un trade-off aceptado. opencode escanea `.opencode/skills/`, `.claude/skills/` y `.agents/skills/` y no documenta una variable para apagar una ruta.
 

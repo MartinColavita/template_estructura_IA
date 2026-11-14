@@ -1,6 +1,6 @@
 # Pipeline del repositorio del Cerebro (opcional; se usa si el repo vive en GitLab).
 # No construye ninguna aplicacion: verifica que ESTE repositorio este sano (espejos, conteo de skills,
-# BOM y caracteres de control, pruebas de bin/ y Doctor; las listas de README/index siguen solo en el hook). Solo necesita Python 3 y git. En GitHub, lo mismo esta en
+# BOM y caracteres de control, pruebas de bin/ y Doctor). Solo necesita Python 3 y git. En GitHub, lo mismo esta en
 # .github/workflows/verificar.yml; en otra plataforma se traducen los tres pasos (espejos, pruebas, doctor).
 
 image: python:3.12-slim
@@ -21,8 +21,6 @@ espejos:
     - python -B bin/verificar-staged.py --todo   # BOM y caracteres de control: la misma guarda del hook
     - if [ -d back/.claude/skills ]; then diff -r back/.claude/skills back/.agents/skills; fi
     - if [ -d front/.claude/skills ]; then diff -r front/.claude/skills front/.agents/skills; fi
-    # los conteos declarados, con el mismo patron que el hook
-    - 'REAL=$(find cerebro-digital/configuracion-ia/skills -mindepth 1 -maxdepth 1 -type d | wc -l); DECL=$(grep -oE "\*\*[0-9]+ habilidades\*\*" AGENTS.md | grep -oE "[0-9]+"); test "$REAL" = "$DECL" || { echo "AGENTS.md declara $DECL skills y hay $REAL"; exit 1; }'
 
 pruebas:
   stage: verificar

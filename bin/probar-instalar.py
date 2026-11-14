@@ -42,7 +42,7 @@ def armar(raiz):
         escribir(raiz, base + '/una-skill/SKILL.md', skill)
     escribir(raiz, 'cerebro-digital/configuracion-ia/agentes/un-agente.md', '---\nname: un-agente\n---\nAgente.\n')
     escribir(raiz, '.githooks/pre-commit', '#!/usr/bin/env bash\nexit 0\n')
-    escribir(raiz, 'AGENTS.md', '# Proyecto\n')
+    escribir(raiz, 'AGENTS.md', '# Proyecto\n\n**1 habilidades**\n')   # el conteo lo cuenta verificar-skills
     os.makedirs(os.path.join(raiz, 'bin'))
     for f in ('instalar.py', 'verificar-skills.py', 'sync-espejos.py'):
         shutil.copy(os.path.join(AQUI, f), os.path.join(raiz, 'bin', f))
@@ -69,13 +69,20 @@ def main():
 
         escribir(tmp, '.claude/skills/una-skill/SKILL.md', '---\nname: una-skill\ndescription: Hace algo. Usar cuando se pida.\n---\n\n# Una skill\n')
         escribir(tmp, 'cerebro-digital/configuracion-ia/skills/una-skill/SKILL.md', '---\nname: una-skill\ndescription: Hace algo. Usar cuando se pida.\n---\n\n# Una skill\n')
-        escribir(tmp, 'AGENTS.md', '# {{PROYECTO}}\n')
+        escribir(tmp, 'AGENTS.md', '# {{PROYECTO}}\n\n**1 habilidades**\n')
         rc, out = instalar(tmp)
         caso('placeholders sin instanciar: aviso, no frena', rc == 0 and 'placeholders' in out, out[-400:])
 
         shutil.rmtree(os.path.join(tmp, '.claude', 'agents'))
         rc, out = instalar(tmp, '--dry-run')
         caso('dry-run no materializa los agentes', rc == 0 and not os.path.isdir(os.path.join(tmp, '.claude', 'agents')), out[-300:])
+
+        verificador = os.path.join(tmp, 'bin', 'verificar-skills.py')
+        shutil.copy(verificador, verificador + '.bak')
+        escribir(tmp, 'bin/verificar-skills.py', 'import sys\nprint("SIN DATOS -- error del script: algo exploto")\nsys.exit(2)\n')
+        rc, out = instalar(tmp, '--dry-run')
+        caso('verificar-skills en SIN DATOS (exploto): HALLAZGO, no un aviso que deja decir OK', rc == 1 and 'SIN DATOS' in out, out[-300:])
+        shutil.move(verificador + '.bak', verificador)
 
     vacio = tempfile.mkdtemp(prefix='probar-instalar-vacio-')
     os.makedirs(os.path.join(vacio, 'bin'))

@@ -278,10 +278,11 @@ que no se pudo leer va `⚠ sin dato`.
   *Lo que esto define:* el orquestador vive en el repositorio raíz, no adentro de cada repo de
   código. Las skills scoped (`guiar-tdd`, `verificar-tdd`, `auditar-codigo`) sí viven en cada
   carpeta y aplican a lo que se clone adentro.
-- ✅ **¿Cuántos workers en paralelo por máquina?** **CERRADO: entre 4 y 8, nunca más.**
+- ✅ **¿Cuántos workers en paralelo por máquina?** **CERRADO: hasta 10, nunca más** (decisión del dueño, 2026-11-13;
+  antes, de 4 a 8).
   Pasado ese punto la máquina se arrastra y los runners de test compiten entre sí: el
   paralelismo empieza a costar más de lo que ahorra. El asistente dice cuántos hay abiertos
-  antes de crear otro, y **frena en el noveno**.
+  antes de crear otro, y **frena al llegar al techo**.
   *Detalle y el resto de las barreras:* **GATE de WORKTREE** en `AGENTS.md`.
 - ✅ **¿Cómo se persiste la evidencia del rojo?** **CERRADO: un commit por paso rojo, local.**
   El worker commitea `test(rojo): <n.º de ítem> <resumen>` con **solo el test**, y después

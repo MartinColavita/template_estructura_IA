@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I \"$CLAUDE_PROJECT_DIR/bin/tendencia.py\" --breve --hook",
+            "command": "for p in python3 python; do $p -c '' 2>/dev/null && exec $p -I \"$CLAUDE_PROJECT_DIR/bin/tendencia.py\" --breve --hook; done",
             "timeout": 20
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I \"$CLAUDE_PROJECT_DIR/bin/registrar-sesion.py\"",
+            "command": "for p in python3 python; do $p -c '' 2>/dev/null && exec $p -I \"$CLAUDE_PROJECT_DIR/bin/registrar-sesion.py\"; done",
             "timeout": 60
           }
         ]

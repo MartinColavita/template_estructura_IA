@@ -17,7 +17,8 @@ python bin/tablero-local.py buscar "reserva" --abiertos        # deduplicación 
 Las skills del pipeline (`redactar-tarea`, `cargar-a-azure`, `tomar-tarea`, `comentar-tarea`,
 `consultar-backlog`, `sincronizar-backlog`, `planificar-lote`, `desarrollar-asignadas`) aplican acá
 **los mismos GATEs** que con Azure: tablero autorizado (esta carpeta), deduplicación con `buscar`,
-confirmación antes de escribir, nivel, borrado con dos «sí» (`--confirmado`) y tarjeta congelada. El
+confirmación antes de escribir, borrado con dos «sí» (`--confirmado`) y, en modo equipo, nivel y tarjeta congelada
+([[tablero-autorizado]]). El
 script sólo ejecuta lo que la skill ya confirmó. Las plantillas de cada tipo son las de
 `tablero/plantillas/` (el cuerpo del archivo es el mismo texto que iría al campo
 Descripción).

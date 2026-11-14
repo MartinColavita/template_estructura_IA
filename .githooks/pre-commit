@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Hook pre-commit del repositorio del Cerebro — bloquea el commit si alguno de los espejos de
-# skills quedo desincronizado con la fuente cerebro-digital/configuracion-ia/skills/.
+# Hook pre-commit del repositorio del Cerebro — bloquea el commit si lo que entra al commit deja algun espejo de
+# skills distinto de su fuente cerebro-digital/configuracion-ia/skills/, o si algo de lo que entra trae BOM o
+# caracteres de control, o si una skill sale de la especificacion (o los conteos que la anuncian no cierran).
 #   .agents/skills/  -> lo lee Antigravity (y opencode lo auto-descubre)
 #   .claude/skills/  -> lo lee Claude Code (skills project-scoped, nativas)
 #
 # Activar UNA vez por dev (los hooks NO viajan activados en el clone):
 #   git config core.hooksPath .githooks
 #
-# Solo importa para quien EDITA skills; el que solo clona no necesita nada.
-# Es una verificacion (no modifica). Compara con el diff propio de git,
-# insensible a CRLF/LF (cross-OS Windows/Linux/mac).
+# Es una verificacion (no modifica). Mira LO QUE ENTRA AL COMMIT (el arbol del indice), no el disco: un cambio sin
+# 'git add' en otra parte no frena este commit, y un espejo que no se agrego si lo frena. .gitattributes (eol=lf)
+# hace que la comparacion sea la misma en Windows, Linux y mac.
 #
 # Shebang BASH (no sh) a proposito: el hook esta escrito y probado en bash (bin/probar-hook.py).
 # Falla CERRADO si se lo corre con otro shell (p. ej. "sh pre-commit"): un shell distinto puede
@@ -22,70 +23,66 @@ if [ -z "${BASH_VERSION:-}" ]; then
 fi
 
 ROOT="$(git rev-parse --show-toplevel)"
-SRC="$ROOT/cerebro-digital/configuracion-ia/skills"
+SRC_REL="cerebro-digital/configuracion-ia/skills"
 AGENTS_SRC="$ROOT/cerebro-digital/configuracion-ia/agentes"
 
-# Si no hay fuente de skills/agentes no hay espejos que verificar -- pero las guardas
-# de encoding (control chars / BOM) SI corren igual: no tienen nada que ver con esto.
-# Por eso esto NO es un "exit 0": marca bandera y sigue (ver el cierre).
-HAY_SKILLS=1
-[ -d "$SRC" ] || HAY_SKILLS=0
-HAY_AGENTES=1
-[ -d "$AGENTS_SRC" ] || HAY_AGENTES=0
+# El arbol que va a entrar al commit, una sola vez. Sin el no se puede decir nada: falla cerrado.
+ARBOL="$(git write-tree 2>/dev/null)"
+if [ -z "$ARBOL" ]; then
+  echo "pre-commit BLOQUEADO: git write-tree fallo: no puedo ver que entra al commit."
+  exit 1
+fi
+en_commit() { git rev-parse -q --verify "$ARBOL:$1" 2>/dev/null; }
 
-# check_mirror SRC REL: generico para cualquier par fuente->espejo (skills o agentes).
+# check_mirror FUENTE ESPEJO (rutas relativas al repo): el espejo versionado entra al commit igual a la fuente.
 check_mirror() {
-  ORIGEN="$1"
-  REL="$2"
-  DST="$ROOT/$REL"
-
-  # La fuente existe: el espejo TIENE que existir (una eliminacion total del espejo es drift).
-  if [ ! -d "$DST" ]; then
-    echo "pre-commit BLOQUEADO: falta el espejo $REL/ (existe la fuente pero no el espejo)."
-    echo "  Corre:  bin/sync-skills.sh o bin/sync-agents.sh   (o los .ps1 en Windows PowerShell)"
-    # Los espejos de AGENTES estan gitignoreados a proposito: no viajan en el clone y no se
-    # versionan. Decirle a alguien que haga 'git add' de una ruta ignorada lo manda a un
-    # error de git. Solo los espejos de SKILLS se agregan al indice.
-    case "$REL" in
-      *agents) echo "  (los espejos de agentes NO se versionan: alcanza con generarlos)" ;;
-      *)       echo "  y despues:  git add $REL" ;;
-    esac
+  F="$(en_commit "$1")"
+  E="$(en_commit "$2")"
+  if [ -z "$E" ]; then
+    echo "pre-commit BLOQUEADO: falta el espejo $2/ en lo que entra al commit (la fuente $1/ si esta)."
+    echo "  Corre:  bin/sync-skills.sh (o .ps1)   y despues:  git add $2"
     return 1
   fi
-
-  # (1) Espejo (en disco) identico a la fuente, insensible a CRLF/LF.
-  if ! git diff --no-index --ignore-cr-at-eol --quiet "$ORIGEN" "$DST" 2>/dev/null; then
-    echo "pre-commit BLOQUEADO: el espejo $REL/ esta desincronizado con la fuente."
-    echo "  1) Corre:  bin/sync-skills.sh o bin/sync-agents.sh   (o los .ps1 en Windows PowerShell)"
-    echo "  2) Luego:  git add $REL   y volve a commitear."
+  if [ "$F" != "$E" ]; then
+    echo "pre-commit BLOQUEADO: en lo que entra al commit, el espejo $2/ no es igual a la fuente $1/:"
+    git diff-tree -r --name-status "$F" "$E" 2>/dev/null | head -10 | sed 's/^/    /'
+    echo "  Corre:  bin/sync-skills.sh (o .ps1)   y despues:  git add $1 $2"
     return 1
   fi
-
-  # (2) Lo que esta en disco DEBE estar staged: si el espejo tiene cambios sin 'git add',
-  #     el commit registraria un espejo viejo aunque el disco este sincronizado.
-  if [ -n "$(git diff --name-only -- "$REL")$(git ls-files --others --exclude-standard -- "$REL")" ]; then
-    echo "pre-commit BLOQUEADO: el espejo $REL/ tiene cambios sin 'git add'."
-    echo "  Corre:  git add $REL   y volve a commitear."
-    return 1
-  fi
-
-  # (3) La FUENTE tambien: con el espejo nuevo en stage y la fuente vieja, el commit queda con los dos distintos
-  #     aunque en el disco coincidan. Solo si el espejo tiene cambios en stage (los de agentes no se versionan).
-  if ! git diff --cached --quiet -- "$REL" &&
-     [ -n "$(git diff --name-only -- "$ORIGEN")$(git ls-files --others --exclude-standard -- "$ORIGEN")" ]; then
-    echo "pre-commit BLOQUEADO: la fuente ${ORIGEN#$ROOT/}/ tiene cambios sin 'git add' (su espejo $REL/ si esta en stage): el commit los dejaria distintos."
-    echo "  Corre:  git add ${ORIGEN#$ROOT/}   y volve a commitear."
-    return 1
-  fi
-
   return 0
 }
 
-# Python 3 para las guardas que son scripts. Falla CERRADO: sin Python no se dice OK sobre nada.
+# Espejos gemelos de los repos de codigo (back/ y front/): no hay fuente canonica, son dos copias y ninguna manda
+# todavia (decision abierta, ver doctor/README.md). Lo unico exigible es que entren iguales al commit.
+check_pair() {
+  A="$(en_commit "$1")"
+  B="$(en_commit "$2")"
+  if [ -z "$A" ] && [ -z "$B" ]; then
+    return 0   # ese lado todavia no arranco
+  fi
+  if [ "$A" != "$B" ]; then
+    echo "pre-commit BLOQUEADO: $1/ y $2/ no entran iguales al commit. Son copias gemelas: todo cambio va en las DOS."
+    return 1
+  fi
+  return 0
+}
+
+# Los espejos de agentes no se versionan: no entran al commit, asi que no lo frenan. Si estan viejos, la herramienta
+# lee el agente viejo: se avisa.
+aviso_agentes() {
+  for REL in .agents/agents .claude/agents; do
+    if [ ! -d "$ROOT/$REL" ] || ! git diff --no-index --ignore-cr-at-eol --quiet "$AGENTS_SRC" "$ROOT/$REL" 2>/dev/null; then
+      echo "pre-commit AVISO (no frena): el espejo $REL/ falta o no coincide con la fuente de agentes; corre  bin/sync-agents.sh (o .ps1)."
+    fi
+  done
+}
+
+# Python 3 para las guardas que son scripts. Falla CERRADO: sin Python no se dice OK sobre nada. Se busca una vez.
+PY=""
 buscar_python() {
-  PY=""
+  [ -n "$PY" ] && return 0
   for c in python3 python py; do
-    if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 6) else 1)' >/dev/null 2>&1; then
+    if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 7) else 1)' >/dev/null 2>&1; then
       PY="$c"; return 0
     fi
   done
@@ -109,98 +106,10 @@ check_control_chars() {
   return 1
 }
 
-# Espejos gemelos de los repos de codigo (back/ y front/). A diferencia de check_mirror,
-# aca NO hay fuente canonica: son dos copias y ninguna manda todavia (decision abierta,
-# ver doctor/README.md). Lo unico exigible es que sean identicas entre si.
-# check_mirror no sirve para esto: compara contra cerebro-digital/.../skills, que tiene
-# muchas mas; usarlo con back/ compararia un punado contra todas y bloquearia todo commit.
-check_pair() {
-  A="$ROOT/$1"
-  B="$ROOT/$2"
-
-  # Si no existe ninguno de los dos, ese lado todavia no arranco: nada que verificar.
-  if [ ! -d "$A" ] && [ ! -d "$B" ]; then
-    return 0
-  fi
-
-  if [ ! -d "$A" ] || [ ! -d "$B" ]; then
-    echo "pre-commit BLOQUEADO: existe uno de los espejos gemelos pero no el otro."
-    echo "  $1/  <->  $2/"
-    return 1
-  fi
-
-  if ! git diff --no-index --ignore-cr-at-eol --quiet "$A" "$B" 2>/dev/null; then
-    echo "pre-commit BLOQUEADO: $1/ y $2/ estan desincronizados entre si."
-    echo "  Son copias gemelas: todo cambio va en las DOS."
-    return 1
-  fi
-
-  if [ -n "$(git diff --name-only -- "$1" "$2")$(git ls-files --others --exclude-standard -- "$1" "$2")" ]; then
-    echo "pre-commit BLOQUEADO: $1/ o $2/ tienen cambios sin 'git add'."
-    return 1
-  fi
-
-  return 0
-}
-
-# Guarda de CONTEO de skills. Cuatro documentos anuncian cuantas skills hay, y ninguno
-# tenia como enterarse de que se agrego una: al sumar las tres skills de auditoria, el
-# README siguio diciendo 20, el index del OKF siguio diciendo "Pipeline Azure DevOps (7)",
-# instalacion.md siguio diciendo 20 y hasta el comentario de este mismo hook hablaba de 21.
-# Un numero afirmado que nadie verifica envejece en silencio y despues se cita como dato.
-# Esto lo convierte en un conteo real contra el disco.
-#
-# Falla CERRADO tambien si el patron no aparece: si alguien reescribe la frase, el hook
-# avisa en vez de dar por buena una verificacion que ya no verifica nada.
-check_conteo_skills() {
-  REAL="$(find "$SRC" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
-  RC=0
-
-  verificar() {
-    ARCHIVO="$1"; PATRON="$2"; QUE="$3"
-    [ -f "$ROOT/$ARCHIVO" ] || return 0
-    DECLARADO="$(grep -oE "$PATRON" "$ROOT/$ARCHIVO" 2>/dev/null | head -1 | grep -oE '[0-9]+' | head -1)"
-    if [ -z "$DECLARADO" ]; then
-      echo "pre-commit BLOQUEADO: no encontre el conteo de skills en $ARCHIVO ($QUE)."
-      echo "  Cambio la redaccion: actualiza el patron en .githooks/pre-commit o restaura la frase."
-      return 1
-    fi
-    if [ "$DECLARADO" != "$REAL" ]; then
-      echo "pre-commit BLOQUEADO: $ARCHIVO dice $DECLARADO skills y en disco hay $REAL ($QUE)."
-      echo "  Actualiza el numero Y la lista: un conteo al dia con una lista incompleta engania igual."
-      return 1
-    fi
-    return 0
-  }
-
-  verificar "AGENTS.md"                  '\*\*[0-9]+ habilidades\*\*'              "total" || RC=1
-  verificar "README.md"                  'Skills del Ecosistema \([0-9]+ habilid'  "total" || RC=1
-  verificar "INSTALACION.md"             '[Ll]as \*\*[0-9]+ skills\*\*'            "total" || RC=1
-
-  # Los dos indices ademas LISTAN las skills una por una. Un total al dia con una lista
-  # incompleta engania igual -- peor, porque el numero da confianza. Aca no se cuenta:
-  # se exige que cada carpeta de skill aparezca nombrada en el archivo.
-  for DOC in "README.md" "cerebro-digital/index.md"; do
-    [ -f "$ROOT/$DOC" ] || continue
-    AUSENTES=""
-    for D in "$SRC"/*/; do
-      NOMBRE="$(basename "$D")"
-      grep -qF "$NOMBRE" "$ROOT/$DOC" || AUSENTES="$AUSENTES $NOMBRE"
-    done
-    if [ -n "$AUSENTES" ]; then
-      echo "pre-commit BLOQUEADO: $DOC no lista estas skills:$AUSENTES"
-      echo "  Agregalas a la lista, no solo al numero."
-      RC=1
-    fi
-  done
-
-  return $RC
-}
-
-# Guarda de ESPECIFICACION de skills. Las cuatro herramientas leen el mismo SKILL.md y la
-# especificacion abierta (agentskills.io) pone limites que ninguna avisa al romperse: el name
-# tiene que ser igual a la carpeta y la description no puede pasar de 1024 caracteres (una
-# description cortada es una skill que deja de dispararse, en silencio). Lo cuenta un script.
+# Guarda de ESPECIFICACION de skills, y de los conteos y listas que las anuncian (AGENTS.md, README.md,
+# INSTALACION.md, cerebro-digital/index.md). Lo cuenta bin/verificar-skills.py, en un proceso: los patrones viven ahi.
+# Corre sobre una copia de lo que entra al commit (el indice), no sobre el disco: una skill a medio hacer sin
+# 'git add' no frena el commit de otra cosa, y un conteo corregido solo en el disco no deja pasar uno roto.
 # Falla CERRADO si no hay Python 3: nunca decir OK sobre algo que no se pudo mirar.
 check_skills_spec() {
   if ! buscar_python; then
@@ -213,7 +122,14 @@ check_skills_spec() {
     return 1
   fi
   # El codigo se toma ANTES de cualquier if: despues de un "if ...; fi" sin rama, $? vale 0 y el 2 no se veia nunca.
-  "$PY" -I "$ROOT/bin/verificar-skills.py" "$ROOT" > "$TMPD/skills.txt" 2>&1
+  IDX="$TMPD/indice"
+  mkdir -p "$IDX"
+  # solo los .md: es lo unico que lee (SKILL.md y references/); el resto de una skill vendida pesa y no se mira
+  git ls-files -z -- "$SRC_REL/*.md" ".claude/skills/*.md" ".agents/skills/*.md" "back/.claude/skills/*.md" \
+    "back/.agents/skills/*.md" "front/.claude/skills/*.md" "front/.agents/skills/*.md" AGENTS.md README.md \
+    INSTALACION.md cerebro-digital/index.md |
+    git checkout-index -z --stdin --prefix="$IDX/" 2>/dev/null
+  "$PY" -I "$ROOT/bin/verificar-skills.py" "$IDX" > "$TMPD/skills.txt" 2>&1
   RC=$?
   if [ "$RC" = "0" ]; then
     return 0
@@ -225,9 +141,9 @@ check_skills_spec() {
     cat "$TMPD/skills.txt"
     return 1
   fi
-  echo "pre-commit BLOQUEADO: hay SKILL.md fuera de la especificacion de Agent Skills:"
+  echo "pre-commit BLOQUEADO: hay skills fuera de la especificacion de Agent Skills, o un conteo que no cierra:"
   grep -E '^  (HALLAZGO|AVISO)' "$TMPD/skills.txt" || cat "$TMPD/skills.txt"
-  echo "  Corregilos (name == carpeta, description de hasta 1024 caracteres) y volve a commitear."
+  echo "  Corregilos (name == carpeta, description de hasta 1024 caracteres, el numero y la lista al dia) y volve a commitear."
   return 1
 }
 
@@ -237,17 +153,15 @@ trap 'rm -rf "$TMPD"' EXIT HUP INT TERM
 
 FALLO=0
 
-# Los espejos de la raiz solo se verifican si existe la fuente correspondiente.
-if [ "$HAY_SKILLS" = "1" ]; then
-  check_mirror "$SRC" ".agents/skills" || FALLO=1
-  check_mirror "$SRC" ".claude/skills" || FALLO=1
-  check_conteo_skills || FALLO=1
+# Los espejos de la raiz solo se verifican si la fuente entra al commit.
+if [ -n "$(en_commit "$SRC_REL")" ]; then
+  check_mirror "$SRC_REL" ".agents/skills" || FALLO=1
+  check_mirror "$SRC_REL" ".claude/skills" || FALLO=1
   check_skills_spec || FALLO=1
 fi
 
-if [ "$HAY_AGENTES" = "1" ]; then
-  check_mirror "$AGENTS_SRC" ".agents/agents" || FALLO=1
-  check_mirror "$AGENTS_SRC" ".claude/agents" || FALLO=1
+if [ -d "$AGENTS_SRC" ]; then
+  aviso_agentes
 fi
 
 # Los gemelos de back/front se auto-saltean si no existe ninguno de los dos lados.

@@ -46,14 +46,14 @@ def main():
 
         tmp = tempfile.mkdtemp(prefix='probar-doctor-')
         os.makedirs(os.path.join(tmp, '.githooks'))
-        guardas = ['check_mirror', 'check_pair', 'check_control_chars', 'check_conteo_skills', 'check_skills_spec']
+        guardas = ['check_mirror', 'check_pair', 'check_control_chars', 'check_skills_spec']
         cuerpo = '#!/usr/bin/env bash\n'
-        for g in guardas[:4]:
+        for g in guardas[:3]:
             cuerpo += '%s() {\n  return 0\n}\n' % g
-        cuerpo += 'function %s {\n  return 0\n}\n' % guardas[4]      # definida con "function", sin ()
-        cuerpo += '\n'.join('%s || FALLO=1' % g for g in guardas[1:3]) + '\n'
-        cuerpo += 'if ! %s; then FALLO=1; fi\n' % guardas[3]
-        cuerpo += 'if ! %s; then FALLO=1; fi\n' % guardas[4]        # llamada dentro de un if
+        cuerpo += 'function %s {\n  return 0\n}\n' % guardas[3]      # definida con "function", sin ()
+        cuerpo += '%s || FALLO=1\n' % guardas[1]
+        cuerpo += 'if ! %s; then FALLO=1; fi\n' % guardas[2]
+        cuerpo += 'if ! %s; then FALLO=1; fi\n' % guardas[3]        # llamada dentro de un if
         cuerpo += '# check_mirror ya no se llama: quedo solo nombrado en este comentario\n'
         with open(os.path.join(tmp, '.githooks', 'pre-commit'), 'w', encoding='utf-8', newline='\n') as h:
             h.write(cuerpo)
@@ -85,6 +85,41 @@ def main():
         sys.argv = argv
     caso('un argumento que no conoce (--help): sale 2 sin correr ni escribir nada', rc == 2, str(rc))
     caso('un argumento suelto (--solo espejos conteos, separado con espacio): sale 2', rc2 == 2, str(rc2))
+
+    medidas = doctor.medidas_de([{'id': 'x', 'titulo': 'X', 'estado': 'HALLAZGO', 'resumen': '',
+                                  'tabla': (['Que', 'Estado'], [['roto.md', 'HALLAZGO'], ['sano.md', 'OK']])}], '2026-01-01')
+    caso('las medidas que guarda el Doctor llevan la huella de cada hallazgo (para comparar hallazgo por hallazgo)',
+         medidas['sondas'][0].get('claves') == ['roto.md'], str(medidas))
+
+    raiz_vieja = (doctor.ROOT, doctor.SRC_SKILLS, doctor.git)
+    tmp2 = tempfile.mkdtemp(prefix='probar-doctor-espejos-')
+    try:
+        for base in ('cerebro-digital/configuracion-ia/skills', '.agents/skills', '.claude/skills'):
+            for rel, texto in (('una/SKILL.md', 'una\n'), ('una/references/guia.md', 'guia\n')):
+                p = os.path.join(tmp2, base, rel)
+                os.makedirs(os.path.dirname(p), exist_ok=True)
+                with open(p, 'w', encoding='utf-8', newline='\n') as h:
+                    h.write(texto)
+        with open(os.path.join(tmp2, '.claude/skills/una/references/guia.md'), 'a', encoding='utf-8') as h:
+            h.write('una linea que solo esta en el espejo\n')
+        doctor.ROOT = tmp2.replace('\\', '/')
+        doctor.SRC_SKILLS = doctor.ROOT + '/cerebro-digital/configuracion-ia/skills'
+        r = doctor.sonda_espejos()
+        caso('espejos: un archivo de references/ distinto en el espejo es HALLAZGO (no solo el SKILL.md)',
+             r['estado'] == 'HALLAZGO' and any('una' in f[2] for f in r['tabla'][1] if f[0] == '.claude/skills'), str(r.get('tabla')))
+        doctor.git = lambda *a: ('.githooks' if a[:2] == ('config', 'core.hooksPath') else
+                                 ('100755 abc 0\t.githooks/pre-commit\n' if a == ('ls-files', '-s', '--', '.githooks/pre-commit') else
+                                  ('100644 abc 0\tbin/sync-skills.sh\n100755 abc 0\tbin/lote.sh\n' if a[:2] == ('ls-files', '-s') else '')))
+        os.makedirs(os.path.join(tmp2, '.githooks'), exist_ok=True)
+        with open(os.path.join(tmp2, '.githooks', 'pre-commit'), 'w', encoding='utf-8', newline='\n') as h:
+            h.write('#!/usr/bin/env bash\n')
+        r = doctor.sonda_guardarrailes()
+        fila = [f for f in r['tabla'][1] if f[0].startswith('Scripts .sh')]
+        caso('un .sh sin permiso de ejecucion en git: HALLAZGO y lo nombra', fila and fila[0][2] == 'HALLAZGO'
+             and 'sync-skills.sh' in fila[0][1] and 'lote.sh' not in fila[0][1], str(fila))
+    finally:
+        doctor.ROOT, doctor.SRC_SKILLS, doctor.git = raiz_vieja
+        shutil.rmtree(tmp2, ignore_errors=True)
 
     fallas = [n for n, ok, _ in ESPERADOS if not ok]
     print()

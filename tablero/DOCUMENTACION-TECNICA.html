@@ -190,7 +190,7 @@ Coordinación:             tomar-tarea · comentar-tarea</div>
   <p>Con tres copias (fuente + 2 espejos) existe el riesgo de que se editen y alguna quede vieja (<i>drift</i>). Se evaluó un pipeline de CI y se descartó — los runners los administra la organización — y en su lugar hay un <b>hook de git versionado</b> que corre <b>solo en la máquina de quien edita skills</b>, antes de cada commit, y verifica <b>los dos espejos</b>.</p>
   <div class="codeblock"><span class="c">// Qué verifica el hook, para CADA espejo, antes de dejar commitear</span>
 1) Existe el espejo? (si se borro .agents/skills/ o .claude/skills/ entero, BLOQUEA)
-2) Espejo == fuente? (comparacion insensible a CRLF/LF -> misma verificacion en Windows/Linux/mac)
+2) Espejo == fuente en lo que entra al commit? (con eol=lf de .gitattributes -> misma verificacion en Windows/Linux/mac)
 3) Lo que hay en disco quedo STAGED? (evita "sincronice el espejo pero me olvide el git add")
 -&gt; si algo falla en CUALQUIER espejo: BLOQUEA el commit y dice que correr (bin/sync-skills.*)</div>
   <table>

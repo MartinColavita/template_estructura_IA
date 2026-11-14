@@ -11,6 +11,7 @@ import tempfile
 AQUI = os.path.dirname(os.path.abspath(__file__))
 SCRIPT = os.path.join(AQUI, 'verificar-staged.py')
 ESPERADOS = []
+SALTEADOS = []   # lo que no corrio se dice en la ultima linea: no es OK
 BOM = b'\xef\xbb\xbf'
 
 
@@ -61,15 +62,17 @@ def main():
 
     escribir(repo, 'con bom.md', BOM + 'hola\n'.encode('utf-8'))
     escribir(repo, 'control.md', b'antes\x07despues\n')
+    escribir(repo, 'vt.md', b'antes\x0bdespues\n')
+    escribir(repo, 'ff.md', b'antes\x0cdespues\n')
     escribir(repo, 'script.ps1', BOM + 'Write-Host "acento"\n'.encode('utf-8'))
     git(repo, 'add', '-A')
     rc, out = correr(repo)
     caso('BOM en un .md (nombre con espacio): HALLAZGO (1)', rc == 1 and 'con bom.md' in out and 'BOM' in out, out[:400])
-    caso('caracter de control: HALLAZGO (1)', 'control.md' in out and 'control' in out.lower(), out[:400])
+    caso('caracteres de control BEL, VT y FF: HALLAZGO, cada uno', all(f in out for f in ('control.md', 'vt.md', 'ff.md')), out[:400])
     caso('un .ps1 con BOM es la excepcion declarada: no se marca', 'script.ps1' not in out, out[:400])
 
     git(repo, 'reset', '-q')
-    for f in ('con bom.md', 'control.md', 'script.ps1', 'nuevo.md'):
+    for f in ('con bom.md', 'control.md', 'vt.md', 'ff.md', 'script.ps1', 'nuevo.md'):
         os.remove(os.path.join(repo, f))
     git(repo, 'mv', 'viejo.md', 'renombrado.md')
     rc, out = correr(repo)
@@ -88,8 +91,20 @@ def main():
     caso('un borrado en stage no se revisa ni frena', rc == 0, out[:300])
     git(repo, 'reset', '-q', '--hard')
     sub = git(repo, 'update-index', '--add', '--cacheinfo', '160000,' + 'a' * 40 + ',docs.md')
-    rc, out = correr(repo)
-    caso('un submodulo con nombre de texto (docs.md) no se lee ni frena', sub.returncode != 0 or (rc == 0 and 'docs.md' not in out), out[:300])
+    if sub.returncode != 0:
+        SALTEADOS.append('el submodulo (git no dejo armarlo en el indice)')
+        print('  SALTEADO %s' % SALTEADOS[-1])
+    else:
+        rc, out = correr(repo)
+        caso('un submodulo con nombre de texto (docs.md) no se lee ni frena', rc == 0 and 'docs.md' not in out, out[:300])
+    git(repo, 'reset', '-q', '--hard')
+    fantasma = git(repo, 'update-index', '--add', '--cacheinfo', '100644,' + 'b' * 40 + ',fantasma.md')
+    if fantasma.returncode != 0:
+        SALTEADOS.append('el blob ilegible (git no dejo armarlo en el indice)')
+        print('  SALTEADO %s' % SALTEADOS[-1])
+    else:
+        rc, out = correr(repo)
+        caso('un archivo en stage cuyo contenido git no puede leer: SIN DATOS (2), no OK', rc == 2 and 'fantasma.md' in out, out[:300])
     git(repo, 'reset', '-q', '--hard')
     if os.name != 'nt':   # Windows no acepta un salto de linea en un nombre de archivo
         escribir(repo, 'a\nb.md', BOM + b'x\n')
@@ -108,7 +123,8 @@ def main():
     shutil.rmtree(tmp, ignore_errors=True)
     fallas = [n for n, ok, _ in ESPERADOS if not ok]
     print()
-    print('%s -- %d de %d casos dieron lo esperado.' % ('OK' if not fallas else 'FALLA', len(ESPERADOS) - len(fallas), len(ESPERADOS)))
+    print('%s -- %d de %d casos dieron lo esperado.%s' % ('OK' if not fallas else 'FALLA', len(ESPERADOS) - len(fallas), len(ESPERADOS),
+                                                         (' SALTEADOS: ' + '; '.join(SALTEADOS)) if SALTEADOS else ''))
     return 1 if fallas else 0
 
 

@@ -58,8 +58,8 @@ el **manual o la documentación de la aplicación** → `documentar-aplicacion`.
   al día con `origin`, si la Tarea depende de otra sin mergear) y **espera el «sí»**; sin él, no se crea el worktree.
   Salir de la base equivocada no falla en el momento: aparece recién en el Merge Request, arrastrando trabajo ajeno.
   **Excepción:** `DEC-005` confirmada («Autorización permanente», en el GATE de confirmación).
-- **Techo: entre 4 y 8 worktrees por máquina, nunca más.** Antes de crear uno se dice cuántos hay abiertos; al llegar a
-  8 se frena y se avisa.
+- **Techo: 10 worktrees por máquina, nunca más.** Antes de crear uno se dice cuántos hay abiertos; al llegar a 10 se
+  frena y se avisa.
 - **Con el árbol sucio, o si la rama ya tiene un worktree, se frena** y se dice qué hay o cuál es, antes del error de `git`.
 - **Dos Tareas que tocan el mismo archivo van en serie.** ⚠ Regla candidata a confirmar por el equipo de devs.
 
@@ -70,7 +70,7 @@ muestran los commits sin pushear, los cambios sin commitear, la rama y de dónde
 el resumen y **lo borra el humano a mano**; con todo pusheado y el árbol limpio, alcanza **un** «sí».
 
 **Las preguntas van siempre en criollo**: *«Voy a abrir un espacio de trabajo aparte para la Tarea #NNNN. Propongo
-salir de `develop`, que está al día con el servidor. Tenés 3 abiertos de los 8 que conviene como máximo. ¿Arranco?»*
+salir de `develop`, que está al día con el servidor. Tenés 3 abiertos de los 10 que conviene como máximo. ¿Arranco?»*
 Una confirmación que el lector no puede evaluar no es una confirmación: es un trámite.
 
 ## 🎫 Redacción y carga de tickets en Azure DevOps

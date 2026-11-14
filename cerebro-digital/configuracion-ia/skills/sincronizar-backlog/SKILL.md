@@ -238,8 +238,6 @@ dice cómo las aplica.
   el pedido es **un** ticket suelto, NO se usa esta skill: se usa
   [[redactar-tarea]] + [[cargar-a-azure]]. Nunca convertir un pedido de un ítem en
   un árbol de muchos.
-- **Confirmación humana por operación.** El "sí" es por lote/sesión; no se
-  generaliza a la próxima sincronización.
 - **No inventar #ID ni estructura como si fuera dato.** Propuesta + confirmación.
 - **PHI prohibido** en lo que se escribe al board.
 - **Provenance/autoría:** la escritura queda auditada por el dueño del PAT; no usar

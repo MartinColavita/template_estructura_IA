@@ -67,6 +67,7 @@ def main():
     rc, out = script('gate-worktree.py', '--repo', repo, '--base', 'develop', '--rama', 'task/1234-prueba', '--json')
     d = json.loads(out)
     caso('arbol limpio y sin worktrees: OK', rc == 0 and d['estado'] == 'OK' and d['worktrees_abiertos'] == 0, out[:200])
+    caso('el techo por defecto es de 10 worktrees por maquina (AGENTS.md, GATE de WORKTREE)', d.get('techo') == 10, str(d.get('techo')))
     caso('avisa que no hay origin/develop', any('origin/develop' in v for v in d['avisos']))
     escribir(repo, 'src/sucio.txt', 'x\n')
     rc, out = script('gate-worktree.py', '--repo', repo, '--base', 'develop', '--rama', 'task/1234-prueba', '--json')
@@ -97,6 +98,13 @@ def main():
     caso('git status que falla (indice roto): SIN DATOS, no "arbol limpio"', rc == 2 and 'limpio' not in out, out[:300])
     with open(indice, 'wb') as h:
         h.write(indice_ok)
+    otro_wt = os.path.join(tmp, 'wt-abierto')
+    sh(repo, 'git', 'worktree', 'add', '-q', otro_wt, '-b', 'task/999-otra')
+    rc, out = script('gate-worktree.py', '--repo', repo, '--base', 'develop', '--rama', 'task/1234-prueba', '--techo', '1', '--json')
+    d = json.loads(out)
+    caso('con el techo alcanzado (1 abierto, techo 1): FRENA y dice cuantos hay y cual es el techo',
+         rc == 1 and d['worktrees_abiertos'] == 1 and any('techo es 1' in m for m in d['motivos']), out[:300])
+    sh(repo, 'git', 'worktree', 'remove', '--force', otro_wt)
 
     print('== verificar-tdd')
     sh(repo, 'git', 'checkout', '-q', '-b', 'task/1234-prueba')

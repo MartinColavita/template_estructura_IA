@@ -741,16 +741,16 @@ def probar(base):
            '--padre', '200051', '--flujo', 'F-01', '--gates', 'OK', '--dedup', 'OK')
     correr('item', L3, '--clave', 'H-02', '--tipo', 'Historia', '--accion', 'ALTA', '--titulo', 'Dos',
            '--padre', '200051', '--flujo', 'F-01', '--gates', 'listo', '--dedup', '2 consultas, 0 cand.')
-    altas = (('H-03', 'OK', '3 consultas ' + MEDIO + ' #125100 distinto'),
+    altas = (('H-03', 'OK', '3 consultas ' + MEDIO + ' 1 cand. ' + MEDIO + ' #125100=distinto'),
              ('H-04', 'OK', 'no aplica'),
-             ('H-06', 'OK', '3 consultas ' + MEDIO + ' #125100 equivalente'),
-             ('H-07', 'OK', '3 consultas ' + MEDIO + ' #125100 solapa parcial'),
+             ('H-06', 'OK', '3 consultas ' + MEDIO + ' #125100=equivalente'),
+             ('H-07', 'OK', '3 consultas ' + MEDIO + ' #125100=solapa'),
              ('H-08', 'OK', '2 consultas ' + MEDIO + ' 3 cand.'),
-             ('H-09', 'OK', '2 consultas ' + MEDIO + ' #125100'),
+             ('H-09', 'OK', '2 consultas ' + MEDIO + ' #125100 no es equivalente'),
              ('H-10', 'no aplica', '1 consulta ' + MEDIO + ' 0 cand.'),
-             ('H-11', 'OK', '3 consultas ' + MEDIO + ' #125100 distinto, #125101 duplicado'),
-             ('H-12', 'OK', '3 consultas ' + MEDIO + ' #125100 distinto: no solapa, otro alcance'),
-             ('H-13', 'OK', '2 consultas ' + MEDIO + ' #125100 equivalente cerrado (va como evolutivo)'),
+             ('H-11', 'OK', '3 consultas ' + MEDIO + ' #125100=distinto, #125101=duda'),
+             ('H-12', 'OK', '3 consultas ' + MEDIO + ' #125100=distinto (otro alcance: no solapa)'),
+             ('H-13', 'OK', '2 consultas ' + MEDIO + ' #125100=equivalente-cerrado (va como evolutivo)'),
              ('H-14', 'SIN DATOS: auditar-tarea.py no corrio', '1 consulta ' + MEDIO + ' 0 cand.'))
     for clave, gates, dedup in altas:
         correr('item', L3, '--clave', clave, '--tipo', 'Historia', '--accion', 'ALTA', '--titulo', clave,
@@ -762,15 +762,15 @@ def probar(base):
             'FRENA' in ' '.join(fila(cierre3, 'H-01')) and 'consultas' in ' '.join(fila(cierre3, 'H-01')), True)
     chequeo('cierre: un GATES que no es OK ni FRENA ("listo") FRENA', 'FRENA' in ' '.join(fila(cierre3, 'H-02')), True)
     frena = lambda clave: 'FRENA' in ' '.join(fila(cierre3, clave) or ['FILA QUE NO ESTA'])
-    chequeo('cierre: un alta con "N consultas . #ID distinto" pasa, tambien con su por que ("distinto: no solapa") '
-            'y con un equivalente cerrado (deriva a un evolutivo)', [frena(c) for c in ('H-03', 'H-12', 'H-13')], [False] * 3)
-    chequeo('cierre: el veredicto es por candidato: uno distinto y otro duplicado en la misma celda FRENA',
+    chequeo('cierre: un alta con #ID=distinto pasa, tambien con su por que al lado y con un equivalente-cerrado '
+            '(deriva a un evolutivo)', [frena(c) for c in ('H-03', 'H-12', 'H-13')], [False] * 3)
+    chequeo('cierre: el veredicto es por candidato: uno distinto y otro en duda en la misma celda FRENA',
             frena('H-11'), True)
     chequeo('cierre: GATES "SIN DATOS" se muestra como SIN DATOS, no como un formato invalido',
             [c for c in (fila(cierre3, 'H-14') or []) if c.startswith(('SIN DATOS', 'FRENA: GATES'))][:1],
             ['SIN DATOS: auditar-tarea.py no corrio'])
     chequeo('cierre: en un alta FRENAN la dedup "no aplica", un candidato equivalente o que solapa, candidatos '
-            'sin #ID, un #ID sin veredicto y GATES "no aplica"',
+            'sin #ID, un #ID sin #ID=veredicto (texto libre) y GATES "no aplica"',
             [frena(c) for c in ('H-04', 'H-06', 'H-07', 'H-08', 'H-09', 'H-10')], [True] * 6)
     chequeo('cierre: en una RELACION, dedup y GATES "no aplica" pasan', frena('R-02'), False)
     procesos = [subprocess.Popen([sys.executable, '-B', LOTE_PY, 'item', L3, '--clave', 'T-%02d' % i, '--tipo', 'Tarea',
@@ -799,13 +799,15 @@ def probar(base):
     lote_mod.os.replace = reemplazo_bloqueado
     try:
         lote_mod._guardar(L4, {'lote': {}, 'items': []})
-        guardado = (leer_json(os.path.join(L4, 'items.json')).get('items'), sorted(os.listdir(L4)))
+        guardado = 'escribio igual'
+    except lote_mod.Falla as e:
+        guardado = (e.codigo, 'SIN DATOS' in e.mensaje, sorted(os.listdir(L4)))
     except Exception as e:
         guardado = 'se cayo: %s: %s' % (type(e).__name__, e)
     finally:
         lote_mod.os.replace = reemplazo_real
-    chequeo('guardar: si Windows no deja reemplazar items.json (otro proceso lo tiene abierto), lo escribe igual',
-            guardado, ([], ['items.json']))
+    chequeo('guardar: si Windows no deja reemplazar items.json (otro proceso lo tiene abierto), SIN DATOS y no '
+            'escribe nada a medias', guardado, (2, True, []))
     correr('item', L3, '--clave', 'H-05', '--tipo', 'Historia', '--accion', 'ALTA', '--titulo', 'Cinco',
            '--padre', '200051', '--flujo', 'F-01', '--gates', 'OK', '--dedup', 'FRENA: duplicado de #125063')
     _, cierre4, _ = correr('cierre', L3)

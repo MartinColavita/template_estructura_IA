@@ -4,6 +4,7 @@ Copia lo versionado (y lo nuevo sin ignorar) a una carpeta temporal, hace un pri
 Se corre:  python -B bin/probar-hook.py   -> OK o FALLA, con el detalle de cada caso. Tarda unos segundos por commit."""
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -73,8 +74,53 @@ def main():
         shutil.copy2(os.path.join(repo, skill), os.path.join(repo, espejo))
         git(repo, 'add', espejo)
     rc, out = commit(repo)
-    caso('una skill con el espejo en stage y la fuente sin stage frena', rc != 0 and "tiene cambios sin 'git add' (su espejo" in out, out[-400:])
+    caso('una skill con el espejo en stage y la fuente sin stage frena', rc != 0 and 'no es igual a la fuente' in out, out[-400:])
     git(repo, 'reset', '-q', '--hard')
+
+    agregar(repo, skill, '\nedicion a medias, sin sincronizar ni agregar\n')
+    agregar(repo, 'COMO-USAR-ESTE-TEMPLATE.md', '\n<!-- cuarta -->\n')
+    git(repo, 'add', 'COMO-USAR-ESTE-TEMPLATE.md')
+    rc, out = commit(repo)
+    caso('una skill editada en el disco, sin agregar, no frena el commit de otra cosa (se mira lo que entra al commit)',
+         rc == 0, out[-400:])
+    git(repo, 'checkout', '-q', '--', skill)
+
+    shutil.rmtree(os.path.join(repo, '.claude', 'agents'))
+    agregar(repo, 'COMO-USAR-ESTE-TEMPLATE.md', '\n<!-- quinta -->\n')
+    git(repo, 'add', 'COMO-USAR-ESTE-TEMPLATE.md')
+    rc, out = commit(repo)
+    caso('sin el espejo de agentes (no se versiona): avisa y no frena', rc == 0 and 'AVISO' in out, out[-400:])
+    shutil.copytree(os.path.join(repo, 'cerebro-digital', 'configuracion-ia', 'agentes'), os.path.join(repo, '.claude', 'agents'))
+
+    with open(os.path.join(repo, 'AGENTS.md'), encoding='utf-8') as h:
+        agents_md = h.read()
+    with open(os.path.join(repo, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write(re.sub(r'\*\*[0-9]+ habilidades\*\*', '**99 habilidades**', agents_md, count=1))
+    git(repo, 'add', 'AGENTS.md')
+    rc, out = commit(repo)
+    caso('un conteo de skills que no cierra frena (lo cuenta verificar-skills)', rc != 0 and '99' in out, out[-400:])
+    git(repo, 'reset', '-q', '--hard')
+
+    nueva = 'cerebro-digital/configuracion-ia/skills/zz-nueva/SKILL.md'
+    os.makedirs(os.path.dirname(os.path.join(repo, nueva)))
+    agregar(repo, nueva, '---\nname: zz-nueva\ndescription: Una skill a medio hacer.\n---\n')
+    agregar(repo, 'COMO-USAR-ESTE-TEMPLATE.md', '\n<!-- sexta -->\n')
+    git(repo, 'add', 'COMO-USAR-ESTE-TEMPLATE.md')
+    rc, out = commit(repo)
+    caso('una skill nueva a medio hacer, sin agregar, no frena el commit de otra cosa', rc == 0, out[-400:])
+    for espejo in ('.claude/skills', '.agents/skills'):
+        os.makedirs(os.path.join(repo, espejo, 'zz-nueva'))
+        shutil.copy2(os.path.join(repo, nueva), os.path.join(repo, espejo, 'zz-nueva', 'SKILL.md'))
+    git(repo, 'add', 'cerebro-digital/configuracion-ia/skills/zz-nueva', '.claude/skills/zz-nueva', '.agents/skills/zz-nueva')
+    with open(os.path.join(repo, 'AGENTS.md'), encoding='utf-8') as h:
+        agents_md = h.read()
+    with open(os.path.join(repo, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write(re.sub(r'\*\*([0-9]+) habilidades\*\*', lambda m: '**%d habilidades**' % (int(m.group(1)) + 1), agents_md, count=1))
+    rc, out = commit(repo)
+    caso('la skill nueva en stage con el conteo corregido solo en el disco: frena (el commit quedaria con el numero viejo)',
+         rc != 0 and 'AGENTS.md' in out, out[-400:])
+    git(repo, 'reset', '-q', '--hard')
+    git(repo, 'clean', '-qfd')
 
     agente = 'cerebro-digital/configuracion-ia/agentes/cerebro-analyst.md'
     agregar(repo, agente, '\nlinea de prueba\n')

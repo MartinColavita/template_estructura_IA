@@ -112,7 +112,7 @@ para que «Sale de» se apoye en ramas al día y no en referencias viejas.
 Junto con la tabla:
 - **Cuántos worktrees hay abiertos en la máquina**: `git worktree list` de **todos** los repos,
   incluidos este repositorio y los de infraestructura (el techo es por máquina), sin contar el principal
-  de cada uno. Cuántos quedarían. Techo: **8**. Las Tareas que lo pasarían quedan **pendientes
+  de cada uno. Cuántos quedarían. Techo: el del GATE de WORKTREE ([[AGENTS]]). Las Tareas que lo pasarían quedan **pendientes
   en el plan**, sin tomar ni abrir, para la próxima corrida.
 - **Por cada repo destino:** si tiene el árbol sucio (qué hay) y si la rama propuesta ya existe
   o ya tiene un worktree (cuál). Se muestra **acá**, antes del "sí" y antes de tocar el
@@ -122,11 +122,12 @@ Junto con la tabla:
 - Las preguntas de «Decisiones abiertas» que hoy se resuelven acá: **autorización de commits
   locales** por Tarea, y el **modo de permisos** de quien programa y de quien verifica.
 
-Sin un "sí" explícito sobre esta tabla, no se toca nada.
+Sin un "sí" explícito sobre esta tabla, no se toca nada. Con `DEC-005` confirmada, lo que fija su tabla no se
+pregunta: se cita en el plan ([[AGENTS]], «Autorización permanente»).
 
 ### 6. Tomar cada Tarea
 [[tomar-tarea]], con sus barreras (otra persona, tarjeta congelada). Es escritura en el
-tablero: confirmación propia.
+tablero: confirmación propia, salvo que la dé `DEC-005`.
 
 ### 7. Abrir el worktree — GATE de WORKTREE
 Por cada Tarea libre, con el "sí" del paso 5 sobre la base de **esa** Tarea:
@@ -153,7 +154,7 @@ Por cada Tarea libre, con el "sí" del paso 5 sobre la base de **esa** Tarea:
   contiene la base al día y con qué SHA. Sin eso la misión no sale.
 - **Justo antes de crearlo se vuelve a chequear** (pudo cambiar desde el plan): si el repo
   tiene el árbol sucio (se muestra qué hay), si la rama ya tiene un worktree (se dice cuál) o
-  si se llegó a 8, **se frena** y se avisa.
+  si se llegó al techo, **se frena** y se avisa.
 
 ### 8. Despachar el worker
 **Misión autocontenida** ([[cerebro-orquestador]] §«Compresión de handoffs»): objetivo, rutas y
@@ -320,7 +321,7 @@ todas.
 
 - **GATE de TABLERO** y los demás GATES de escritura en Azure de `AGENTS.md`: tomar y comentar
   pasan por [[tomar-tarea]] y [[comentar-tarea]], que los aplican.
-- **GATE de WORKTREE:** la base se pregunta, se dice cuántos hay abiertos (techo 8), con el
+- **GATE de WORKTREE:** la base se pregunta, se dice cuántos hay abiertos contra el techo de [[AGENTS]], con el
   árbol sucio se frena.
 - **Quien verifica no es quien programó** (`DEC-005`: el otro motor si hay dos; otro agente del
   mismo motor con contexto limpio si hay uno). Sin verificador, no se despacha.

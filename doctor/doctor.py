@@ -252,6 +252,19 @@ def meses_desde(fecha):
         return None
 
 
+def contenido_de(carpeta):
+    """Cada archivo de la carpeta (ruta relativa -> texto con fin de linea normalizado): para comparar un espejo
+    entero, references/ incluidas, y no solo su SKILL.md."""
+    res = {}
+    for base, dirs, archivos in os.walk(carpeta):
+        dirs[:] = [d for d in dirs if d != "__pycache__"]
+        for a in archivos:
+            p = os.path.join(base, a)
+            with open(largo(p), "rb") as h:
+                res[os.path.relpath(p, carpeta).replace(os.sep, "/")] = h.read().replace(b"\r\n", b"\n")
+    return res
+
+
 def dirs_de(p):
     return sorted(d for d in listar(p) if es_dir(os.path.join(p, d))) \
         if es_dir(p) else []
@@ -334,8 +347,14 @@ def sonda_guardarrailes():
         modo = (indice or "").split(" ")[0]
         filas.append(["Hook ejecutable en git (100755)", modo or "(no se pudo leer)",
                       "SIN DATOS" if not modo else ("OK" if modo == "100755" else "HALLAZGO")])
+        scripts = git("ls-files", "-s", "--", "bin/*.sh", "doctor/bin/*.sh")
+        sin_bit = [l.split("\t", 1)[1] for l in (scripts or "").splitlines()
+                   if "\t" in l and not l.startswith("100755")]
+        filas.append(["Scripts .sh ejecutables en git (100755)",
+                      "(no se pudo leer)" if scripts is None else (", ".join(sin_bit) if sin_bit else "todos"),
+                      "SIN DATOS" if scripts is None else ("HALLAZGO" if sin_bit else "OK")])
         cuerpo = leer(hook)
-        for fn in ["check_mirror", "check_pair", "check_control_chars", "check_conteo_skills", "check_skills_spec"]:
+        for fn in ["check_mirror", "check_pair", "check_control_chars", "check_skills_spec"]:
             # presente = definida Y llamada; nombrada en un comentario no cuenta
             definida = re.search(r"^\s*(?:function\s+)?" + fn + r"\s*(?:\(\))?\s*\{", cuerpo, re.M)
             llamada = re.search(r"^\s*(?:if\s+!?\s*|!\s*)?" + fn + r"\b(?!\s*(?:\(\))?\s*\{)", cuerpo, re.M)
@@ -403,12 +422,8 @@ def sonda_espejos():
         presentes = dirs_de(ruta)
         faltan = [s for s in fuente if s not in presentes]
         sobran = [s for s in presentes if s not in fuente]
-        distintas = []
-        for s in fuente:
-            a, b = SRC + "/" + s + "/SKILL.md", ruta + "/" + s + "/SKILL.md"
-            if es_archivo(a) and es_archivo(b):
-                if leer(a).replace("\r\n", "\n") != leer(b).replace("\r\n", "\n"):
-                    distintas.append(s)
+        distintas = [s for s in fuente if s in presentes and
+                     contenido_de(SRC + "/" + s) != contenido_de(ruta + "/" + s)]
         problema = faltan or sobran or distintas
         detalle = []
         if faltan:
@@ -447,6 +462,31 @@ def sonda_espejos():
             "hay que subir ese cambio a la fuente primero o se pierde al sincronizar." + CIERRE))
 
 
+def medidas_de(resultados, hoy):
+    """Lo que se guarda de una corrida para compararla con la siguiente: por sonda, su estado y la huella de cada
+    hallazgo (sin las claves, la comparacion vuelve a contar filas y un hallazgo nuevo se esconde detras de uno
+    arreglado)."""
+    import comparar as _cmp_medidas  # noqa: la huella de cada fila, para comparar hallazgo por hallazgo
+    return {"fecha": hoy, "alcance": ALCANCE or "proyecto",
+            "sondas": [{"id": r["id"], "titulo": r["titulo"],
+                        "estado": r["estado"], "resumen": r["resumen"],
+                        "filas": len(r["tabla"][1]) if r.get("tabla") else 0,
+                        "claves": _cmp_medidas.claves_de(r),
+                        "acciones": len(r.get("acciones", []))} for r in resultados]}
+
+
+def verificar_skills():
+    """bin/verificar-skills.py como modulo (sus CONTEOS y LISTAS), o None si no se puede cargar."""
+    import importlib.util
+    try:
+        spec = importlib.util.spec_from_file_location("verificar_skills", ROOT + "/bin/verificar-skills.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+    except (OSError, ImportError, SyntaxError):
+        return None
+
+
 def sonda_conteos():
     if not es_dir(SRC_SKILLS):
         return res("Conteos declarados", "SIN DATOS", "No se encontro la carpeta de skills.",
@@ -460,38 +500,26 @@ def sonda_conteos():
                                       "doctor/doctor.py — hoy apunta a "
                                       "cerebro-digital/configuracion-ia/skills/."}])
     real = len(dirs_de(SRC_SKILLS))
-    patrones = [
-        ("AGENTS.md", r"\*\*(\d+) habilidades\*\*"),
-        ("README.md", r"Skills del Ecosistema \((\d+) habilid"),
-        ("INSTALACION.md", r"[Ll]as \*\*(\d+) skills\*\*"),
-    ]
-    filas = []
-    for arch, pat in patrones:
-        p = ROOT + "/" + arch
-        if not es_archivo(p):
-            filas.append([arch, "-", "archivo ausente", "SIN DATOS"]); continue
-        m = re.search(pat, leer(p))
-        if not m:
-            filas.append([arch, "-", "no se encontro el patron (cambio la redaccion)", "HALLAZGO"])
-        else:
-            d = int(m.group(1))
-            filas.append([arch, str(d), "coincide" if d == real else "declara " + str(d) + ", hay " + str(real),
-                          "OK" if d == real else "HALLAZGO"])
-    # que ademas las LISTEN, no solo el numero
-    for arch in ["README.md", "cerebro-digital/index.md"]:
-        p = ROOT + "/" + arch
-        if not es_archivo(p):
-            continue
-        cuerpo = leer(p)
-        ausentes = [s for s in dirs_de(SRC_SKILLS) if s not in cuerpo]
-        filas.append([arch + " (lista completa)", str(real - len(ausentes)) + "/" + str(real),
-                      "no nombra: " + ", ".join(ausentes) if ausentes else "las nombra a todas",
-                      "HALLAZGO" if ausentes else "OK"])
-    estado = "HALLAZGO" if any(f[3] == "HALLAZGO" for f in filas) else "OK"
+    vs = verificar_skills()
+    if vs is None:
+        return res("Conteos declarados vs. realidad", "SIN DATOS", "No se pudo cargar bin/verificar-skills.py, que tiene los patrones de los conteos.",
+                   significa="Los patrones de los conteos viven en bin/verificar-skills.py (los usan el hook y el CI).",
+                   importa="SIN DATOS no es aprobado: este aspecto quedo sin revisar.",
+                   acciones=[{"paso": "Restaurar bin/verificar-skills.py desde el template."}])
+    # el mismo control que corren el hook y el CI (bin/verificar-skills.py), no una copia de su logica
+    problemas = vs.conteo(ROOT)
+    if not vs.documentos_de_conteo(ROOT):
+        return res("Conteos declarados vs. realidad", "SIN DATOS", "No existe ninguno de los documentos que anuncian "
+                   "las skills: no hay conteo que verificar.",
+                   significa="Los conteos y las listas viven en " + ", ".join(a for a, _ in vs.CONTEOS) + ".",
+                   importa="SIN DATOS no es aprobado: este aspecto quedo sin revisar.")
+    filas = [[p, "HALLAZGO"] for p in problemas] or [["los numeros y las listas de " +
+                                                     ", ".join(vs.documentos_de_conteo(ROOT)), "OK"]]
+    estado = "HALLAZGO" if problemas else "OK"
     return res("Conteos declarados vs. realidad", estado,
         "Hay " + str(real) + " skills en disco." +
         ("" if estado == "OK" else " Algun documento declara otra cosa."),
-        (["Documento", "Declara", "Detalle", "Estado"], filas),
+        (["Que", "Estado"], filas),
         significa="Varios documentos anuncian cuantas skills hay y ademas las listan una por una. "
                   "Esta sonda cuenta las carpetas reales y compara las dos cosas: el numero y la lista.",
         importa="Un numero que nadie verifica envejece en silencio y despues se cita como dato duro. "
@@ -501,12 +529,12 @@ def sonda_conteos():
             {"paso": "Mira la tabla: la fila que falla te dice el documento y que declara."},
             {"paso": "Corregi el numero Y la lista. Un conteo al dia con una lista incompleta "
                      "engana igual, y encima da confianza."},
-            {"paso": "Si cambiaste la redaccion de la frase, actualiza tambien el patron que la "
-                     "busca en .githooks/pre-commit — si no, la guarda deja de verificar sin avisar."}],
+            {"paso": "Si cambiaste la redaccion de la frase, actualiza tambien su patron en CONTEOS, en "
+                     "bin/verificar-skills.py (lo usan el hook, el CI y esta sonda)."}],
         pedido=None if estado == "OK" else (
             "En este repositorio hay " + str(real) + " skills en "
             "cerebro-digital/configuracion-ia/skills/, y algunos documentos declaran otra cosa:\n\n" +
-            "\n".join("- " + f[0] + ": " + f[2] for f in filas if f[3] == "HALLAZGO") +
+            "\n".join("- " + f[0] for f in filas if f[1] == "HALLAZGO") +
             "\n\nCorregi el numero Y la lista en cada uno. Ojo: un conteo al dia con una lista "
             "incompleta engana igual, asi que verifica que cada documento NOMBRE las " + str(real) +
             " skills, no solo que diga el numero correcto." + CIERRE))
@@ -1672,14 +1700,7 @@ def main():
 
         # El JSON de la misma corrida: es lo que hace posible comparar dos dias sin
         # tener que parsear HTML. Es el insumo de la tendencia, que todavia no existe.
-        import comparar as _cmp_medidas  # noqa: la huella de cada fila, para comparar hallazgo por hallazgo
-        medidas = {"fecha": hoy, "alcance": ALCANCE or "proyecto",
-                   "sondas": [{"id": r["id"], "titulo": r["titulo"],
-                               "estado": r["estado"], "resumen": r["resumen"],
-                               "filas": len(r["tabla"][1]) if r.get("tabla") else 0,
-                               "claves": _cmp_medidas.claves_de(r),
-                               "acciones": len(r.get("acciones", []))} for r in resultados]}
-        crudo = json.dumps(medidas, ensure_ascii=False, indent=2)
+        crudo = json.dumps(medidas_de(resultados, hoy), ensure_ascii=False, indent=2)
         abrir(historico + "/reporte-" + hoy + sufijo + ".json", "w").write(crudo)
 
         # Rotacion previo <- ultimo <- este. Es lo que permite comparar dos corridas

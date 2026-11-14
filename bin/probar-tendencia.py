@@ -41,7 +41,8 @@ def main():
     rc, out = correr('--sesiones', p)
     caso('una sola sesion: SIN DATOS (2)', rc == 2 and 'al menos 2' in out)
     rc, out = correr('--sesiones', p, '--breve', '--hook')
-    caso('--hook con SIN DATOS: sale 0 y lo dice en el texto', rc == 0 and 'SIN DATOS' in out, out[:200])
+    caso('--hook con menos de dos sesiones: sale 0 y no le dice nada al modelo (es el estado normal de un clon nuevo)',
+         rc == 0 and out.strip() == '', out[:200])
     with open(p, 'w', encoding='utf-8') as h:
         for i, (b, s, f) in enumerate([(2, 2, 6), (2, 1, 5), (1, 1, 4), (0, 0, 2)]):
             h.write(sesion(i, b, s, f) + '\n')

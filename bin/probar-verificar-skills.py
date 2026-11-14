@@ -72,6 +72,29 @@ def main():
     rc, out = correr(os.path.dirname(AQUI))
     caso('las skills de ESTE repositorio cumplen la especificacion', rc == 0, out[:600])
 
+    cuenta = tempfile.mkdtemp(prefix='probar-skills-conteo-')
+    for n in ('una', 'otra'):
+        skill(cuenta, n, '---\nname: %s\ndescription: x\n---\n' % n)
+    docs = {'AGENTS.md': '**2 habilidades**\n', 'README.md': 'Skills del Ecosistema (2 habilidades): una, otra\n',
+            'INSTALACION.md': 'Las **2 skills**\n', os.path.join('cerebro-digital', 'index.md'): 'una y otra\n'}
+    for rel, texto in docs.items():
+        with open(os.path.join(cuenta, rel), 'w', encoding='utf-8', newline='\n') as h:
+            h.write(texto)
+    rc, out = correr(cuenta)
+    caso('conteos y listas al dia: OK', rc == 0, out[:300])
+    skill(cuenta, 'tercera', '---\nname: tercera\ndescription: x\n---\n')
+    rc, out = correr(cuenta, '--json')
+    conteo = json.loads(out).get('conteo', [])
+    caso('una skill nueva sin actualizar los documentos: HALLAZGO por cada numero y cada lista que no cierran',
+         rc == 1 and json.loads(out).get('veredicto') == 'HALLAZGO' and len(conteo) == 5
+         and all('tercera' in c for c in conteo if 'no nombra' in c), str(conteo))
+    with open(os.path.join(cuenta, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write('Son tres habilidades.\n')
+    rc, out = correr(cuenta, '--json')
+    caso('si cambio la redaccion y el patron no aparece: HALLAZGO, no OK', any('no encontre el conteo' in c for c in json.loads(out).get('conteo', [])),
+         out[:300])
+    shutil.rmtree(cuenta, ignore_errors=True)
+
     for d_ in (tmp, solo_bien, vacio):
         shutil.rmtree(d_, ignore_errors=True)
     fallas = [n for n, ok, _ in ESPERADOS if not ok]

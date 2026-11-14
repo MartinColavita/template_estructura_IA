@@ -133,7 +133,7 @@ confirmar por el equipo. Con la columna que aplique **confirmada**, vale como el
 | Qué fija | Modo solo | Modo equipo (⚠ propuesta) |
 |---|---|---|
 | Base de los worktrees | `develop` al día con `origin` (si avanzó, merge; nunca rebase); sin remoto, `develop` local | Igual |
-| Techo de worktrees por máquina | 6 | 6 |
+| Techo de worktrees por máquina | El del GATE de WORKTREE (`AGENTS.md`: 10) | Igual |
 | Carpeta de los worktrees | `<carpeta padre del repositorio>/worktrees/<ID>-<slug>` | Igual |
 | Motor que programa | **Claude Code** | Lo elige quien despacha, por lote |
 | Quién verifica | **Otro agente de Claude Code, contexto limpio, sólo lectura**, declarado en el veredicto («Verificado por: Claude Code · sub-agente de sólo lectura»). Si hay otro motor instalado, se prefiere | El otro motor; sin él, esa Tarea no se despacha |

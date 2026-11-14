@@ -55,17 +55,9 @@ def _archivos(base):
 
 
 def _mismo_contenido(a, b):
-    """Byte por byte y sin la cache de filecmp, que se fia del tamano y la fecha: en Linux la fecha avanza de a
-    tics de milisegundos, y dos escrituras del mismo largo en el mismo tic la enganan."""
-    if os.path.getsize(a) != os.path.getsize(b):
-        return False
-    with open(a, 'rb') as fa, open(b, 'rb') as fb:
-        while True:
-            x, y = fa.read(65536), fb.read(65536)
-            if x != y:
-                return False
-            if not x:
-                return True
+    """Por contenido y sin la cache de filecmp, que se fia del tamano y la fecha: en Linux la fecha avanza de a tics
+    de milisegundos, y dos escrituras del mismo largo en el mismo tic la enganan."""
+    return os.path.getsize(a) == os.path.getsize(b) and _huella(a) == _huella(b)
 
 
 def _huella(ruta):

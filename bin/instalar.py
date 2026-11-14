@@ -190,9 +190,13 @@ def main():
         if rc == 0:
             print('  ' + salida.splitlines()[0])
         elif rc == 2:
-            aviso('verificar-skills: ' + salida.splitlines()[0])
+            # 2 es tambien lo que devuelve cuando explota; la fuente de skills existe (se chequeo arriba): no se pudo
+            # verificar, y eso no es OK (lo mismo que hace el hook)
+            hallazgo('verificar-skills no pudo verificar las skills (SIN DATOS): ' + (salida.splitlines() or [''])[0],
+                     'python -I bin/verificar-skills.py')
         else:
-            hallazgo('hay SKILL.md fuera de la especificacion de Agent Skills', 'python -I bin/verificar-skills.py  y corregir lo que lista')
+            hallazgo('hay skills fuera de la especificacion de Agent Skills, o un conteo que no cierra',
+                     'python -I bin/verificar-skills.py  y corregir lo que lista')
             for linea in salida.splitlines()[1:8]:
                 print('      ' + linea)
 

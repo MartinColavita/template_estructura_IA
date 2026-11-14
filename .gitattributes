@@ -1,7 +1,7 @@
 # EOL determinista (LF) en las skills para que el espejo y la fuente queden
 # byte-idénticos (blobs iguales) sin depender del core.autocrlf de cada mantenedor.
-# El hook pre-commit igual compara insensible a CRLF/LF, pero esto mantiene los
-# blobs limpios. Se limita a las skills (las 3 copias) y a los scripts shell.
+# El hook pre-commit compara lo que entra al commit (el indice), asi que depende de
+# esto: con eol=lf, la fuente y los espejos guardan lo mismo en cualquier sistema. Se limita a las skills (las 3 copias) y a los scripts shell.
 cerebro-digital/configuracion-ia/skills/** text=auto eol=lf
 .agents/skills/** text=auto eol=lf
 .claude/skills/** text=auto eol=lf

@@ -173,8 +173,8 @@ que estar conectado (`/mcp` lo muestra activo); si no lo está, avisar y derivar
    corrida.
    - `orca status --json` y `orca orchestration run-create --objective
      "<lote>" --json` → `run_id` para todo el lote.
-   - **Hasta 8 Tareas en simultáneo**, y nunca más que lo que deja el techo
-     de 8 worktrees por máquina contando los que ya están abiertos. Las que
+   - **Tantas Tareas en simultáneo como deje el techo de worktrees por máquina** (GATE de
+     WORKTREE de [[AGENTS]]), contando los que ya están abiertos. Las que
      no entran quedan pendientes para la próxima corrida (no se lanzan a
      ciegas).
    - Por cada Tarea se anota el **SHA de la base** (`git -C <repo>
@@ -307,7 +307,7 @@ que estar conectado (`/mcp` lo muestra activo); si no lo está, avisar y derivar
    Quien programa no se aprueba a sí mismo: **verifica otro agente** (el otro
    motor si hay dos; si no, uno del mismo motor con contexto limpio, `DEC-005`), con
    contexto nuevo y en **sólo lectura**, sobre el **mismo worktree** de la
-   Tarea. Así no se suman worktrees y entran 8 Tareas a la vez.
+   Tarea. Así no se suman worktrees y entran tantas Tareas como deje el techo.
 
    - **Si programó Claude, verifica Gemini, en una pestaña de Orca** sobre
      el worktree de la Tarea: `orca terminal create --worktree

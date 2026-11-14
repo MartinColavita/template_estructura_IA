@@ -50,6 +50,7 @@ def probar_firma(tmp, plantilla):
     escribir(ajeno, 'documentos/acta.md', 'recibido: {{PROYECTO}}\n')
     escribir(ajeno, 'back/README.md', 'back de {{PROYECTO}}\n')
     escribir(ajeno, 'tablero/documentos/guia.md', 'guia de {{PROYECTO}}\n')
+    escribir(ajeno, 'borrador/nota.md', 'borrador de {{PROYECTO}}\n')
     instanciar(ajeno, '--modo', 'solo', '--autor', 'ana')
     leido = lambda rel: open(os.path.join(ajeno, rel), encoding='utf-8').read()
     caso('instanciar no toca un proyecto enchufado (otro repo en back/) ni documentos/; si el README del template',
@@ -57,6 +58,8 @@ def probar_firma(tmp, plantilla):
          and leido('back/README.md') == 'back de X\n', leido('back/mi-app/notas.md') + leido('back/README.md'))
     caso('documentos/ se saltea solo en la raiz: una carpeta del template con ese nombre, mas adentro, se instancia',
          leido('tablero/documentos/guia.md') == 'guia de X\n', leido('tablero/documentos/guia.md'))
+    caso('borrador/ (el trabajo en curso, que no se versiona) tampoco se toca', '{{PROYECTO}}' in leido('borrador/nota.md'),
+         leido('borrador/nota.md'))
     sin_sync = mini('sin-sync-espejos')
     escribir(sin_sync, 'cerebro-digital/configuracion-ia/skills/una/SKILL.md', '---\nname: una\n---\n')
     r = subprocess.run([sys.executable, '-I', os.path.join(sin_sync, 'bin', 'instanciar.py'), '--proyecto', 'X',
@@ -139,6 +142,13 @@ def main():
     tmp = tempfile.mkdtemp(prefix='probar-arrancar-')
     copia = os.path.join(tmp, 'nucleo')
     shutil.copytree(RAIZ, copia, ignore=shutil.ignore_patterns('.git', 'archify', 'borrador', 'salida', '__pycache__', 'INFORME-ESQUELETO.html'))
+    # archify pesa 5 MB y aca no se usa: va solo su SKILL.md, para que la copia tenga las skills que anuncian AGENTS.md,
+    # el README e INSTALACION.md (verificar-skills cuenta las carpetas contra esos numeros)
+    archify = os.path.join('cerebro-digital', 'configuracion-ia', 'skills', 'archify', 'SKILL.md')
+    for base in (os.path.join('cerebro-digital', 'configuracion-ia', 'skills'), os.path.join('.claude', 'skills'),
+                 os.path.join('.agents', 'skills')):
+        os.makedirs(os.path.join(copia, base, 'archify'), exist_ok=True)
+        shutil.copy2(os.path.join(RAIZ, archify), os.path.join(copia, base, 'archify', 'SKILL.md'))
     app = os.path.join(tmp, 'mi-app')
     escribir(app, 'CLAUDE.md', '# mi-app\n\n```bash\nnpm test\n```\n')
     escribir(app, 'src/server.js', "const app = require('express')();\napp.get('/salud', (q, r) => r.send('ok'));\n")

@@ -10,7 +10,7 @@ Por qué existen: `AGENTS.md`, «Lo que se cuenta, lo cuenta un script». Cada s
 - `bin/gate-worktree.py`: los datos duros del GATE de WORKTREE (worktrees abiertos, árbol sucio, rama ya usada, base al día).
 - `bin/verificar-tdd.py`: la mitad mecánica de `verificar-tdd`: por ítem, rojo sólo con tests y antes del verde, leído de `git log`; la rama `evidencia/<ID>`.
 - `bin/auditar-diff.py`: secretos y posibles datos personales en las líneas agregadas del diff, y elegibilidad.
-- `bin/atajos.py`: las marcas `atajo:` del código de un repo; HALLAZGO las que no tienen límite o `cuando …`, o citan una `DT-nnn` que no está abierta.
+- `bin/atajos.py`: las marcas `atajo:` del código de un repo (con `--base`, sólo las que agrega el cambio); HALLAZGO las que no tienen límite o `cuando …`, o citan una `DT-nnn` que no está abierta.
 - `bin/datos-cierre.py`: rama, último commit, cantidad de commits, archivos, si está pusheada, respaldo y link del Merge Request, leídos del repositorio para el comentario de cierre.
 - `bin/inventariar-codigo.py`: el inventario de una aplicación existente (lenguajes, build, pipeline, contratos, migraciones, tests, deuda, posibles secretos) para `absorber-aplicacion`.
 - `bin/radiografiar-codigo.py`: la radiografía de una aplicación existente, cada hecho con `archivo:línea` (endpoints, entidades y estados, pantallas, reglas candidatas, integraciones, permisos, dependencias entre módulos); la lectura de `absorber-aplicacion` empieza por lo que señala.
@@ -32,11 +32,11 @@ Por qué existen: `AGENTS.md`, «Lo que se cuenta, lo cuenta un script». Cada s
 - `bin/cobertura-e2e.py`: por Historia y Escenario, qué tiene prueba de punta a punta automatizada, qué es sólo esqueleto y qué no tiene nada; vale para cualquier motor porque lee la traza.
 - `bin/generar-documentacion.py`: la guía de uso (`--tipo manual`) y la documentación técnica y funcional (`--tipo tecnica --app <repo>`) de la aplicación, desde las fichas, el contexto, las decisiones, `aplicacion/`, los pendientes, la bitácora y la radiografía; HTML con índice y diagramas SVG; lo que el Cerebro no tiene queda marcado, no inventado.
 - `bin/verificar-staged.py`: BOM UTF-8 y caracteres de control en lo que se va a commitear (lo corre el hook); con `--todo`, en todo lo versionado (lo corre el CI).
-- `bin/verificar-skills.py`: cada `SKILL.md` contra la especificación abierta de Agent Skills (nombre igual a la carpeta, descripción de hasta 1024 caracteres); lo corre el hook.
+- `bin/verificar-skills.py`: cada `SKILL.md` contra la especificación abierta de Agent Skills (nombre igual a la carpeta, descripción de hasta 1024 caracteres), y que el número de skills que anuncian `AGENTS.md`, el README e `INSTALACION.md` sea el real y las listas las nombren a todas; lo corren el hook, los dos CI y el instalador, y el Doctor toma sus patrones.
 - `bin/instalar.py`: después de clonar: hook, espejos de agentes, verificación de espejos y de skills, placeholders sin instanciar.
 - `bin/instanciar.py`: instancia el template para un proyecto (placeholders, módulo, modo y tablero de `DEC-006`, la firma de `DEC-005` con `--desatendido`, stack de `DEC-003`, espejos); lo corre `arrancar-proyecto.py`.
 - `bin/verificar-sello.py`: si el sello de una auditoría pedida sigue vigente, en un tablero con historial de revisiones (Azure DevOps, Jira); con tablero local no aplica.
-- `bin/probar-*.py`: la prueba de cada script (OK o FALLA, caso por caso); `probar-reglas.py` mide a un modelo con su CLI y sin él es SIN DATOS. Las corren el CI y `generar-informe.py`.
+- `bin/probar-*.py`: la prueba de cada script (OK o FALLA, caso por caso; las del Doctor, `probar-doctor-sondas.py` y `probar-doctor-comparar.py`); `probar-reglas.py` mide a un modelo con su CLI y sin él es SIN DATOS. Las corren el CI y `generar-informe.py`.
 - `bin/sync-espejos.py` (y sus envoltorios `bin/sync-skills.*` y `bin/sync-agents.*`): regenera los espejos de skills y de agentes desde la fuente; arma el espejo aparte y recién al final reemplaza el viejo (si Windows no lo deja, archivo por archivo), y frena si en el espejo se editó o se agregó algo desde el último sync, según el manifiesto `<espejo>.sync.json` que deja al lado y git ignora (`--pisar` para regenerar igual). Lo usan también `instalar.py` e `instanciar.py`.
 - `bin/actualizar.*`: trae lo último del repo y corre el instalador, en un comando.
 - `bin/auditoria/`: el paquete común de `auditar-tarea.py`, `auditar-historia.py`, `analizar-tareas.py`, `derivar-arbol.py` y `lote.py`.

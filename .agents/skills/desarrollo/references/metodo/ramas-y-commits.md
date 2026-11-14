@@ -9,7 +9,7 @@
 El **GATE de WORKTREE** de `AGENTS.md` es duro y está por encima de todo lo de acá:
 
 - **De qué rama sale se PREGUNTA.** Nunca se infiere, nunca se inventa.
-- **Techo de 4 a 8 espacios de trabajo por máquina.** Al llegar a 8, se frena.
+- **Techo de espacios de trabajo por máquina** (el del GATE de WORKTREE de `AGENTS.md`). Al llegar, se frena.
 - **Con el árbol sucio, se frena** y se muestra qué hay.
 - **Dos Tareas que tocan el mismo archivo se serializan** (⚠ regla candidata, a confirmar por el equipo; así está en `AGENTS.md`).
 - **Borrar un espacio con trabajo sin pushear NO lo hace la IA nunca.**

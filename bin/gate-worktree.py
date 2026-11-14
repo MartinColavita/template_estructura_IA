@@ -8,7 +8,7 @@
 Tres estados, nunca dos:  0 = se puede crear   1 = FRENA (hay algo que decidir)   2 = SIN DATOS
 
 POR QUE EXISTE. AGENTS.md manda que de donde sale la rama se PREGUNTA, que se diga cuantos
-worktrees hay abiertos (techo 8 por maquina), que con el arbol sucio se frene y que si la rama ya
+worktrees hay abiertos (techo 10 por maquina), que con el arbol sucio se frene y que si la rama ya
 tiene un worktree se avise antes. Esos cuatro datos los calculaba el modelo mirando salidas de git:
 tardaba, gastaba tokens y a veces se equivocaba. Este script los mide siempre igual. La pregunta
 al humano la sigue haciendo la skill: este script solo le da los numeros.
@@ -56,7 +56,7 @@ def main():
     ap.add_argument('--base', required=True, help='rama base propuesta (p. ej. develop)')
     ap.add_argument('--rama', required=True, help='rama que se va a crear (p. ej. task/1234-slug)')
     ap.add_argument('--repos', default='', help='otros repos de la maquina, separados por coma (para el techo)')
-    ap.add_argument('--techo', type=int, default=8)
+    ap.add_argument('--techo', type=int, default=10)
     ap.add_argument('--fetch', action='store_true')
     ap.add_argument('--json', action='store_true')
     a = ap.parse_args()

@@ -75,9 +75,11 @@ un test o un Escenario**; (c) un choque entre dos fuentes del mismo rango.
 1. Verificar el tablero autorizado y leer las tarjetas involucradas (Estado, Ruta de iteración, Asignado).
 2. Leer las fuentes: la ficha y su bloque de derivación, la maqueta, las reglas, los contratos ya cargados.
 3. **Dedup por ítem** ([[deduplicacion-antes-de-crear]]: tag + documento fuente + objetivo). El resumen de cada fila va con
-   `lote.py item --dedup` y dice cuántas consultas corrieron, con el `#ID` y el veredicto de cada candidato:
-   `"3 consultas · 0 cand."` o `"3 consultas · #125100 distinto"`; en una fila que no es alta, `"no aplica"`. Un
-   candidato equivalente o que solapa bloquea el alta ([[deduplicacion-antes-de-crear]]): se pregunta en el arranque.
+   `lote.py item --dedup` y dice cuántas consultas corrieron, con cada candidato como `#ID=veredicto` (`distinto`,
+   `solapa`, `equivalente`, `equivalente-cerrado` o `duda`): `"3 consultas · 0 cand."` o
+   `"3 consultas · 1 cand. · #125100=distinto"`; en una fila que no es alta, `"no aplica"`. Un candidato `equivalente`,
+   `solapa` o `duda` bloquea el alta, y se pregunta en el arranque; uno `equivalente-cerrado` no: deriva a un evolutivo
+   ([[deduplicacion-antes-de-crear]]).
 4. **Tareas, sólo si se pidió auditoría:** correr [[auditar-historia]] sobre cada Historia padre, **un agente por Historia, en paralelo**. Si no se pidió, este paso no corre.
 5. Clasificar cada duda —propia o, si corrieron, de las auditorías— en **F** (la resuelve una fuente: se anota cuál y el arreglo exacto), **R** (recomendación técnica clara) o **P** (necesita a una persona).
 6. `python bin/lote.py preparar` (paso 0) crea `borrador/lote-<AAAAMMDD>-<tema>/` con el esqueleto de `CONTEXTO.md`, `items.json` y `tiempos.json`. Cada ítem se anota con `python bin/lote.py item <carpeta> --clave T-01 --tipo Tarea --accion ALTA --titulo "…" --padre "#NNNNN" …`. En `CONTEXTO.md` van el alcance, las fuentes leídas (rutas), lo decidido por F y R con su fuente, las P con su recomendación, la dedup por ítem y el estado de cada tarjeta a editar.
@@ -96,7 +98,8 @@ Un solo mensaje, en criollo:
 6. Una línea, sin pregunta: *«No corro auditoría salvo que me la pidas.»* (Si ya la pidieron en el pedido, se dice que va a correr.)
 
 El mensaje **cierra el turno**: no se redacta nada antes de la respuesta. Si el lote **no tiene
-Tareas, ni preguntas, ni duplicados dudosos**, el arranque no se muestra y se pasa a la fase 2.
+Tareas en modo equipo (la pregunta del nivel), ni preguntas, ni duplicados dudosos**, el arranque no se muestra y
+se pasa a la fase 2.
 
 La respuesta vale entera: «dale», «tu recomendación» o «sí a todo» acepta las recomendaciones
 de las preguntas numeradas. **La pregunta del nivel no lleva recomendación y no se da por
@@ -145,7 +148,7 @@ Un solo mensaje con lo que escribe `python bin/lote.py cierre <carpeta>` en `CIE
 
    | # | Acción | Ítem | Padre | Puntos | GATES y §2b | Auditoría | `⚠` abiertos | Dedup | Archivo |
    |---|---|---|---|---|---|---|---|---|---|
-   | 1 | ALTA / **PISA** / RELACIÓN | título | `#ID` o `[H-nn]` | n | OK / FRENA: cuál / no aplica / SIN DATOS | no se pidió / COMPLETA / CON HUECOS / NO SE SELLA: por qué | P-nnn | N consultas · 0 cand. / N consultas · `#ID` veredicto | ruta |
+   | 1 | ALTA / **PISA** / RELACIÓN | título | `#ID` o `[H-nn]` | n | OK / FRENA: cuál / no aplica / SIN DATOS | no se pidió / COMPLETA / CON HUECOS / NO SE SELLA: por qué | P-nnn | N consultas · 0 cand. / N consultas · `#ID=veredicto` | ruta |
 
    «GATES y §2b» resume el Bloque de GATES y el checklist de cierre de [[cargar-a-azure]] de ese
    ítem; el detalle queda en su archivo. Una fila con FRENA o SIN DATOS no se escribe.

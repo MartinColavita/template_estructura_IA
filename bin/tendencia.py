@@ -69,11 +69,17 @@ def main():
     ap.add_argument('--hook', action='store_true', help='salida 0 siempre: el veredicto va en el texto (hook SessionStart)')
     ap.add_argument('--json', action='store_true')
     a = ap.parse_args()
+    # Como hook, "todavia no hay con que comparar" es el estado normal de un clon nuevo, no una falla: no se le
+    # dice nada al modelo en cada sesion. Un error del script si se dice (abajo, en __main__).
     if not os.path.isfile(a.sesiones):
-        print('SIN DATOS -- todavia no hay sesiones registradas (%s): la primera linea la deja el hook SessionEnd' % a.sesiones); return SIN_DATOS
+        if not a.hook:
+            print('SIN DATOS -- todavia no hay sesiones registradas (%s): la primera linea la deja el hook SessionEnd' % a.sesiones)
+        return SIN_DATOS
     filas = leer(a.sesiones)
     if len(filas) < 2:
-        print('SIN DATOS -- %d sesion(es) registrada(s); hacen falta al menos 2 para comparar' % len(filas)); return SIN_DATOS
+        if not a.hook:
+            print('SIN DATOS -- %d sesion(es) registrada(s); hacen falta al menos 2 para comparar' % len(filas))
+        return SIN_DATOS
     n = max(1, min(a.n, len(filas) // 2))
     ultimas, anteriores = filas[-n:], filas[:-n][-n:] if len(filas) > n else filas[:-n]
     if not anteriores:

@@ -170,7 +170,7 @@ ESQUEMA = {
     'id': '#ID en Azure: obligatorio en PISA y EXISTE; null hasta que se escribe',
     'ficha': 'ficha fuente (default: la del lote)',
     'flujo': 'Historia: el [F-nn] de la ficha',
-    'dedup': 'opcional: columna Dedup del cierre (N consultas . 0 cand. / N consultas . #ID veredicto / no aplica); '
+    'dedup': 'opcional: columna Dedup del cierre (N consultas . 0 cand. / N consultas . #ID=veredicto / no aplica); '
              'sin el: SIN DATOS',
     'gates': 'opcional: columna GATES y 2b del cierre (OK / FRENA: cual / no aplica); sin el: SIN DATOS',
     'cambia': 'PISA: que cambia, en dos lineas',
@@ -364,21 +364,20 @@ def _guardar(carpeta, datos):
     ruta = os.path.join(carpeta, 'items.json')
     # se escribe aparte y se reemplaza de una: quien lee al mismo tiempo nunca ve un json a medias
     _escribir_json(ruta + '.nuevo', {'_esquema': ESQUEMA, 'lote': datos.get('lote', {}), 'items': items})
-    for _ in range(40):
+    for _ in range(100):
         try:
             os.replace(ruta + '.nuevo', ruta)
             return
         except PermissionError:
             # Windows no deja reemplazar un archivo que otro proceso tiene abierto (un lector de lote.py, OneDrive,
-            # el antivirus): se reintenta unos 2 s
+            # el antivirus): se reintenta unos 5 s
             time.sleep(0.05)
-    # sigue abierto: se escribe encima, como antes del reemplazo de una (el bloqueo ya deja afuera a los demas
-    # escritores; lo que se pierde es solo que un lector, en ese instante, pueda ver el json a medias)
-    with open(ruta + '.nuevo', 'rb') as h:
-        contenido = h.read()
-    with open(ruta, 'wb') as h:
-        h.write(contenido)
-    os.remove(ruta + '.nuevo')
+    try:
+        os.remove(ruta + '.nuevo')
+    except OSError:
+        pass
+    raise Falla(SIN_DATOS, 'SIN DATOS -- no se pudo reemplazar %s: otro proceso lo tiene abierto (OneDrive, el '
+                'antivirus, un editor). items.json quedo como estaba: volve a correr el comando.' % _mostrar(ruta))
 
 
 def _trabar(fd):
@@ -1459,37 +1458,22 @@ def _col_dedup(it):
     # un "OK" suelto no muestra que se busco
     if not re.search(r'\b[1-9][0-9]*\s+consultas?\b', d):
         return ('FRENA: el dedup no dice cuantas consultas se corrieron ("N consultas . 0 cand.", o '
-                '"N consultas . #ID veredicto" por candidato)')
-    candidatos = [('#' + n, _veredicto(resto)) for n, resto in re.findall(r'#([0-9]+)([^#]*)', d)]
+                '"N consultas . #ID=veredicto" por candidato)')
+    # cada candidato, con un veredicto de un vocabulario cerrado: el texto libre se lee mal ("no es equivalente")
+    ids = re.findall(r'#[0-9]+', d)
+    pares = re.findall(r'#([0-9]+)=(distinto|solapa|equivalente-cerrado|equivalente|duda)(?![\w-])', d)
+    if len(pares) != len(ids):
+        return ('FRENA: cada candidato va como #ID=veredicto (distinto, solapa, equivalente, equivalente-cerrado o '
+                'duda)')
     cuantos = re.search(r'\b([0-9]+)\s+cand', d)
-    if cuantos and int(cuantos.group(1)) > len(candidatos):
-        return 'FRENA: el dedup dice %s candidato(s) y trae %d #ID con su veredicto' % (cuantos.group(1), len(candidatos))
-    sin_veredicto = [i for i, v in candidatos if v is None]
-    if sin_veredicto:
-        return 'FRENA: ' + ', '.join(sin_veredicto) + ' sin su veredicto (equivalente / solapa / distinto)'
-    bloquean = [i for i, v in candidatos if v[1]]
+    if cuantos and int(cuantos.group(1)) > len(pares):
+        return 'FRENA: el dedup dice %s candidato(s) y trae %d con su veredicto' % (cuantos.group(1), len(pares))
+    bloquean = ['#' + n for n, v in pares if v in ('solapa', 'equivalente', 'duda')]
     if alta and bloquean:
-        # deduplicacion-antes-de-crear: un equivalente abierto bloquea el alta, y ante la duda es duplicado
-        return ('FRENA: ' + ', '.join(bloquean) + ' es equivalente, solapa o queda en duda: bloquea el alta (se '
-                'actualiza el existente o se pregunta)')
+        # deduplicacion-antes-de-crear: un equivalente abierto bloquea el alta, y ante la duda es duplicado; uno
+        # cerrado no (no se reabre: el alta es el bug o el evolutivo que deriva de el)
+        return 'FRENA: ' + ', '.join(bloquean) + ' bloquea el alta: se actualiza el existente o se pregunta'
     return d
-
-
-VEREDICTOS_DEDUP = (('distint', False), ('equivalente', True), ('solapa', True), ('duplicad', True), ('dud', True))
-
-
-def _veredicto(texto):
-    """El veredicto de un candidato: la primera palabra de veredicto en su tramo ("distinto: no solapa" es
-    distinto). (palabra, bloquea un alta) o None. Un equivalente CERRADO no bloquea: no se reabre, y el alta es el
-    bug o el evolutivo que deriva de el (deduplicacion-antes-de-crear)."""
-    t = texto.lower()
-    hallados = sorted((t.find(p), p, bloquea) for p, bloquea in VEREDICTOS_DEDUP if p in t)
-    if not hallados:
-        return None
-    _, palabra, bloquea = hallados[0]
-    if palabra == 'equivalente' and re.search(r'equivalente\W+(?:y\W+)?cerrad', t):
-        return palabra, False
-    return palabra, bloquea
 
 
 def _frena(*celdas):
@@ -1688,6 +1672,10 @@ def _aplicar_mapa(s, mapa):
 
 
 def cmd_ids(a):
+    return _con_bloqueo(os.path.abspath(a.carpeta), lambda: _cmd_ids(a))
+
+
+def _cmd_ids(a):
     carpeta = os.path.abspath(a.carpeta)
     datos = _cargar(carpeta)
     mapa = _leer_mapa(a.mapa or 'mapa-ids.json', carpeta)
