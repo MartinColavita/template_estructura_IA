@@ -1,3 +1,15 @@
+---
+id: fuentes-devops-operacion
+tipo: fuentes
+estado: F-Draft
+modulo: general
+title: "Fuentes — operación y mantenimiento de servidores"
+description: De dónde salió cada idea de la puerta operacion-de-servidores, de su colector, de sus scripts y de las plantillas del pilar operacion; bibliografía con licencia y fecha.
+tags: [devops, operacion, servidores, fuentes, seccion]
+last_updated: 2026-11-18
+author: "equipo"
+---
+
 # Referencias externas — operación y mantenimiento de servidores
 
 Esto es **bibliografía, no una dependencia**: nada de lo que se cita acá se instala, se copia ni se invoca desde el
@@ -88,3 +100,5 @@ No aporta ideas: se leyó para que el código lea bien lo que devuelven estas he
 - El **servidor remoto** al que pasó el MCP de PagerDuty (el repositorio quedó deprecado): sin evaluar.
 - En **RHEL**, que `needs-restarting -r` sea la forma de saber si hace falta reiniciar: el informe lo dejó en ⚠. La
   documentación confirma los códigos de salida; no dice si necesita permisos de administrador.
+
+_Últ. modif.: 2026-11-18 — @equipo — mudada a la sección (M-062)_

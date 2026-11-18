@@ -35,8 +35,8 @@ Por si su descripción no llega al modelo: una **presentación** → `cerebro-pp
 `cerebro-mockup-design`; una **transcripción de reunión** → `cerebro-meet-analyst`; un **diagrama técnico** → `archify`;
 el **manual o la documentación de la aplicación** → `documentar-aplicacion`.
 
-**Por función**: arquitectura o infraestructura → `arquitectura-e-infraestructura`; el pipeline (y su YAML) o un
-despliegue → `despliegue-continuo`; un servidor → `operacion-de-servidores`; seguridad → `seguridad`; **GitLab** (el
+**Por función**: arquitectura, infraestructura o el diseño de la red → `arquitectura-e-infraestructura`; el pipeline (y su YAML) o un
+despliegue → `despliegue-continuo`; un servidor o «no llega, no resuelve» → `operacion-de-servidores`; seguridad → `seguridad`; **GitLab** (el
 proyecto, los ajustes de CI fuera del YAML, los runners, la instancia) → `gestion-de-gitlab`.
 
 ---

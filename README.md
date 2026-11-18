@@ -38,7 +38,7 @@ Acá viven el **Cerebro Digital** (la fuente única de verdad del negocio, en fo
 | Directorio | Propósito | Se versiona |
 |------------|-----------|-------------|
 | `documentos/` | Lo que **entra**: requerimientos, notas, reuniones, documentos de origen, vengan de vos, de un cliente o de un funcional. Nunca se genera acá, se recibe; cada uno queda registrado en `cerebro-digital/fuentes.md` | No (salvo su README): puede traer datos de personas |
-| `cerebro-digital/` | 🧠 **Cerebro Digital (bundle OKF)**. Fuente única de verdad del negocio, la metodología y la arquitectura, más la configuración de IA (`configuracion-ia/`: agentes, skills, orquestador de desarrollo, integraciones) | Sí |
+| `cerebro-digital/` | 🧠 **Cerebro Digital (bundle OKF)**. Fuente única de verdad del negocio, la metodología y la arquitectura; las **secciones** `arquitectura/`, `devops/`, `seguridad/` y `networking/` (la portada de cada función, con su método, scripts, decisiones y fuentes); y la configuración de IA (`configuracion-ia/`: agentes, skills, orquestador de desarrollo, integraciones) | Sí |
 | `entregables/` | Artefactos ya promovidos desde `borrador/` (diseños, especificaciones técnicas; presentaciones sólo en local) | Sí |
 | `borrador/` | 🧪 Borrador de trabajo (mockups, docs, presentaciones en curso, lotes de tickets). Nunca se versiona | No |
 | `tablero/` | 🎫 Toolkit para derivar tickets desde el Cerebro, para cualquier tablero (local por archivos, Azure DevOps, Jira u otro; `DEC-006`): método, plantillas, checklists, ejemplos e histórico por referencia | Sí |

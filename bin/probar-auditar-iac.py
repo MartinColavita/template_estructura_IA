@@ -298,6 +298,250 @@ BASE = {
 }
 
 
+# RED-ABIERTA: lo que NO es hallazgo (cada bloque es un falso positivo probable) y una variante por forma de abrir.
+RED_OK = '''resource "aws_security_group" "web" {
+  name = "web"
+  ingress {
+    description = "HTTPS publico"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    description = "SSH solo desde la red de administracion"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.red_admin, "10.0.0.0/8"]
+  }
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  # ingress { from_port = 22, to_port = 22, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group_rule" "salida" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.web.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "https6" {
+  security_group_id = aws_security_group.web.id
+  cidr_ipv6         = "::/0"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "app" {
+  security_group_id = aws_security_group.web.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = var.puerto_app
+  to_port           = var.puerto_app
+  ip_protocol       = "tcp"
+}
+
+resource "azurerm_network_security_rule" "https" {
+  name                       = "https"
+  priority                   = 100
+  direction                  = "Inbound"
+  access                     = "Allow"
+  protocol                   = "Tcp"
+  source_port_range          = "*"
+  destination_port_range     = "443"
+  source_address_prefix      = "Internet"
+  destination_address_prefix = "*"
+}
+
+resource "azurerm_network_security_rule" "cerrar_ssh" {
+  name                   = "cerrar-ssh"
+  priority               = 200
+  direction              = "Inbound"
+  access                 = "Deny"
+  protocol               = "*"
+  destination_port_range = "22"
+  source_address_prefix  = "*"
+}
+
+resource "google_compute_firewall" "https" {
+  name          = "https"
+  network       = "red"
+  source_ranges = ["0.0.0.0/0"]
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+}
+
+resource "google_compute_firewall" "ssh_interno" {
+  name          = "ssh-interno"
+  network       = "red"
+  source_ranges = ["10.10.0.0/16"]
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+}
+
+resource "google_compute_firewall" "ssh_bastion" {
+  name        = "ssh-bastion"
+  network     = "red"
+  source_tags = ["bastion"]
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+}
+
+resource "google_compute_firewall" "salida" {
+  name               = "salida"
+  network            = "red"
+  direction          = "EGRESS"
+  destination_ranges = ["0.0.0.0/0"]
+  allow {
+    protocol = "all"
+  }
+}
+'''
+K8S_RED_OK = '''apiVersion: v1
+kind: Service
+metadata:
+  name: web-publico
+spec:
+  type: LoadBalancer
+  loadBalancerSourceRanges:
+    - 0.0.0.0/0
+  ports:
+    - name: https
+      port: 443
+      targetPort: 8443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: base-interna
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin
+  annotations:
+    service.beta.kubernetes.io/load-balancer-source-ranges: "10.0.0.0/8"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 22
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etiqueta
+  labels:
+    type: LoadBalancer
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: interno-comentado
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal  # interno
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5432
+'''
+AWS_SG_22 = ('resource "aws_security_group" "admin" {\n  ingress {\n    from_port   = 22\n    to_port     = 22\n'
+             '    protocol    = "tcp"\n    cidr_blocks = [\n      "0.0.0.0/0",\n    ]\n  }\n}\n')
+AWS_RULE_TODO = ('resource "aws_security_group_rule" "todo" {\n  type              = "ingress"\n  from_port         = 0\n'
+                 '  to_port           = 0\n  protocol          = "-1"\n  ipv6_cidr_blocks  = ["::/0"]\n'
+                 '  security_group_id = "sg-ejemplo"\n}\n')
+AWS_VPC_RANGO = ('resource "aws_vpc_security_group_ingress_rule" "rango" {\n  security_group_id = "sg-ejemplo"\n'
+                 '  cidr_ipv4         = "0.0.0.0/0"\n  from_port         = 5000\n  to_port           = 6000\n'
+                 '  ip_protocol       = "tcp"\n}\n')
+AZ_RULE = ('resource "azurerm_network_security_rule" "rdp" {\n  direction              = "Inbound"\n  access                 = "Allow"\n'
+           '  protocol               = "Tcp"\n  destination_port_range = "3389"\n  source_address_prefix  = "*"\n}\n')
+AZ_RULE_LISTA = ('resource "azurerm_network_security_rule" "todo" {\n  direction               = "Inbound"\n  access                  = "Allow"\n'
+                 '  protocol                = "*"\n  destination_port_range  = "*"\n  source_address_prefixes = ["10.0.0.0/8", "0.0.0.0/0"]\n}\n')
+AZ_NSG = ('resource "azurerm_network_security_group" "app" {\n  name = "nsg-app"\n  security_rule {\n    name                    = "sql"\n'
+          '    priority                = 110\n    direction               = "Inbound"\n    access                  = "Allow"\n'
+          '    protocol                = "Tcp"\n    source_address_prefix   = "Internet"\n'
+          '    destination_port_ranges = ["443", "1433"]\n  }\n}\n')
+GCP_TODO = ('resource "google_compute_firewall" "todo" {\n  name          = "permitir-todo"\n  network       = "red"\n'
+            '  source_ranges = ["0.0.0.0/0"]\n  allow {\n    protocol = "tcp"\n  }\n}\n')
+K8S_LB_SIN = 'apiVersion: v1\nkind: Service\nmetadata:\n  name: web\nspec:\n  type: LoadBalancer\n  ports:\n    - port: 443\n'
+K8S_LB_REDIS = ('apiVersion: v1\nkind: Service\nmetadata:\n  name: cache\nspec:\n  type: LoadBalancer\n'
+                '  loadBalancerSourceRanges: ["0.0.0.0/0"]\n  ports:\n    - name: redis\n      port: 6379\n')
+K8S_LB_VACIA = ('apiVersion: v1\nkind: Service\nmetadata:\n  name: vacia\nspec:\n  type: LoadBalancer\n'
+                '  loadBalancerSourceRanges: []\n  ports:\n    - port: 22\n')
+K8S_LB_NULA = ('apiVersion: v1\nkind: Service\nmetadata:\n  name: nula\nspec:\n  type: LoadBalancer\n'
+               '  loadBalancerSourceRanges:\n  ports:\n    - port: 5432\n')
+K8S_LB_ANOT_VACIA = ('apiVersion: v1\nkind: Service\nmetadata:\n  name: anotacion\n  annotations:\n'
+                     '    service.beta.kubernetes.io/load-balancer-source-ranges: ""\nspec:\n  type: LoadBalancer\n'
+                     '  ports:\n    - port: 22\n')
+K8S_LB_KIND_COMILLAS = ('apiVersion: v1\nkind: "Service"\nmetadata:\n  name: comillas\nspec:\n  type: LoadBalancer\n'
+                        '  ports:\n    - port: 443\n')
+K8S_LB_FLUJO = ('apiVersion: v1\nkind: Service\nmetadata:\n  name: flujo\nspec:\n  type: LoadBalancer\n'
+                '  loadBalancerSourceRanges: ["0.0.0.0/0"]\n  ports: [{port: 22, targetPort: 2222}]\n')
+AWS_SG_ATRIBUTO = ('resource "aws_security_group" "atributo" {\n  ingress = [{\n    from_port        = 22\n    to_port          = 22\n'
+                   '    protocol         = "tcp"\n    cidr_blocks      = ["0.0.0.0/0"]\n    ipv6_cidr_blocks = []\n'
+                   '    description      = ""\n    prefix_list_ids  = []\n    security_groups  = []\n    self             = false\n'
+                   '  }]\n}\n')
+AZ_NSG_ATRIBUTO = ('resource "azurerm_network_security_group" "atributo" {\n  name = "nsg"\n  security_rule = [{\n'
+                   '    name                   = "ssh"\n    direction              = "Inbound"\n    access                 = "Allow"\n'
+                   '    protocol               = "Tcp"\n    destination_port_range = "22"\n    source_address_prefix  = "*"\n'
+                   '  }]\n}\n')
+GCP_SIN_ORIGEN = ('resource "google_compute_firewall" "sin_origen" {\n  name    = "ssh"\n  network = "red"\n  allow {\n'
+                  '    protocol = "tcp"\n    ports    = ["22"]\n  }\n}\n')
+GCP_PROTO_6 = ('resource "google_compute_firewall" "numero" {\n  name          = "rdp"\n  network       = "red"\n'
+               '  source_ranges = ["0.0.0.0/0"]\n  allow {\n    protocol = "6"\n    ports    = ["3389"]\n  }\n}\n')
+# Lo que no se puede saber desde el codigo: aviso, nunca HALLAZGO ni silencio.
+AWS_ORIGEN_VAR = ('resource "aws_security_group" "origen_var" {\n  ingress {\n    from_port   = 22\n    to_port     = 22\n'
+                  '    protocol    = "tcp"\n    cidr_blocks = var.permitidos\n  }\n}\n')
+AWS_ORIGEN_TOLIST = ('resource "aws_security_group_rule" "tolist" {\n  type              = "ingress"\n  from_port         = 3306\n'
+                     '  to_port           = 3306\n  protocol          = "tcp"\n  cidr_blocks       = tolist(["0.0.0.0/0"])\n'
+                     '  security_group_id = "sg-ejemplo"\n}\n')
+AWS_TIPO_VAR = ('resource "aws_security_group_rule" "tipo_var" {\n  type              = var.tipo\n  from_port         = 22\n'
+                '  to_port           = 22\n  protocol          = "tcp"\n  cidr_blocks       = ["0.0.0.0/0"]\n'
+                '  security_group_id = "sg-ejemplo"\n}\n')
+AZ_DIRECCION_VAR = ('resource "azurerm_network_security_rule" "direccion_var" {\n  direction              = var.direccion\n'
+                    '  access                 = "Allow"\n  protocol               = "Tcp"\n  destination_port_range = "22"\n'
+                    '  source_address_prefix  = "*"\n}\n')
+AWS_SG_ATRIBUTO_VAR = 'resource "aws_security_group" "reglas_var" {\n  ingress = var.reglas\n}\n'
+
+
 def reportar(nombre, contenido):
     ruta = os.path.join(TMP, nombre)
     with open(ruta, 'w', encoding='utf-8') as h:
@@ -533,6 +777,58 @@ variable "etiquetas" {
     plantilla['chart/templates/deploy.yaml'] = 'apiVersion: apps/v1\nkind: Deployment\nspec:\n  template:\n    spec:\n      containers:\n        - image: {{ .Values.imagen }}\n'
     rc, out, d = auditar(armar(plantilla))
     caso('una plantilla de Helm no se mira como manifiesto, y se avisa', rc == 0 and any('Helm' in a for a in d.get('avisos', [])), out[:600])
+
+    # ---------- RED-ABIERTA ----------
+    rc, out, d = auditar(armar(dict(BASE, **{'envs/dev/red.tf': RED_OK, 'k8s/red.yaml': K8S_RED_OK})))
+    caso('falso positivo: 443 abierto, SSH desde un rango privado o por etiqueta de origen, ICMP, salida, Deny, EGRESS, '
+         'comentado, LoadBalancer con rango explicito o interno (con un comentario al final), ClusterIP, type: LoadBalancer '
+         'en las etiquetas: RED-ABIERTA en OK (0)',
+         rc == 0 and regla(d, 'RED-ABIERTA') == ('OK', 0), out[:900])
+    caso('un puerto que llega por variable con origen abierto: aviso, no hallazgo',
+         any('RED-ABIERTA' in a and 'variable' in a for a in d.get('avisos', [])), str(d.get('avisos'))[:600])
+    variantes_red = [
+        ('aws_security_group: ingress 22 desde 0.0.0.0/0 (lista en varias lineas)', 'envs/dev/red.tf', AWS_SG_22, 2, '22'),
+        ('aws_security_group_rule: protocolo -1 desde ::/0', 'envs/dev/red.tf', AWS_RULE_TODO, 1, 'todos'),
+        ('aws_vpc_security_group_ingress_rule: rango 5000-6000 que incluye 5432', 'envs/dev/red.tf', AWS_VPC_RANGO, 1, '5432'),
+        ('azurerm_network_security_rule: 3389 desde *', 'envs/dev/red.tf', AZ_RULE, 1, '3389'),
+        ('azurerm_network_security_rule: todos los puertos desde una lista con 0.0.0.0/0', 'envs/dev/red.tf', AZ_RULE_LISTA, 1, 'todos'),
+        ('azurerm_network_security_group: security_rule desde Internet a 443 y 1433', 'envs/dev/red.tf', AZ_NSG, 3, '1433'),
+        ('google_compute_firewall: allow tcp sin ports desde 0.0.0.0/0', 'envs/dev/red.tf', GCP_TODO, 5, 'todos'),
+        ('Service LoadBalancer sin loadBalancerSourceRanges', 'k8s/red.yaml', K8S_LB_SIN, 6, 'loadBalancerSourceRanges'),
+        ('Service LoadBalancer abierto a 0.0.0.0/0 en el 6379', 'k8s/red.yaml', K8S_LB_REDIS, 6, '6379'),
+        ('Service LoadBalancer con loadBalancerSourceRanges: [] (igual que sin rango)', 'k8s/red.yaml', K8S_LB_VACIA, 6, 'loadBalancerSourceRanges'),
+        ('Service LoadBalancer con loadBalancerSourceRanges sin valor', 'k8s/red.yaml', K8S_LB_NULA, 6, 'loadBalancerSourceRanges'),
+        ('Service LoadBalancer con la anotacion load-balancer-source-ranges vacia', 'k8s/red.yaml', K8S_LB_ANOT_VACIA, 8, 'loadBalancerSourceRanges'),
+        ('Service LoadBalancer con kind: "Service" entre comillas', 'k8s/red.yaml', K8S_LB_KIND_COMILLAS, 6, 'loadBalancerSourceRanges'),
+        ('Service LoadBalancer con ports en estilo flujo hacia el 22', 'k8s/red.yaml', K8S_LB_FLUJO, 6, '22 (SSH)'),
+        ('aws_security_group: ingress escrito como atributo (lista de objetos) al 22', 'envs/dev/red.tf', AWS_SG_ATRIBUTO, 2, '22 (SSH)'),
+        ('azurerm_network_security_group: security_rule escrito como atributo al 22', 'envs/dev/red.tf', AZ_NSG_ATRIBUTO, 3, '22 (SSH)'),
+        ('google_compute_firewall de ingreso sin source_ranges, source_tags ni source_service_accounts (Google toma 0.0.0.0/0)',
+         'envs/dev/red.tf', GCP_SIN_ORIGEN, 4, 'source_ranges'),
+        ('google_compute_firewall con protocolo por numero ("6" = tcp) al 3389', 'envs/dev/red.tf', GCP_PROTO_6, 5, '3389'),
+    ]
+    for nombre, archivo, contenido, linea, palabra in variantes_red:
+        rc, out, d = auditar(armar(dict(BASE, **{archivo: contenido})))
+        h = hall(d, 'RED-ABIERTA')
+        caso('%s: HALLAZGO con archivo y linea' % nombre,
+             rc == 1 and len(h) == 1 and h[0]['archivo'] == archivo and h[0]['linea'] == linea and palabra in h[0]['detalle'], out[:900])
+    avisos_red = [
+        ('origen por variable (var.) hacia el 22', AWS_ORIGEN_VAR, 'variable'),
+        ('origen por expresion (tolist) hacia el 3306', AWS_ORIGEN_TOLIST, 'variable'),
+        ('aws_security_group_rule con type por variable hacia el 22', AWS_TIPO_VAR, 'variable'),
+        ('azurerm_network_security_rule con direction por variable hacia el 22', AZ_DIRECCION_VAR, 'variable'),
+        ('aws_security_group con ingress = var.reglas (no se lee)', AWS_SG_ATRIBUTO_VAR, 'no se miran'),
+    ]
+    for nombre, contenido, palabra in avisos_red:
+        rc, out, d = auditar(armar(dict(BASE, **{'envs/dev/red.tf': contenido})))
+        caso('%s: aviso de RED-ABIERTA, no HALLAZGO ni silencio' % nombre,
+             rc == 0 and regla(d, 'RED-ABIERTA') == ('OK', 0)
+             and any(a.startswith('envs/dev/red.tf:') and 'RED-ABIERTA' in a and palabra in a for a in d.get('avisos', [])),
+             str(d.get('avisos'))[:600] + ' ' + out[:400])
+    rc, out = correr('--repo', armar(dict(BASE, **{'envs/dev/red.tf': AWS_SG_22})))
+    caso('texto: RED-ABIERTA en la lista de reglas y en el hallazgo', rc == 1 and 'HALLAZGO  RED-ABIERTA' in out and '-- RED-ABIERTA:' in out, out[:900])
+    rc, out, d = auditar(armar({'Dockerfile': 'FROM python:3.12-slim\nUSER app\n', '.dockerignore': '.git\n'}, git=False))
+    caso('sin Terraform ni Kubernetes: RED-ABIERTA es N/A', regla(d, 'RED-ABIERTA')[0] == 'N/A', out[:600])
 
     # ---------- herramientas (reportes plantados: sin instalar nada) ----------
     vacio = os.path.join(TMP, 'path-vacio')

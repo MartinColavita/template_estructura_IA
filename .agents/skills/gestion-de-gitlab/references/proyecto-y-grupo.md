@@ -2,7 +2,7 @@
 
 > Fuentes: documentación oficial de GitLab (roles, ramas y tags protegidos, aprobaciones, push rules, CI/CD,
 > tokens, acciones rápidas, cierre automático). Detalle en
-> `cerebro-digital/configuracion-ia/referencias-externas/referencias-gestion-de-gitlab.md`.
+> `cerebro-digital/devops/fuentes-gitlab.md`.
 
 Esta lista la **mide** `bin/auditar-gitlab.py proyecto` (o `grupo`): cada fila tiene su chequeo. Lo que falta se
 arregla con **el cambio exacto** de la puerta, que aplica una persona; la IA no toca la configuración. Los nombres de

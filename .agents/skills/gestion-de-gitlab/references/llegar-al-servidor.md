@@ -2,7 +2,7 @@
 
 > Fuentes: documentación oficial de GitLab (claves SSH en CI, deploy keys y deploy tokens, alcance de runners,
 > agente de Kubernetes, GitOps con Flux, infraestructura como código) y la página de manual de `sshd(8)`. Detalle en
-> `cerebro-digital/configuracion-ia/referencias-externas/referencias-gestion-de-gitlab.md`.
+> `cerebro-digital/devops/fuentes-gitlab.md`.
 
 **Primero, el inventario.** El servidor o el cluster destino tiene que figurar en el inventario autorizado, por su
 alias exacto: `python -I bin/activo-autorizado.py --alias <alias>`. Si no figura, no existe, ni para leerlo (GATE de

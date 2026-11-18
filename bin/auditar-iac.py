@@ -33,6 +33,17 @@ LAS REGLAS (expresiones acotadas, no un analizador de HCL completo: cada una tie
   DOCKER-IGNORE          un Dockerfile sin .dockerignore
   IMAGEN-LATEST          una imagen de Compose o de Kubernetes sin etiqueta o con latest
   K8S-SECRET             un Secret de Kubernetes con data o stringData en el repositorio (Base64 no es cifrado)
+  RED-ABIERTA            un ingreso abierto a todo internet (0.0.0.0/0, ::/0, * o Internet) hacia un puerto de
+                         administracion o de base (22, 3389, 3306, 5432, 1433, 27017, 6379, 9200), un rango que lo
+                         incluya o todos los puertos, en aws_security_group (ingress), aws_security_group_rule,
+                         aws_vpc_security_group_ingress_rule, azurerm_network_security_rule, azurerm_network_security_group
+                         (security_rule) y google_compute_firewall (de ingreso sin source_ranges, source_tags ni
+                         source_service_accounts, Google toma 0.0.0.0/0); las reglas como bloque o como atributo con una
+                         lista de objetos escrita tal cual; y un Service LoadBalancer de Kubernetes sin
+                         loadBalancerSourceRanges, o con la lista vacia (abre a todo internet por defecto: si es publico,
+                         se escribe), o con 0.0.0.0/0 hacia uno de esos puertos. Un puerto, un origen, una direccion o un
+                         tipo que llega por variable o expresion (var., local., tolist(...)), y unas reglas como atributo
+                         que no se leen limpio: aviso.
 De un secreto se imprime la regla, el archivo, la linea y una huella (12 caracteres de su SHA-256, solo si el valor
 tiene 16 caracteres o mas: uno corto se revierte con un diccionario): nunca el valor. Que nombre y que formato son
 secreto lo dice auditoria/secretos.py, el criterio comun. Un .tfvars que git ignora no da SECRETO-LITERAL (aviso).
@@ -53,7 +64,8 @@ versionado, una imagen latest o una clave escrita tal cual. Este script lo cuent
 
 QUE NO HACE. No corre plan, apply, init ni nada que toque la nube o baje algo de internet; no escribe nada. No juzga el
 diseno, el costo ni la red; no sabe si un argumento existe en el proveedor (eso lo dice un plan, que corre el
-pipeline). Solo biblioteca estandar. ASCII puro en este archivo.
+pipeline). De la red solo cuenta RED-ABIERTA: no juzga la segmentacion ni la salida a internet. Solo biblioteca
+estandar. ASCII puro en este archivo.
 """
 
 import argparse
@@ -93,7 +105,13 @@ REGLAS = (
     ('DOCKER-IGNORE', 'dockerfile', 'Dockerfile sin .dockerignore'),
     ('IMAGEN-LATEST', ('compose', 'kubernetes'), 'imagen sin etiqueta o con latest'),
     ('K8S-SECRET', 'kubernetes', 'Secret con data o stringData en el repositorio'),
+    ('RED-ABIERTA', ('terraform', 'kubernetes'), 'ingreso abierto a todo internet a un puerto de administracion o de base'),
 )
+# RED-ABIERTA: los puertos que nunca se abren a todo internet, y los origenes que son "todo internet".
+PUERTOS_SENSIBLES = {22: 'SSH', 3389: 'RDP', 3306: 'MySQL', 5432: 'PostgreSQL', 1433: 'SQL Server',
+                     27017: 'MongoDB', 6379: 'Redis', 9200: 'Elasticsearch'}
+ORIGEN_ABIERTO = {'0.0.0.0/0', '::/0', '*', 'internet'}
+TODOS_LOS_PUERTOS = (0, 65535)
 # Que nombre guarda un secreto y que formatos lo son: auditoria/secretos.py (secret_name, *_FILE o password_length
 # nombran algo, no lo guardan).
 FORMATOS = secretos.FORMATOS
@@ -106,7 +124,11 @@ APLICA = {'fmt': ('terraform',), 'validate': ('terraform',), 'tflint': ('terrafo
           'hadolint': ('dockerfile',), 'kubeconform': ('kubernetes',)}
 PROHIBIDAS = {'apply', 'destroy', 'import', 'init', 'plan', 'refresh', 'state', 'taint', 'untaint', 'force-unlock', 'test',
               'login', 'logout', 'push', 'get', 'console', 'workspace', '-write', '-write=true', '--fix', '--init', 'install'}
-NO_MIRA = ('si el diseno es bueno, el costo y la red',
+NO_MIRA = ('si el diseno es bueno y el costo; de la red, solo RED-ABIERTA (no la segmentacion ni la salida a internet)',
+           'reglas de red armadas con dynamic, for_each o pasadas a un modulo por variable, reglas escritas como atributo '
+           '(ingress = [...], security_rule = [...]) que no son una lista de objetos escrita tal cual (avisa), un protocolo '
+           'de AWS por numero fuera de 6 (tcp), 17 (udp), 1 y 58 (ICMP) (avisa), las NACL, los NSG de Bicep, las NetworkPolicy y los '
+           'puertos que publica Compose',
            'si los argumentos y los valores existen en el proveedor: eso lo dice un plan, que corre el pipeline',
            'HCL completo (son expresiones acotadas), Terraform escrito en JSON (.tf.json), charts de Helm, Kustomize y Ansible',
            'secretos fuera de estos archivos y en el historial de git (en el diff los mira auditar-diff.py)',
@@ -380,6 +402,8 @@ def analizar_tf(rel, texto, inf, carpetas):
         elif tipo == 'output':
             if 'description' not in atributos(esq, cod, b0, b1):
                 inf.h('TF-OUTPUT', rel, lin.de(pos), 'la salida %s no tiene description' % nombre)
+        elif tipo == 'resource' and nombre in REGLAS_DE_RED:
+            red_tf(rel, nombre, etiquetas[1] if len(etiquetas) > 1 else '?', pos, b0, b1, esq, cod, lin, inf)
     secretos_hcl(rel, cod, esq, lin, inf)
 
 
@@ -414,6 +438,283 @@ def revisar_fuente(rel, linea, nombre, fuente, con_version, inf):
         return
     if re.match(r'^([\w.-]+\.[\w.-]+/)?[\w-]+/[\w-]+/[\w-]+(//.*)?$', fuente) and not con_version:
         inf.h('TF-MODULO-VERSION', rel, linea, 'el modulo %s sale del registro sin version' % nombre)
+
+
+# ---------------------------------------------------------------- RED-ABIERTA (Terraform u OpenTofu y Kubernetes)
+
+REGLAS_DE_RED = ('aws_security_group', 'aws_security_group_rule', 'aws_vpc_security_group_ingress_rule',
+                 'azurerm_network_security_rule', 'azurerm_network_security_group', 'google_compute_firewall')
+
+
+def valor_crudo(esq, cod, ini, fin):
+    """El texto (sin comentarios) del valor de un atributo; una lista entera aunque ocupe varias lineas."""
+    k = ini
+    while k < fin and esq[k] in ' \t':
+        k += 1
+    if k < fin and esq[k] == '[':
+        prof = 0
+        for j in range(k, fin):
+            if esq[j] == '[':
+                prof += 1
+            elif esq[j] == ']':
+                prof -= 1
+                if prof == 0:
+                    return cod[k:j + 1]
+        return cod[k:fin]
+    j = esq.find('\n', k, fin)
+    return cod[k:(fin if j < 0 else j)].strip()
+
+
+def elementos(crudo):
+    """Los elementos de un valor (una lista o uno solo): el texto sin comillas, o None si no es un literal."""
+    t = crudo.strip()
+    partes = [p.strip() for p in t[1:-1].split(',')] if t.startswith('[') and t.endswith(']') else [t]
+    res = []
+    for p in partes:
+        if not p:
+            continue
+        if len(p) >= 2 and p[0] == '"' and p[-1] == '"' and '${' not in p:
+            res.append(p[1:-1].strip())
+        elif re.match(r'^-?\d+$', p):
+            res.append(p)
+        else:
+            res.append(None)
+    return res
+
+
+def rango_puertos(texto):
+    """'22' -> (22, 22); '1000-2000' -> (1000, 2000); '*' -> todos; None si no se entiende (una variable)."""
+    if texto is None:
+        return None
+    t = str(texto).strip()
+    if t == '*':
+        return TODOS_LOS_PUERTOS
+    m = re.match(r'^(\d+)(?:\s*-\s*(\d+))?$', t)
+    if not m:
+        return None
+    a, b = int(m.group(1)), int(m.group(2) or m.group(1))
+    return (min(a, b), max(a, b))
+
+
+def informar_red(inf, rel, linea, que, origenes, rangos, desconocido, dudoso=None):
+    """HALLAZGO si un origen abierto llega a un puerto sensible o a todos; aviso si el puerto no se puede saber, si el
+    origen llega por variable o expresion (None en origenes), o si dudoso dice que la direccion o el tipo no se leen."""
+    abiertos = sorted(set(o for o in origenes if o is not None and o.lower() in ORIGEN_ABIERTO))
+    por_variable = any(o is None for o in origenes)
+    if not abiertos and not por_variable:
+        return
+    todos = any(r[0] <= 1 and r[1] >= 65535 for r in rangos)
+    sens = sorted(set(p for p in PUERTOS_SENSIBLES for r in rangos if r[0] <= p <= r[1]))
+    destino = 'todos los puertos' if todos else ', '.join('%d (%s)' % (p, PUERTOS_SENSIBLES[p]) for p in sens)
+    if (todos or sens) and abiertos and not dudoso:
+        inf.h('RED-ABIERTA', rel, linea, '%s: ingreso desde %s hacia %s (la administracion entra por bastion, VPN o un '
+                                         'acceso sin puerto abierto; una base no se expone)' % (que, ', '.join(abiertos), destino))
+    elif todos or sens:
+        inf.aviso('%s:%d: RED-ABIERTA: %s hacia %s, pero %s: no se sabe si abre a todo internet (revisarlo a mano)' % (
+            rel, linea, que, destino, dudoso or 'el origen llega por variable o expresion'))
+    elif desconocido and abiertos:
+        inf.aviso('%s:%d: RED-ABIERTA: %s abre a %s un puerto que llega por variable o un protocolo que no se lee: '
+                  'no se sabe cual (revisarlo a mano)' % (rel, linea, que, ', '.join(abiertos)))
+
+
+def objetos_lista(esq, ini, fin):
+    """Los cuerpos (desde, hasta) de una lista de objetos escrita tal cual (ingress = [{ ... }, { ... }]), cada objeto
+    en varias lineas; None si el valor no se lee limpio (una variable, un for, una funcion, un objeto en una linea)."""
+    k = ini
+    while k < fin and esq[k] in ' \t':
+        k += 1
+    if k >= fin or esq[k] != '[':
+        return None
+    prof, cierra = 0, None
+    for j in range(k, fin):
+        if esq[j] == '[':
+            prof += 1
+        elif esq[j] == ']':
+            prof -= 1
+            if prof == 0:
+                cierra = j
+                break
+    if cierra is None:
+        return None
+    res, j = [], k + 1
+    while j < cierra:
+        if esq[j] in ' \t\n,':
+            j += 1
+            continue
+        if esq[j] != '{':
+            return None
+        f = cerrar(esq, j, cierra)
+        if f >= cierra or '\n' not in esq[j:f]:
+            return None
+        res.append((j, f))
+        j = f + 1
+    return res
+
+
+def red_tf(rel, tipo, nombre, pos, b0, b1, esq, cod, lin, inf):
+    """Las reglas de ingreso de un recurso de red de Terraform u OpenTofu, contra RED-ABIERTA."""
+    que = '%s "%s"' % (tipo, nombre)
+
+    def lista(attrs, campo, fin):
+        return elementos(valor_crudo(esq, cod, attrs[campo][3], fin)) if campo in attrs else []
+
+    def uno(attrs, campo, fin):
+        """(esta, valor): valor None si no es un literal."""
+        if campo not in attrs:
+            return False, None
+        v = lista(attrs, campo, fin)
+        return True, (v[0] if len(v) == 1 else None)
+
+    def regla_aws(ini, fin, linea, campos_origen, campo_proto, dudoso=None):
+        attrs = atributos(esq, cod, ini, fin)
+        origenes = sum((lista(attrs, c, fin) for c in campos_origen), [])
+        proto = uno(attrs, campo_proto, fin)[1]
+        desde, hasta = uno(attrs, 'from_port', fin)[1], uno(attrs, 'to_port', fin)[1]
+        rangos, desconocido = [], False
+        p = proto.lower() if proto is not None else None
+        if p in ('icmp', 'icmpv6', '1', '58'):
+            return
+        if p in ('-1', 'all'):
+            rangos = [TODOS_LOS_PUERTOS]
+        elif p in ('tcp', 'udp', '6', '17'):
+            r = rango_puertos('%s-%s' % (desde, hasta)) if desde is not None and hasta is not None else None
+            rangos, desconocido = ([r], False) if r else ([], True)
+        else:
+            desconocido = True      # por variable, o un protocolo por numero que este script no lee
+        informar_red(inf, rel, linea, que, origenes, rangos, desconocido, dudoso)
+
+    def regla_azure(ini, fin, linea):
+        attrs = atributos(esq, cod, ini, fin)
+        direccion, acceso = uno(attrs, 'direction', fin)[1], uno(attrs, 'access', fin)[1]
+        if (direccion is not None and direccion.lower() != 'inbound') or (acceso is not None and acceso.lower() != 'allow'):
+            return
+        dudoso = None if direccion is not None and acceso is not None else 'la direccion o el acceso llegan por variable'
+        proto = uno(attrs, 'protocol', fin)[1]
+        if proto is not None and proto.lower() in ('icmp', 'esp', 'ah'):
+            return
+        origenes = lista(attrs, 'source_address_prefix', fin) + lista(attrs, 'source_address_prefixes', fin)
+        puertos = [rango_puertos(x) for x in lista(attrs, 'destination_port_range', fin) + lista(attrs, 'destination_port_ranges', fin)]
+        informar_red(inf, rel, linea, que, origenes, [r for r in puertos if r], not puertos or any(r is None for r in puertos), dudoso)
+
+    if tipo == 'aws_security_group' or tipo == 'azurerm_network_security_group':
+        bloque = 'ingress' if tipo == 'aws_security_group' else 'security_rule'
+
+        def una_regla(ini, fin, linea):
+            if tipo == 'aws_security_group':
+                regla_aws(ini, fin, linea, ('cidr_blocks', 'ipv6_cidr_blocks'), 'protocol')
+            else:
+                regla_azure(ini, fin, linea)
+
+        for sub in items(esq, cod, b0, b1):
+            if sub[0] == 'attr' and sub[1] == bloque:
+                objetos = objetos_lista(esq, sub[3], b1)
+                if objetos is None:
+                    inf.aviso('%s:%d: RED-ABIERTA: %s escribe %s como atributo y no se lee limpio: no se miran (revisarlas a mano)' % (
+                        rel, lin.de(sub[2]), que, bloque))
+                for desde, hasta in objetos or ():
+                    una_regla(desde + 1, hasta, lin.de(desde))
+            elif sub[0] != 'bloque':
+                continue
+            elif sub[1] == bloque:
+                una_regla(sub[4], sub[5], lin.de(sub[3]))
+            elif sub[1] == 'dynamic' and sub[2][:1] == [bloque]:
+                inf.aviso('%s:%d: RED-ABIERTA: %s arma sus reglas con dynamic: no se miran (revisarlas a mano)' % (rel, lin.de(sub[3]), que))
+    elif tipo == 'aws_security_group_rule':
+        esta, tipo_regla = uno(atributos(esq, cod, b0, b1), 'type', b1)
+        if esta and tipo_regla is None:
+            regla_aws(b0, b1, lin.de(pos), ('cidr_blocks', 'ipv6_cidr_blocks'), 'protocol', 'el tipo (type) llega por variable')
+        elif (tipo_regla or '').lower() == 'ingress':
+            regla_aws(b0, b1, lin.de(pos), ('cidr_blocks', 'ipv6_cidr_blocks'), 'protocol')
+    elif tipo == 'aws_vpc_security_group_ingress_rule':
+        regla_aws(b0, b1, lin.de(pos), ('cidr_ipv4', 'cidr_ipv6'), 'ip_protocol')
+    elif tipo == 'azurerm_network_security_rule':
+        regla_azure(b0, b1, lin.de(pos))
+    elif tipo == 'google_compute_firewall':
+        attrs = atributos(esq, cod, b0, b1)
+        esta, direccion = uno(attrs, 'direction', b1)
+        if (esta and direccion is not None and direccion.upper() != 'INGRESS') or (
+                'disabled' in attrs and valor_crudo(esq, cod, attrs['disabled'][3], b1) == 'true'):
+            return
+        dudoso = 'la direccion llega por variable' if esta and direccion is None else None
+        origenes = lista(attrs, 'source_ranges', b1)
+        if not any(c in attrs for c in ('source_ranges', 'source_tags', 'source_service_accounts')):
+            # El proveedor pide uno de los tres para INGRESS; sin ninguno, Google Cloud toma 0.0.0.0/0.
+            origenes = ['0.0.0.0/0']
+            que = '%s (sin source_ranges, source_tags ni source_service_accounts: Google toma 0.0.0.0/0)' % que
+        for sub in items(esq, cod, b0, b1):
+            if sub[0] != 'bloque' or sub[1] != 'allow':
+                continue
+            a2 = atributos(esq, cod, sub[4], sub[5])
+            proto = uno(a2, 'protocol', sub[5])[1]
+            p = proto.lower() if proto is not None else None
+            p = {'6': 'tcp', '17': 'udp', '132': 'sctp'}.get(p, p)
+            rangos, desconocido = [], p is None
+            if p == 'all' or (p in ('tcp', 'udp', 'sctp') and 'ports' not in a2):
+                rangos = [TODOS_LOS_PUERTOS]
+            elif p in ('tcp', 'udp', 'sctp'):
+                puertos = [rango_puertos(x) for x in lista(a2, 'ports', sub[5])]
+                rangos, desconocido = [r for r in puertos if r], any(r is None for r in puertos)
+            informar_red(inf, rel, lin.de(sub[3]), que, origenes, rangos, desconocido, dudoso)
+
+
+RX_LB_INTERNO = re.compile(r'(?i)^\s+\S*(load-balancer-internal|load-balancer-type|aws-load-balancer-scheme)\S*:\s*["\']?(true|internal)["\']?\s*(#.*)?$')
+
+
+def hijos_de(lineas, a, b, clave):
+    """Los indices de los hijos directos de una clave de primer nivel del documento (spec:, metadata:)."""
+    ini = next((i for i in range(a, b) if re.match(r'^%s:\s*(#.*)?$' % clave, lineas[i])), None)
+    if ini is None:
+        return []
+    res, ind = [], None
+    for i in range(ini + 1, b):
+        l = lineas[i]
+        if not l.strip() or l.lstrip().startswith('#'):
+            continue
+        if sangria(l) == 0:
+            break
+        ind = sangria(l) if ind is None else ind
+        if sangria(l) == ind:
+            res.append(i)
+    return res
+
+
+def red_k8s(rel, lineas, a, b, inf):
+    """Un Service LoadBalancer: sin rango de origen (o con uno vacio) abre a todo internet por defecto; con 0.0.0.0/0, no
+    a un puerto sensible. El type se busca solo en spec (no en metadata.labels)."""
+    tipo = next((i for i in hijos_de(lineas, a, b, 'spec') if re.match(r'^\s+type:\s*["\']?LoadBalancer["\']?\s*(#.*)?$', lineas[i])), None)
+    if tipo is None or any(RX_LB_INTERNO.match(lineas[i]) for i in range(a, b)):
+        return
+    origenes = []
+    for k in range(a, b):
+        m = re.match(r'^(\s*)loadBalancerSourceRanges:\s*(.*)$', lineas[k])
+        if m:
+            enlinea = re.sub(r'\s+#.*$', '', m.group(2)).strip()
+            if enlinea:
+                origenes += [x.strip().strip('"\'') for x in enlinea.strip('[]').split(',') if x.strip()]
+            else:
+                for j in range(k + 1, b):
+                    if not lineas[j].strip():
+                        continue
+                    mm = re.match(r'^\s*-\s*["\']?([^"\'\s#]+)', lineas[j])
+                    if not mm or sangria(lineas[j]) < len(m.group(1)):
+                        break
+                    origenes.append(mm.group(1))
+        m = re.match(r'^\s+\S*load-balancer-source-ranges:\s*(.*)$', lineas[k])
+        if m:
+            origenes += [x.strip() for x in valor_yaml(m.group(1)).split(',') if x.strip()]
+    origenes = [o for o in origenes if o.lower() not in ('null', '~')]
+    if not origenes:
+        inf.h('RED-ABIERTA', rel, tipo + 1, 'Service LoadBalancer sin loadBalancerSourceRanges (o con la lista vacia): abre a todo '
+                                          'internet por defecto (si es publico, el rango se escribe, aunque sea 0.0.0.0/0; si no, '
+                                          'el balanceador va interno)')
+        return
+    abiertos = sorted(set(o for o in origenes if o in ('0.0.0.0/0', '::/0')))
+    # port: en bloque (- port: 22) o en flujo (ports: [{port: 22}]); targetPort y nodePort no cuentan.
+    puertos = set(int(p) for k in range(a, b) for p in re.findall(r'(?<![\w.-])port:\s*["\']?(\d+)', re.sub(r'\s#.*$', '', lineas[k])))
+    sens = sorted(p for p in puertos if p in PUERTOS_SENSIBLES)
+    if abiertos and sens:
+        inf.h('RED-ABIERTA', rel, tipo + 1, 'Service LoadBalancer abierto a %s hacia %s' % (
+            ', '.join(abiertos), ', '.join('%d (%s)' % (p, PUERTOS_SENSIBLES[p]) for p in sens)))
 
 
 # ---------------------------------------------------------------- Bicep
@@ -666,7 +967,8 @@ def analizar_kubernetes(rel, texto, inf, contador, plantillas):
         if '{{' in doc:
             plantillas.add(rel)
             continue
-        if kind.group(1) == 'Secret':
+        kind = kind.group(1).strip('"\'')          # kind: "Service" es el mismo kind
+        if kind == 'Secret':
             if re.search(r'(?m)^sops:', doc):
                 continue
             for i in range(a, b):
@@ -683,6 +985,8 @@ def analizar_kubernetes(rel, texto, inf, contador, plantillas):
                 if valores:
                     inf.h('K8S-SECRET', rel, i + 1, 'un Secret con %d valor(es) en %s: Base64 no es cifrado' % (valores, m.group(1)))
             continue
+        if kind == 'Service':
+            red_k8s(rel, lineas, a, b, inf)
         for i in range(a, b):
             m = re.match(r'^\s*(?:-\s+)?image:\s*(\S.*)$', lineas[i])
             if m:

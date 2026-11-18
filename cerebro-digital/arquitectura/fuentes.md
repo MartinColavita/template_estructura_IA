@@ -1,3 +1,15 @@
+---
+id: fuentes-arquitectura
+tipo: fuentes
+estado: F-Draft
+modulo: general
+title: "Fuentes — arquitectura e infraestructura"
+description: De dónde salió cada idea de la puerta arquitectura-e-infraestructura, de sus referencias y de sus scripts; bibliografía con licencia y fecha, nada se instala ni se copia.
+tags: [arquitectura, infraestructura, fuentes, seccion]
+last_updated: 2026-11-18
+author: "equipo"
+---
+
 # Referencias externas — arquitectura e infraestructura
 
 Esto es **bibliografía, no una dependencia**: nada de lo que se cita acá se instala, se copia ni se invoca. Dice de
@@ -91,3 +103,5 @@ parte es `SIN DATOS`. Nunca les pasa una opción que cambie algo.
   escribió): los lectores de reportes se probaron con reportes plantados, armados según el formato documentado. La
   documentación de Checkov no dice si manda datos sin clave de la plataforma (el script le pasa `--skip-download`);
   la de Trivy no dice qué pasa con `--skip-check-update` sin chequeos en el cache.
+
+_Últ. modif.: 2026-11-18 — @equipo — mudada a la sección (M-062)_

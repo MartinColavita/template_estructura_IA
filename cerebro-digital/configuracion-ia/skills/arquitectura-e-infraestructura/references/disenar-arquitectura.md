@@ -6,7 +6,7 @@ persona valida, por `cerebro-curator`. **Nada se inventa**: un elemento sin fuen
 pregunta (regla 3 de [[AGENTS]]).
 
 Las ideas vienen del modelo C4, de MADR y de los ADR (bibliografía:
-`cerebro-digital/configuracion-ia/referencias-externas/referencias-arquitectura-e-infraestructura.md`); el texto y
+`cerebro-digital/arquitectura/fuentes.md`); el texto y
 las reglas son propios.
 
 ## Antes de empezar

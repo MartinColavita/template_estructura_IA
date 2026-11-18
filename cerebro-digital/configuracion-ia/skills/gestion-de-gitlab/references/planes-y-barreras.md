@@ -1,7 +1,7 @@
 # Qué da cada plan, y qué barrera reemplaza a la que no da
 
 > Fuentes: la documentación oficial de GitLab, leída para la investigación de la función. Detalle y fechas en
-> `cerebro-digital/configuracion-ia/referencias-externas/referencias-gestion-de-gitlab.md`.
+> `cerebro-digital/devops/fuentes-gitlab.md`.
 
 Los planes son los mismos en GitLab.com y en una instancia propia: **Free, Premium y Ultimate**. **Casi todas las
 barreras de GitLab dependen del plan**, y una skill no puede prometer lo que el plan no da. El plan está en la ficha

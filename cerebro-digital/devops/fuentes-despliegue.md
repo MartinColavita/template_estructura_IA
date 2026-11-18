@@ -1,3 +1,15 @@
+---
+id: fuentes-devops-despliegue
+tipo: fuentes
+estado: F-Draft
+modulo: general
+title: "Fuentes — CI/CD y despliegue continuo"
+description: De dónde salió cada idea de la puerta despliegue-continuo, de sus referencias y de sus scripts; bibliografía con licencia y fecha, nada se instala ni se copia.
+tags: [devops, despliegue, ci-cd, fuentes, seccion]
+last_updated: 2026-11-18
+author: "equipo"
+---
+
 # Referencias externas — CI/CD y despliegue continuo
 
 Esto es **bibliografía, no una dependencia**: nada de lo que se cita acá se instala, se copia ni se invoca desde el
@@ -77,3 +89,5 @@ investigación de M-048; las páginas de documentación se leyeron, no se copió
 - Azul y verde con los «slots» de una plataforma como servicio no se verificó.
 - En el lockfile, la documentación muestra el commit como un marcador (`sha1-...`): el script acepta el SHA con o sin
   ese prefijo.
+
+_Últ. modif.: 2026-11-18 — @equipo — mudada a la sección (M-062)_

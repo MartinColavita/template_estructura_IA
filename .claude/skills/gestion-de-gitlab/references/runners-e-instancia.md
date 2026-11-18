@@ -3,7 +3,7 @@
 > Fuentes: documentación oficial de GitLab Runner (seguridad, ejecutores, `config.toml`, registro) y de la
 > administración de una instancia propia (política de mantenimiento, camino de actualización, respaldo, chequeos,
 > endurecimiento), y los avisos de parche de 2025 y 2026. Detalle en
-> `cerebro-digital/configuracion-ia/referencias-externas/referencias-gestion-de-gitlab.md`.
+> `cerebro-digital/devops/fuentes-gitlab.md`.
 
 **El host es de otro.** El sistema operativo, los parches, los respaldos y el acceso al host de un runner o de la
 instancia son de [[operacion-de-servidores]]; su seguridad, de [[seguridad]]. El host está en el inventario por su

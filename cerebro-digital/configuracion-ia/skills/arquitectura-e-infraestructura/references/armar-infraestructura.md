@@ -8,7 +8,7 @@ tocar la nube**. Lo general no se repite: configuración y secretos en
 tiene que exigir, en `cerebro-digital/configuracion-ia/skills/desarrollo/references/metodo/entregar-a-produccion.md`.
 
 Las ideas vienen de las guías oficiales de HashiCorp, OpenTofu, AWS, Google Cloud, Microsoft, Docker y Kubernetes, y
-de 12-factor (bibliografía: `cerebro-digital/configuracion-ia/referencias-externas/referencias-arquitectura-e-infraestructura.md`).
+de 12-factor (bibliografía: `cerebro-digital/arquitectura/fuentes.md`).
 
 ## Antes de escribir una línea
 

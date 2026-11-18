@@ -1,3 +1,15 @@
+---
+id: fuentes-devops-gitlab
+tipo: fuentes
+estado: F-Draft
+modulo: general
+title: "Fuentes — gestión de GitLab"
+description: De dónde salió cada idea de la puerta gestion-de-gitlab, de bin/auditar-gitlab.py, de la ficha GitLab del proyecto y de la guía del MCP de GitLab; bibliografía con licencia y fecha.
+tags: [devops, gitlab, fuentes, seccion]
+last_updated: 2026-11-18
+author: "equipo"
+---
+
 # Referencias externas — Gestión de GitLab
 
 Esto es **bibliografía, no una dependencia**: nada de lo que se cita acá se instala, se copia ni se invoca desde el
@@ -76,3 +88,5 @@ la sesión, por máquina; sin ellas, lo que depende de ellas es `SIN DATOS`.
   los mira.
 - La licencia de GitLab Runner, de to-be-continuous y de cada componente de `gitlab.com/components`.
 - GitLab Dedicated, runners en Windows y la instalación por Helm: no se investigaron.
+
+_Últ. modif.: 2026-11-18 — @equipo — mudada a la sección (M-062)_

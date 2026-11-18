@@ -71,8 +71,10 @@ parte del veredicto es `SIN DATOS`, nunca OK. Ninguna se vendoriza. **Se instala
 hash** (en marzo de 2026 publicaron versiones de Trivy comprometidas: un escáner es cadena de suministro como
 cualquier otra). **La versión y el hash los fija cada proyecto** (en `DEC-007` y `DEC-009`) y se verifican al
 instalar: el template no puede fijarlos por todos. Los scripts informan la versión que corrió y rechazan sólo la de
-Trivy comprometida. En el CI, las acciones y las plantillas van por SHA. Qué idea se tomó de cada fuente, en
-`cerebro-digital/configuracion-ia/referencias-externas/`.
+Trivy comprometida. En el CI, las acciones y las plantillas van por SHA. Qué idea se tomó de cada fuente, en las
+páginas de fuentes de cada sección del Cerebro: `cerebro-digital/arquitectura/fuentes.md`, `cerebro-digital/devops/`
+(`fuentes-despliegue.md`, `fuentes-operacion.md`, `fuentes-gitlab.md`), `cerebro-digital/seguridad/`
+(`fuentes-aplicaciones.md`, `fuentes-servidores.md`) y `cerebro-digital/networking/fuentes.md`.
 
 | Herramienta | Origen | Licencia | La ejecuta | Lo que el script nunca le pasa |
 |---|---|---|---|---|
@@ -101,4 +103,4 @@ Trivy comprometida. En el CI, las acciones y las plantillas van por SHA. Qué id
 | El método de desarrollo y sus guardarraíles | `cerebro-digital/configuracion-ia/skills/desarrollo/SKILL.md` |
 | La bibliografía del método | `…/desarrollo/references/referencias-externas.md` |
 | Las reglas y las barreras | `AGENTS.md` |
-| De dónde salió cada idea de las funciones de arquitectura, despliegue, operación, seguridad y GitLab | `cerebro-digital/configuracion-ia/referencias-externas/00-index.md` |
+| De dónde salió cada idea de las funciones de arquitectura, despliegue, operación, seguridad y GitLab, y de la red | Las fuentes de cada sección del Cerebro (`cerebro-digital/arquitectura/`, `cerebro-digital/devops/`, `cerebro-digital/seguridad/`, `cerebro-digital/networking/`); el índice, en `cerebro-digital/configuracion-ia/referencias-externas/00-index.md` |

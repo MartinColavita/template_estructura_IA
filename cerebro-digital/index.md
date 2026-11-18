@@ -68,7 +68,14 @@ El conocimiento validado se organiza por módulos funcionales dentro de `cerebro
 - **`configuracion-ia/orquestador-desarrollo.md`**: diseño del orquestador de código.
 - **`configuracion-ia/mejoras.md`**: registro de propuestas de mejora del ecosistema (autocorrección consultada).
 - **`configuracion-ia/integracion-azure-mcp/`**, **`integracion-gitlab-mcp/`** e **`integracion-stitch-mcp/`**: setup de los MCP (tablero, repositorios, diseño UX/UI).
-- **`configuracion-ia/referencias-externas/`**: de dónde salió cada idea de las funciones de arquitectura, despliegue, operación, seguridad y GitLab (bibliografía con su licencia; nada se instala ni se copia).
+- **`configuracion-ia/referencias-externas/`**: el índice de las fuentes de cada función (que viven en su sección, abajo) y la bibliografía de los orquestadores por función y de Obsidian.
+
+### 🧭 Secciones transversales (el método y las fuentes, para todos los módulos)
+Cada una es la portada de una función: qué cubre, cómo se le pide a la IA, las guías del método (que viven en las skills y Obsidian no muestra), los scripts, las decisiones y sus fuentes (bibliografía con su licencia; nada se instala ni se copia). Lo concreto del proyecto sigue en los pilares del módulo.
+-   **`arquitectura/`**: arquitectura de la aplicación e infraestructura como código ([[cerebro-digital/arquitectura/index|portada]]; fuentes en `fuentes.md`).
+-   **`devops/`**: CI/CD y despliegue, operación de servidores y GitLab ([[cerebro-digital/devops/index|portada]]; fuentes en `fuentes-despliegue.md`, `fuentes-operacion.md` y `fuentes-gitlab.md`).
+-   **`seguridad/`**: seguridad de la aplicación y de los servidores ([[cerebro-digital/seguridad/index|portada]]; fuentes en `fuentes-aplicaciones.md` y `fuentes-servidores.md`).
+-   **`networking/`**: la red: zonas, exposición, DNS, TLS, firewall, acceso administrativo, y el diagnóstico de conectividad ([[cerebro-digital/networking/index|portada]]; fuentes en `fuentes.md`).
 
 ### 📦 Módulo: `modulo-ejemplo` (renombrar al instanciar)
 -   **`modulo-ejemplo/funcional/`**: el **qué**: reglas de negocio, glosario, flujos y pantallas. Una ficha por flujo, con su bloque `## Derivación a backlog`.

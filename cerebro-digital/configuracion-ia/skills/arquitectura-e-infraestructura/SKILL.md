@@ -51,12 +51,14 @@ La IA **escribe y verifica**; lo que toca la nube lo corre el pipeline y lo apru
 | «diseñá la arquitectura», «documentá la arquitectura», «el diagrama C4», «la vista de despliegue», «¿qué atributos de calidad pesan?» | La vista C4 (contexto, contenedores, despliegue) en Mermaid, cada elemento con su fuente o `⚠ supuesto`, y los atributos de calidad con su medida | [disenar-arquitectura.md](references/disenar-arquitectura.md) | `bin/radiografiar-codigo.py --mermaid` (si la aplicación ya existe) | Borrador; al Cerebro, por `cerebro-curator` con el «sí» |
 | «¿qué conviene para la arquitectura, X o Y?», «registrá esta decisión», «hacé un ADR» | Conducir **una** decisión técnica: contexto, opciones con pros y contras, recomendación en `⚠`, cómo se confirma | [disenar-arquitectura.md](references/disenar-arquitectura.md) | — | La `DEC-nnn` la escribe `cerebro-curator` con el «sí»; la IA no decide por el equipo |
 | «armá la infraestructura», «escribí el Terraform», «dockerizá la app», «armá el docker-compose», «los manifiestos de Kubernetes», «sumá un ambiente» | Escribir la infraestructura como código en su repositorio, con el ciclo de [[desarrollo]], y probarla sin tocar la nube | [armar-infraestructura.md](references/armar-infraestructura.md) | `bin/auditar-iac.py` (autochequeo de quien escribe) | **GATE de INFRAESTRUCTURA**: sólo lo que no toca la nube |
+| «diseñá la red», «qué puertos abro», «armá la VPC», «armá la VNet», «configurá el DNS», «dónde termino TLS», «cómo entramos a administrar» | Los flujos, las zonas por ambiente, la exposición mínima, la salida, DNS, TLS y el acceso administrativo; la ficha [[red]] y el código, por [[desarrollo]] | [disenar-red.md](references/disenar-red.md) | `bin/auditar-iac.py` (regla `RED-ABIERTA`) | **GATE de INFRAESTRUCTURA**; configurar quién entra, N3 |
 | «revisá la infraestructura», «auditá este cambio de infra», «¿está para el Merge Request?» | La verificación, por **otro agente**, en sólo lectura | [auditar-infraestructura.md](references/auditar-infraestructura.md) | `bin/auditar-iac.py` | Sólo lectura |
 | «revisá este plan de infraestructura», «¿qué hace este plan?», «¿lo apruebo?» | El resumen del plan que publicó el pipeline y la pregunta de aprobación en criollo | [auditar-infraestructura.md](references/auditar-infraestructura.md) | `bin/resumir-plan.py` | Aprueba una persona **en la plataforma** (GATE de DESPLIEGUE) |
 | «aplicá», «destruí esto», «importá el recurso», «desbloqueá el estado», «sacalo del estado» | **No se hace.** Se explica por qué y se arma el resumen para que lo haga una persona | [[AGENTS]] | — | **Nunca la IA** |
 
 **Desempate.** Si el pedido nombra una decisión o un diagrama, es arquitectura; si nombra archivos, un módulo o un
-ambiente, es infraestructura; si trae un plan, es auditar. «Ocupate de la infraestructura» a secas se pregunta:
+ambiente, es infraestructura; si nombra puertos, zonas, DNS o TLS, es la red; si trae un plan, es auditar.
+«No llega» o «no resuelve» sobre algo que ya corre es de [[operacion-de-servidores]]. «Ocupate de la infraestructura» a secas se pregunta:
 ¿diseñarla, escribirla o revisarla? Nunca se elige por la persona.
 
 ## Las barreras
@@ -109,4 +111,5 @@ un `validate` sin `plan` (no sabe si los argumentos existen en el proveedor). Lo
 | La vista C4 en curso, una decisión en curso, la salida de los scripts, el JSON del plan | `borrador/arquitectura/` y `borrador/infraestructura/<fecha>/` (nunca se versionan) |
 | Una decisión validada | `decisiones.md` del módulo, como `DEC-nnn`, **sólo por `cerebro-curator`**, con el «sí» |
 | Recursos, nombres, estado, secretos y la vista de despliegue validados | [[infraestructura]], por `cerebro-curator` con el «sí» |
+| Zonas, puertos abiertos con su motivo, DNS, dónde termina TLS y cómo se administra, validados | [[red]], por `cerebro-curator` con el «sí» |
 | El código de infraestructura | Su repositorio, donde lo fije `DEC-007` (nunca en este, `DEC-001`), por [[desarrollo]] |

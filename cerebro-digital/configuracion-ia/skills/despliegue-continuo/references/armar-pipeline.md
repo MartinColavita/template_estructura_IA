@@ -4,7 +4,7 @@
 > revisarlo. El pipeline es código: entra por [[desarrollo]] (rama, Merge Request, verificador distinto) y lo que
 > tiene que frenar está en `cerebro-digital/configuracion-ia/skills/desarrollo/references/metodo/entregar-a-produccion.md`.
 > Acá va lo que esa guía no dice: cómo se arma para que la IA no pueda bajarle la guardia. Bibliografía:
-> `cerebro-digital/configuracion-ia/referencias-externas/referencias-despliegue-continuo.md`.
+> `cerebro-digital/devops/fuentes-despliegue.md`.
 
 ## La regla que ordena todo: la barrera vive en la plataforma
 

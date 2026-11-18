@@ -54,7 +54,7 @@ hash** (en el pipeline, una acción por su SHA, no por su etiqueta). La versión
 | **¿Es lo que pedía la Tarea?** | El diff contra la Tarea y [[infraestructura]] | Un recurso que nadie pidió, o uno pedido que falta |
 | **¿Respeta la arquitectura?** | Contra la vista C4 y las `DEC` | Un contenedor o una conexión que la arquitectura no tiene |
 | **Lo que guarda datos** | Cada base, almacenamiento o gestor de secretos nuevo o tocado | Sin `prevent_destroy`, o sin respaldo declarado |
-| **La red** | Reglas de entrada, puertos, direcciones abiertas a todo internet | Algo expuesto que la ficha no dice que esté expuesto |
+| **La red** | Cada regla de entrada, puerto y origen contra la ficha [[red]], con los chequeos de [disenar-red.md](disenar-red.md) §«Cómo lo revisa el verificador» (y los avisos de `RED-ABIERTA`, a mano) | Algo expuesto que la ficha [[red]] no dice que esté expuesto, o una regla sin su flujo |
 | **Las identidades** | Los permisos que se crean | Más permisos de los que el recurso necesita |
 | **Los nombres y etiquetas** | Contra la convención de [[infraestructura]] | Un recurso fuera de convención |
 | **Los módulos** | Uno por capacidad; ninguno que envuelva un solo recurso | Un módulo que no agrega nada |

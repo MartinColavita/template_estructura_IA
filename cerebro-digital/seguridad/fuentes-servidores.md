@@ -1,3 +1,15 @@
+---
+id: fuentes-seguridad-servidores
+tipo: fuentes
+estado: F-Draft
+modulo: general
+title: "Fuentes — seguridad de los servidores"
+description: De dónde salió cada idea de la mitad servidores de la puerta seguridad (auditar, endurecer, vulnerabilidades, incidentes), de sus scripts y de las plantillas del pilar seguridad; bibliografía con licencia y fecha.
+tags: [seguridad, servidores, fuentes, seccion]
+last_updated: 2026-11-18
+author: "equipo"
+---
+
 # Referencias externas — seguridad de los servidores
 
 Esto es **bibliografía, no una dependencia**: nada de lo que se cita acá se instala, se copia ni se invoca desde el
@@ -74,3 +86,5 @@ de nuevo, en español: de las fuentes se tomaron ideas, nunca texto.
 - **Al escribir los scripts** no se pudo confirmar: que Trivy liste en su JSON un resultado `os-pkgs` aunque no
   encuentre nada (si no lo hiciera, una imagen limpia daría `SIN DATOS`, nunca un OK falso); la opción `--quiet` de
   `trivy image`; y la forma del descriptor de la base en las versiones viejas de Grype (se aceptan las dos).
+
+_Últ. modif.: 2026-11-18 — @equipo — mudada a la sección (M-062)_

@@ -2,7 +2,7 @@
 
 > Fuentes: documentación oficial de GitLab CI/CD (referencia del YAML, `include`, componentes, inputs, variables,
 > job token, `id_tokens`, caché, ambientes, CI Lint). Detalle en
-> `cerebro-digital/configuracion-ia/referencias-externas/referencias-gestion-de-gitlab.md`.
+> `cerebro-digital/devops/fuentes-gitlab.md`.
 
 **El pipeline en general no está acá.** Estructura, fijado de imágenes y acciones, caché, ambientes, OIDC y la
 barrera de despliegue son de [[despliegue-continuo]]:

@@ -1,3 +1,15 @@
+---
+id: fuentes-seguridad-aplicaciones
+tipo: fuentes
+estado: F-Draft
+modulo: general
+title: "Fuentes — seguridad de la aplicación"
+description: De dónde salió cada idea de la mitad aplicación de la puerta seguridad (escanear, modelar amenazas, probar un ambiente), de sus scripts y del normalizador; bibliografía con licencia y fecha.
+tags: [seguridad, aplicacion, fuentes, seccion]
+last_updated: 2026-11-18
+author: "equipo"
+---
+
 # Referencias externas — seguridad de la aplicación
 
 Esto es **bibliografía, no una dependencia**: nada de lo que se cita acá se instala, se copia ni se invoca desde el
@@ -84,3 +96,5 @@ defecto), TruffleHog (AGPL, verifica por defecto) y CodeQL (sólo con la licenci
 - Si la araña de la baseline de ZAP se queda en el dominio del objetivo: la documentación no lo dice; el script controla después lo que pidió.
 - Las etiquetas exactas de las plantillas intrusivas de Nuclei, y si OSV-Scanner, Gitleaks, Trivy y Nuclei publican binario de Windows.
 - Que `--log-opts` de Gitleaks y los patrones de `-x` de Bandit se escriban como los arma el script: no se corrió ninguna herramienta.
+
+_Últ. modif.: 2026-11-18 — @equipo — mudada a la sección (M-062)_
