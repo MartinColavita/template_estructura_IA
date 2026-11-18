@@ -3,8 +3,9 @@ name: cerebro-orquestador
 description: >
   Director ÚNICO del ecosistema de agentes de {{PROYECTO}}. Arma el Plan de Ejecución, aplica
   el flujo de curaduría de 5 pasos, vigila la conversación para detectar conocimiento de
-  negocio nuevo o cambiado (Consulta Interactiva de Decisión, una por ítem), rutea el
-  sub-flujo de tickets de Azure de forma determinista, y coordina sub-agentes con umbrales
+  negocio nuevo o cambiado (Consulta Interactiva de Decisión, una por ítem), rutea cada
+  pedido a la puerta de su función y el sub-flujo de tickets de Azure de forma determinista,
+  y coordina sub-agentes con umbrales
   objetivos: cuándo delegar, cuándo pausar, y que las skills NO se heredan al delegar.
   Trigger: "planificá esto", "delegá el análisis", "coordiná", "armá el plan", "procesá esta
   documentación", "actualizá el cerebro", cualquier tarea multi-agente, y toda interacción
@@ -78,6 +79,35 @@ Por cada candidato, contrastar contra el OKF (`contexto.md`, `index.md` del mód
 - ❌ Disparar una interacción por cada mensaje trivial (ruido conversacional).
 - ❌ Interpretar "no dijo que no" como confirmación.
 
+## 🧭 Ruteo por función — el dominio del pedido decide la puerta
+
+Cada función tiene **una puerta**: una skill que es además el rol de su orquestador y que, adentro, rutea por el
+objeto del pedido. Se carga **sólo la puerta**; ella lee la referencia que hace falta. La misma tabla está, en una
+línea, en [[AGENTS]]: así el disparo no depende de que la descripción de la skill entre en el listado.
+
+| El pedido es de… | Puerta | Frases típicas |
+|---|---|---|
+| **Conocimiento** (documentos, reuniones, reglas, el Cerebro) | esta skill | «procesá esta documentación», «actualizá el Cerebro» |
+| **Tickets** | el ruteo de la sección siguiente | «bajá la ficha al board», «redactá esta historia» |
+| **Código** de la aplicación | **`desarrollo`** | «programá esto», «arreglá este bug», «revisá el código» |
+| **Arquitectura e infraestructura** | **`arquitectura-e-infraestructura`** | «diseñá la arquitectura», «armá la infraestructura de la app», «dockerizá», «revisá este plan de infraestructura» |
+| **CI/CD y despliegue** (también el YAML del pipeline) | **`despliegue-continuo`** | «armá el pipeline», «desplegá a prueba», «pasá a producción», «volvé a la versión anterior» |
+| **Servidores** (salud, mantenimiento, una caída) | **`operacion-de-servidores`** | «¿por qué anda lento?», «renová el certificado», «se cayó el servicio», «escribí el runbook» |
+| **Seguridad** (de la aplicación o de lo que corre) | **`seguridad`** | «escaneá la seguridad», «modelo de amenazas», «auditá el servidor», «¿qué parcheo primero?», «se filtró una clave» |
+| **GitLab** (el proyecto, los ajustes de CI fuera del YAML, los runners, la instancia) | **`gestion-de-gitlab`** | «configurá el proyecto en GitLab», «revisá los runners», «¿cómo está la instancia?» |
+
+**Desempate entre funciones.** «¿Anda bien?» es operación; «¿está expuesto?» es seguridad. Escribir el pipeline es
+despliegue continuo; escribir la infraestructura que ese pipeline aplica, arquitectura e infraestructura. Una caída
+es de operación; una intrusión o una clave filtrada, de seguridad. Lo que termina en código pasa además por
+`desarrollo` (G2). Si el pedido cruza dos funciones, el plan nombra las dos puertas, en orden. Ante la duda se
+pregunta: nunca se elige por la persona.
+
+Cuando el pedido va a una puerta, el plan de la puerta cuenta como el Plan de Ejecución.
+
+**Sesión dedicada.** Para un trabajo largo de una sola función se puede abrir la sesión con su orquestador
+(`claude --agent orquestador-<función>`, en `INSTALACION.md`): carga la puerta sola y no debe escribir archivos; delega en
+`nucleo-productor` y en `nucleo-verificador`.
+
 ## 🎫 Ruteo del sub-flujo Azure (tickets) — determinista
 
 Cuando el pedido toca Azure DevOps, el **objeto del pedido** decide la skill (no el gusto del modelo), para que la **cantidad** de work items no dependa de qué skill elija el LLM:
@@ -98,6 +128,8 @@ Cuando el pedido toca Azure DevOps, el **objeto del pedido** decide la skill (no
 - **Ejecutar un slice** ("migrá el slice X", "seguí con la migración", "refactorizá el módulo X", "cortá el tráfico de X") → **`modernizar-slice`**: contrato, construcción por el pipeline normal, `bin/paridad.py comparar`, corte sólo con `bin/mapa-modernizacion.py corte` en OK.
 - **Los hallazgos del Doctor** («atendé los hallazgos», «arreglá lo que marcó el Doctor») → **`atender-hallazgos`**.
 - **Mejoras al propio ecosistema** ("¿qué mejorarías?", una señal repetida del Doctor o de los cierres) → **`mejorar-ecosistema`**: una propuesta por vez, registrada en `configuracion-ia/mejoras.md`, nunca aplicada sin el "sí".
+- **Un segundo chequeo o una estimación** (a pedido; nunca es requisito para avanzar): la lista de tests de una Tarea → **`auditar-tarea`**; los criterios de una Historia → **`auditar-historia`**; la coherencia del conjunto de Tareas de una Historia → **`analizar-tareas`**; los Puntos de historia → **`estimar-story-points`**.
+- **Una pregunta sobre el dominio, una regla, una decisión, un pendiente o el avance** → **`cerebro-knowledge`** (qué se lee del Cerebro, en qué orden y cómo se cita). **Redactar o corregir un borrador funcional** para que se entienda → **`cognitive-doc-design`**. **Retomar o cerrar una sesión con Engram** → **`engram-memory-protocol`** (continuidad, nunca fuente de reglas: gana el Cerebro).
 - **Desempate:** si el pedido nombra una ficha/módulo/documento del Cerebro → árbol; si nombra o describe **un** work item / `#ID` → 1 ítem. **Ante ambigüedad, preguntar** cuál — nunca asumir árbol ni ítem. Las barreras de escritura (tablero, dedup, confirmación, nivel/cardinalidad) las aplican las skills del pipeline (ver [[AGENTS]] §«Redacción y carga de tickets en Azure DevOps» (las barreras) y [[redaccion-de-tickets]] (el método)).
 
 ## 🤖 Orquestación de sub-agentes — umbrales objetivos

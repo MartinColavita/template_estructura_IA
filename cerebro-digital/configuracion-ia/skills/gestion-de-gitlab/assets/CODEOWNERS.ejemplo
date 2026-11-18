@@ -1,0 +1,12 @@
+# Molde de CODEOWNERS para GitLab. En el repositorio de código va como .gitlab/CODEOWNERS (entra por desarrollo).
+#
+# Sólo frena en Premium o Ultimate, y sólo si la regla de la rama protegida exige la aprobación de los dueños
+# (Settings > Repository > Protected branches > "Code owner approval"). En Free el archivo no hace nada: quien revisa
+# los cambios del pipeline lo fija el método.
+#
+# Los dueños van por grupo de GitLab, no por persona. <grupo>/<quienes-aprueban-el-pipeline> es un subgrupo cuyos
+# miembros son las personas que aprueban cambios de pipeline. La identidad de la IA no va en ese subgrupo.
+
+[Pipeline y configuración de GitLab]
+/.gitlab-ci.yml   @<grupo>/<quienes-aprueban-el-pipeline>
+/.gitlab/         @<grupo>/<quienes-aprueban-el-pipeline>

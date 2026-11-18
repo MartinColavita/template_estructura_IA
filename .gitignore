@@ -108,3 +108,13 @@ qa/**/.env
 # pueden traer nombres y datos de personas: NUNCA se versionan. La regla 3.1 manda los
 # borradores a borrador/, pero ese script escribe aca por defecto.
 scratch/
+
+# Obsidian como visor del Cerebro (INSTALACION.md): se versiona solo la configuracion compartida
+# (que carpetas se ocultan y los colores del grafo). El estado de cada maquina, los temas y todo
+# plugin de terceros quedan afuera: por aca no viaja codigo ajeno. /.trash/ es su papelera.
+/.obsidian/*
+!/.obsidian/app.json
+!/.obsidian/graph.json
+/.trash/
+# y si alguien abre una subcarpeta como boveda (no se recomienda), nada de su .obsidian/ entra al commit
+/*/**/.obsidian/

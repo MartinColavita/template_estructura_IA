@@ -95,6 +95,39 @@ def main():
          out[:300])
     shutil.rmtree(cuenta, ignore_errors=True)
 
+    # Ruteo escrito: cada skill tiene que estar nombrada en un texto que se carga siempre (AGENTS.md o la skill del
+    # orquestador). La descripcion sola no alcanza: Claude Code la saca del listado cuando hay muchas skills.
+    rut = tempfile.mkdtemp(prefix='probar-skills-ruteo-')
+    skill(rut, 'cerebro-orquestador', '---\nname: cerebro-orquestador\ndescription: x\n---\n\nUn diagrama va a `una`. Lo otro, a `una-mas-larga`.\n')
+    for n in ('una', 'otra'):
+        skill(rut, n, '---\nname: %s\ndescription: x\n---\n' % n)
+    with open(os.path.join(rut, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write('**3 habilidades**\n\nToda solicitud pasa por `cerebro-orquestador`. Lo de tickets, por [[otra]].\n')
+    rc, out = correr(rut, '--json')
+    d = json.loads(out)
+    caso('ruteo al dia: cada skill nombrada en AGENTS.md o en el orquestador (con acentos graves o doble corchete)',
+         rc == 0 and d.get('ruteo') == [], out[:300])
+    rc, out = correr(rut)
+    caso('ruteo al dia: lo dice el resumen', rc == 0 and 'ruteo: al dia' in out, out[:300])
+    skill(rut, 'una-mas', '---\nname: una-mas\ndescription: x\n---\n')
+    skill(rut, 'tercera', '---\nname: tercera\ndescription: x\n---\n')
+    with open(os.path.join(rut, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write('**5 habilidades**\n\nToda solicitud pasa por `cerebro-orquestador`. Lo de tickets, por [[otra]]. La tercera no se nombra entre marcas.\n')
+    rc, out = correr(rut, '--json')
+    d = json.loads(out)
+    caso('una skill que ningun texto fijo nombra: HALLAZGO, con su nombre',
+         rc == 1 and d.get('veredicto') == 'HALLAZGO' and 'tercera' in d.get('ruteo', []), out[:300])
+    caso('un nombre que solo aparece adentro de otro mas largo no cuenta como ruteo',
+         'una-mas' in d.get('ruteo', []) and 'una' not in d.get('ruteo', []), str(d.get('ruteo')))
+    rc, out = correr(rut)
+    caso('sin ruteo: el texto dice cuales y por que importa', rc == 1 and 'HALLAZGO ruteo' in out and 'tercera' in out and 'listado' in out, out[:500])
+    shutil.rmtree(os.path.join(rut, 'cerebro-digital', 'configuracion-ia', 'skills', 'cerebro-orquestador'))
+    with open(os.path.join(rut, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write('**4 habilidades**\n')
+    rc, out = correr(rut)
+    caso('sin la skill del orquestador no hay ruteo que verificar: lo dice y no frena', rc == 0 and 'ruteo: no se verifico' in out, out[:300])
+    shutil.rmtree(rut, ignore_errors=True)
+
     for d_ in (tmp, solo_bien, vacio):
         shutil.rmtree(d_, ignore_errors=True)
     fallas = [n for n, ok, _ in ESPERADOS if not ok]

@@ -43,6 +43,7 @@ QUE NO HACE, a proposito:
 import hashlib
 import os
 import re
+import sys
 
 # ------------------------------------------------------------------- acoplamiento
 
@@ -1398,6 +1399,110 @@ VALOR_INOCUO = re.compile(
     r"xxx+|\*+|secret|password|null|none|true|false)$")
 
 
+# Los analizadores que cuentan como "la puerta esta puesta": el comercial del proyecto de
+# origen y los abiertos (codigo, dependencias, secretos), mas el escaner del nucleo
+# (bin/escanear-seguridad.py). Antes solo se reconocia el comercial, y un proyecto con
+# Semgrep en el pipeline salia como "sin analisis". Con limite de palabra, para que
+# "bandita" no sea Bandit; y sin las lineas de comentario: un "pendiente: sumar semgrep"
+# no es una puerta.
+ANALIZADOR = re.compile(
+    r"(?i)(?<![\w-])(veracode|pipeline-scan|srcclr|sourceclear|semgrep|opengrep|codeql|"
+    r"bandit|osv-scanner|pip-audit|npm audit|dependency-check|gitleaks|betterleaks|"
+    r"trufflehog|trivy|escanear-seguridad)(?!\w)|SAST\.gitlab-ci\.yml|components/sast")
+
+# Archivos de supresiones que bin/seguridad/normalizar.py NO sabe leer entrada por entrada
+# (los de texto -.trivyignore, .gitleaksignore, osv-scanner.toml- y las marcas en el codigo
+# -# nosec, # nosemgrep, gitleaks:allow- los juzga normalizar.revisar_supresiones: motivo Y
+# vencimiento, por entrada). Antes se buscaba la palabra "motivo" en el archivo entero: una
+# entrada justificada tapaba a todas las demas, y una sin vencimiento pasaba igual.
+SUPRESIONES_NO_LEIBLES = re.compile(
+    r"(?i)(veracode|mitigation|baseline).*\.(json|xml|ya?ml)$|^\.trivyignore\.ya?ml$")
+
+# Lo que nombra un analizador sin correrlo: un comentario al final de la linea (con espacio
+# antes, como en YAML: "https://" no es un comentario) y un echo suelto.
+COMENTARIO_FINAL = re.compile(r"\s(#|//).*$")
+ECO = re.compile(r"(?i)^\s*(?:-\s*)?(?:(?:script|run):\s*)?(?:echo|printf|write-host|write-output)\b")
+ENCADENA = re.compile(r"&&|\|\||;|\|")
+
+
+def _sin_comentarios(txt):
+    """Lo que el pipeline ejecuta: sin lineas de comentario, sin el comentario al final de una
+    linea y sin un echo suelto (un echo encadenado con && o ; se queda: lo que sigue corre)."""
+    out = []
+    for l in txt.splitlines():
+        if l.strip().startswith(("#", "//")):
+            continue
+        l = COMENTARIO_FINAL.sub("", l)
+        if ECO.match(l) and not ENCADENA.search(l):
+            continue
+        out.append(l)
+    return "\n".join(out)
+
+
+def _sangria(l):
+    return len(l) - len(l.lstrip())
+
+
+def _job_apagado(bloque):
+    """True si un job de GitLab no corre nunca: when: never a nivel del job, o todas sus rules
+    en when: never. Una rule con if (o changes, exists) que no termina en never lo prende."""
+    cuerpo = [l for l in bloque[1:] if l.strip() and not l.strip().startswith("#")]
+    if not cuerpo:
+        return False
+    ind = min(_sangria(l) for l in cuerpo)
+    if any(_sangria(l) == ind and re.match(r"\s*when:\s*never\s*$", COMENTARIO_FINAL.sub("", l)) for l in cuerpo):
+        return True
+    for i, l in enumerate(cuerpo):
+        if _sangria(l) == ind and re.match(r"\s*rules:\s*$", l):
+            items = []
+            for m in cuerpo[i + 1:]:
+                if _sangria(m) <= ind:
+                    break
+                s = COMENTARIO_FINAL.sub("", m).strip()
+                if s.startswith("- "):
+                    items.append([s[2:].strip()])
+                elif items:
+                    items[-1].append(s)
+            if items and all(any(re.match(r"when:\s*never$", x) for x in it) for it in items):
+                return True
+    return False
+
+
+def _sin_jobs_apagados(txt):
+    """El .gitlab-ci.yml sin los jobs que no corren nunca (cada clave de primer nivel es un bloque)."""
+    bloques, actual = [], []
+    for l in txt.splitlines():
+        if l and not l[0].isspace() and not l.startswith("#"):
+            if actual:
+                bloques.append(actual)
+            actual = [l]
+        else:
+            actual.append(l)
+    if actual:
+        bloques.append(actual)
+    return "\n".join("\n".join(b) for b in bloques if not _job_apagado(b))
+
+
+def _activo(p):
+    """El texto de un archivo de pipeline que de verdad se ejecuta."""
+    t = _leer(p)
+    if p.endswith(".gitlab-ci.yml"):
+        t = _sin_jobs_apagados(t)
+    return _sin_comentarios(t)
+
+
+def _revisar_supresiones(raiz):
+    """(hallazgos, error) con el juez del paquete de seguridad. error si no se pudo cargar."""
+    bin_ = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bin")
+    try:
+        if bin_ not in sys.path:
+            sys.path.insert(0, bin_)
+        from seguridad import normalizar
+    except ImportError as e:
+        return None, "no se pudo cargar bin/seguridad/normalizar.py (%s)" % e
+    return normalizar.revisar_supresiones(raiz, normalizar.CATEGORIAS), ""
+
+
 def _pipelines(u):
     out = []
     for base in (u["raiz"], CTX["root"]):
@@ -1428,10 +1533,12 @@ def sonda_seguridad():
                           "archivo de pipeline; sin el, ningun analisis se ejecuta solo",
                           "HALLAZGO"])
         else:
-            txt = "\n".join(_leer(p) for p in pipes)
+            # Solo lo que se ejecuta: un analizador nombrado en un comentario (de linea o al
+            # final), en un echo suelto o en un job de GitLab apagado (when: never) no es una puerta.
+            txt = "\n".join(_activo(p) for p in pipes)
             filas.append([pre + "definicion de pipeline", "si",
                           ", ".join(_rel(p) for p in pipes[:3]), "OK"])
-            hay = re.search(r"(?i)veracode|pipeline-scan|srcclr|sourceclear", txt) is not None
+            hay = ANALIZADOR.search(txt) is not None
             filas.append([pre + "paso de SAST en el pipeline", "si" if hay else "no",
                           "el analisis corre solo en cada entrega" if hay else
                           "el analisis no esta en el pipeline: depende de que alguien se "
@@ -1443,22 +1550,30 @@ def sonda_seguridad():
                           "puerta" if not frena else "configurado para cortar",
                           "OK" if frena else "SIN DATOS"])
 
-        # Supresiones: existir esta bien; lo que no puede faltar es el motivo escrito.
-        sup = []
+        # Supresiones: existir esta bien; cada una lleva motivo Y vencimiento vigente (regla 5 de
+        # bin/seguridad/). Las juzga el mismo juez que usa escanear-seguridad.py, entrada por entrada.
+        malas, error = _revisar_supresiones(u["raiz"])
+        no_leibles = []
         for b, dirs, files in os.walk(u["raiz"]):
             dirs[:] = [d for d in dirs if d not in BASURA and not d.startswith(".")]
             for fn in files:
-                if re.search(r"(?i)(veracode|mitigation|baseline).*\.(json|xml|ya?ml)$", fn):
-                    sup.append(os.path.join(b, fn).replace("\\", "/"))
-        if sup:
-            sin_motivo = [s for s in sup
-                          if not re.search(r"(?i)comment|reason|justification|motivo",
-                                           _leer(s))]
-            filas.append([pre + "supresiones justificadas",
-                          str(len(sup) - len(sin_motivo)) + " de " + str(len(sup)),
-                          "una supresion sin motivo escrito es un hallazgo tapado"
-                          if sin_motivo else "todas traen su motivo",
-                          "HALLAZGO" if sin_motivo else "OK"])
+                if SUPRESIONES_NO_LEIBLES.search(fn):
+                    no_leibles.append(_rel(os.path.join(b, fn).replace("\\", "/")))
+        nombre = pre + "supresiones con motivo y vencimiento"
+        if malas is None:
+            filas.append([nombre, "sin revisar", error, "SIN DATOS"])
+        elif malas:
+            filas.append([nombre, str(len(malas)) + " sin motivo, sin vencimiento o vencida(s)",
+                          "; ".join("%s:%d (%s)" % (_rel(os.path.join(u["raiz"], h["archivo"]).replace("\\", "/")),
+                                                    h["linea"], h["regla"]) for h in malas[:4]) +
+                          " -- una supresion sin motivo o sin vencimiento es un hallazgo tapado", "HALLAZGO"])
+        elif no_leibles:
+            filas.append([nombre, "sin revisar", "formato que el juez de supresiones no lee entrada "
+                          "por entrada (" + ", ".join(no_leibles[:3]) + "): se revisan a mano",
+                          "SIN DATOS"])
+        else:
+            filas.append([nombre, "ninguna mal", "ninguna supresion sin motivo, sin vencimiento o "
+                          "vencida", "OK"])
 
         # Credenciales con valor literal. Solo en archivos de configuracion, y solo
         # cuando el valor NO viene de afuera: asi el falso positivo es raro.
@@ -1507,7 +1622,7 @@ def sonda_seguridad():
                   "antes de desplegar. Esta sonda "
                   "NO corre SAST ni lo reemplaza: verifica que la PUERTA este puesta "
                   "-que el analisis este en el pipeline, que frene la entrega y no solo "
-                  "avise, y que las supresiones traigan su motivo escrito-. Y agrega lo unico "
+                  "avise, y que las supresiones traigan motivo y vencimiento-. Y agrega lo unico "
                   "que si revisa por su cuenta: credenciales con valor escrito en archivos de "
                   "configuracion, que es lo que mas caro sale y lo mas barato de encontrar.",
         importa="SAST hace FALLAR EL BUILD, que frena muchisimo mas que un informe que "
@@ -1522,9 +1637,10 @@ def sonda_seguridad():
             {"paso": "Si el analisis corre pero no frena: eso es una sugerencia, no una "
                      "puerta. Hay que configurarlo para que corte cuando la politica no se "
                      "cumple, y acordar el umbral con el equipo."},
-            {"paso": "Si hay una supresion sin motivo: escribile el motivo AL LADO. Una "
-                     "supresion sin justificacion es un hallazgo tapado, y el que la lea "
-                     "dentro de seis meses no va a poder decidir si sigue valiendo."},
+            {"paso": "Si hay una supresion sin motivo o sin vencimiento: escribile al lado el "
+                     "motivo y 'vence: AAAA-MM-DD'. Una supresion sin justificacion ni fecha es "
+                     "un hallazgo tapado para siempre, y el que la lea dentro de seis meses no "
+                     "va a poder decidir si sigue valiendo."},
             {"paso": "Si aparece una credencial escrita: sacala del codigo Y ROTALA. Borrarla "
                      "no alcanza, porque queda en el historial de git."}],
         pedido=None if estado == "OK" else (

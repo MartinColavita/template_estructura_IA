@@ -238,6 +238,14 @@ def main():
     caso('un comentario SQL borrado ("--- ...") no se toma por cabecera: la linea agregada queda en db/v2.sql:1',
          d['lineas_agregadas'] == 9 and 'db/v2.sql' in d['archivos'], out[:400])
     with open(diff, 'w', encoding='utf-8') as h:
+        h.write('--- a/ci/runner.toml\n+++ b/ci/runner.toml\n@@ -0,0 +1,3 @@\n+a = glrtr-abcdefghijklmnopqrstuv\n'
+                '+b = glsoat-abcdefghijklmnopqrstuv\n+c = glrtrx-abcdefghijklmnopqrstuv\n')
+    rc, out = script('auditar-diff.py', '--archivo', diff, '--json')
+    d = json.loads(out)
+    caso('los prefijos de token de GitLab de la tabla oficial (glrtr-, glsoat-) son HALLAZGO; uno inventado (glrtrx-) no',
+         any(h.startswith('ci/runner.toml:1') for h in d['hallazgos']) and any(h.startswith('ci/runner.toml:2') for h in d['hallazgos'])
+         and not any(h.startswith('ci/runner.toml:3') for h in d['hallazgos']), out[:400])
+    with open(diff, 'w', encoding='utf-8') as h:
         h.write('--- a/docs/guia.md\n+++ b/docs/guia.md\n@@ -1 +1,2 @@\n hola\n+una linea mas de documentacion\n')
     rc, out = script('auditar-diff.py', '--archivo', diff, '--json')
     d = json.loads(out)
@@ -249,6 +257,68 @@ def main():
     rc, out = script('auditar-diff.py', '--repo', repo, '--base', 'develop', '--id', '9999', '--json')
     d = json.loads(out)
     caso('desde el repo: lee el diff de la rama y avisa que la rama no nombra la Tarea', d['lineas_agregadas'] > 0 and any('no nombra' in v for v in d['avisos']), out[:300])
+    caso('desde el repo, sin palabras de cierre en los mensajes: ningun hallazgo de cierre',
+         not any('cierra' in h for h in d['hallazgos']), out[:300])
+    escribir(repo, 'src/app.txt', 'base\ncambio con enlace\n')
+    commit(repo, 'feat: enlaza la tarjeta\n\nAB#1234 y Related to #12, sin cerrar nada')
+    rc, out = script('auditar-diff.py', '--repo', repo, '--base', 'develop', '--json')
+    d = json.loads(out)
+    caso('un mensaje que solo enlaza (AB#1234, Related to #12) no es hallazgo', not any('cierra' in h for h in d['hallazgos']), out[:300])
+    escribir(repo, 'src/app.txt', 'base\ncambio con enlace\ncambio que cierra\n')
+    commit(repo, 'fix: cierra por afuera\n\nFixes AB#1234\nCloses: grupo/proyecto#7')
+    rc, out = script('auditar-diff.py', '--repo', repo, '--base', 'develop', '--json')
+    d = json.loads(out)
+    cierres = [h for h in d['hallazgos'] if 'cierra' in h]
+    caso('un mensaje de commit con "Fixes AB#1234" o "Closes: grupo/proyecto#7": HALLAZGO por cada uno, con el commit',
+         rc == 1 and len(cierres) == 2 and all('mensaje de commit' in h for h in cierres), out[:500])
+    caso('con --archivo no hay mensajes que leer: lo dice en lo que no mira',
+         any('mensajes de commit' in x for x in json.loads(script('auditar-diff.py', '--archivo', diff + '.ff', '--json')[1])['no_mira']))
+    with open(diff, 'w', encoding='utf-8') as h:
+        h.write('--- a/src/conexion.cfg\n+++ b/src/conexion.cfg\n@@ -0,0 +1,3 @@\n'
+                '+DefaultEndpointsProtocol=https;AccountName=x;AccountKey=' + 'A' * 86 + '==\n'
+                '+gh = github_pat_' + 'a1' * 30 + '\n'
+                '+ia = sk-proj_' + 'b2' * 20 + '\n')
+    rc, out = script('auditar-diff.py', '--archivo', diff, '--json')
+    d = json.loads(out)
+    caso('el criterio comun de secretos.py: AccountKey=, github_pat_ y sk-proj_ son HALLAZGO (antes pasaban)',
+         rc == 1 and all(any(h.startswith('src/conexion.cfg:%d' % i) for h in d['hallazgos']) for i in (1, 2, 3)), out[:500])
+    caso('el valor del secreto no se imprime', 'AAAAAAAAAA' not in out and 'a1a1a1a1' not in out, out[:300])
+    with open(diff, 'w', encoding='utf-8') as h:
+        h.write('--- a/src/app.py\n+++ b/src/app.py\n@@ -0,0 +1,2 @@\n+password = "SuperSecreta123"  # <persona>\n'
+                '+url = "postgres://admin:clave123@db.example.com/x"\n')
+    rc, out = script('auditar-diff.py', '--archivo', diff, '--json')
+    d = json.loads(out)
+    caso('se conservan la regla de "clave o contrasena escrita" (aunque la linea tenga un marcador) y la de URL con usuario',
+         rc == 1 and any(h.startswith('src/app.py:1') for h in d['hallazgos']) and any(h.startswith('src/app.py:2') for h in d['hallazgos']), out[:500])
+
+    # una rama SIN commits propios, cuya base tiene un merge ajeno con "Closes #12": no es de esta rama
+    repo2 = os.path.join(tmp, 'repo2')
+    os.makedirs(repo2)
+    sh(repo2, 'git', 'init', '-q', '-b', 'develop')
+    sh(repo2, 'git', 'config', 'user.name', 'Prueba')
+    sh(repo2, 'git', 'config', 'user.email', 'prueba@example.com')
+    escribir(repo2, 'a.txt', 'a\n')
+    commit(repo2, 'base')
+    escribir(repo2, 'a.txt', 'a\nb\n')
+    commit(repo2, 'Merge branch otra\n\nCloses #12')
+    sh(repo2, 'git', 'checkout', '-q', '-b', 'task/77-sin-commits')
+    escribir(repo2, 'a.txt', 'a\nb\nc sin commitear\n')
+    rc, out = script('auditar-diff.py', '--repo', repo2, '--base', 'develop', '--json')
+    d = json.loads(out)
+    caso('rama sin commits propios: develop..HEAD resuelve (vacio) y se queda ahi; el "Closes #12" ajeno no frena',
+         not any('cierra' in h for h in d['hallazgos']), out[:500])
+    rc, out = script('auditar-diff.py', '--repo', repo2, '--base', 'no-existe', '--json')
+    d = json.loads(out)
+    caso('si ningun rango de mensajes resuelve, no cae a HEAD~1..HEAD: lo dice en lo que no mira',
+         not any('cierra' in h for h in d['hallazgos']) and any('mensajes de commit' in x for x in d['no_mira']), out[:500])
+    escribir(repo2, 'a.txt', 'a\nb\n')
+    sh(repo2, 'git', 'checkout', '-q', '-b', 'task/78-cierra')
+    escribir(repo2, 'a.txt', 'a\nb\nd\n')
+    commit(repo2, 'fix: varios\n\nCloses issue #12\nFixes issues #13 and #14')
+    rc, out = script('auditar-diff.py', '--repo', repo2, '--base', 'develop', '--json')
+    d = json.loads(out)
+    caso('"Closes issue #12" y "Fixes issues #13": HALLAZGO (cierre.py admite la palabra issue en el medio)',
+         rc == 1 and len([h for h in d['hallazgos'] if 'cierra' in h]) == 2, out[:500])
 
     print('== inventariar-codigo')
     escribir(repo, 'openapi.yaml', 'openapi: 3.0.0\n')

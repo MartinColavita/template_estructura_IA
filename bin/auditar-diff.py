@@ -14,6 +14,9 @@ QUE MIDE sobre las lineas AGREGADAS del diff:
                       <documento>, <identificador> NO es hallazgo: es justamente lo que se pide.
   Elegibilidad:       diff vacio -> SIN DATOS; solo documentacion -> aviso; la rama no nombra el
                       --id de la Tarea -> aviso.
+  Y con --repo, los MENSAJES DE COMMIT de la rama: una palabra de cierre seguida de una tarjeta
+  ("Fixes AB#123", "Closes #12") es HALLAZGO, porque al mergear cambia la tarjeta por afuera de sus
+  GATEs (AGENTS.md, GATE de DESPLIEGUE). Enlazar sin cerrar: "AB#123", "Related to #12".
 
 QUE NO MIDE: el contrato contra el codigo, los limites de modulo, la cobertura de la lista de tests
 (eso lo hace verificar-tdd.py y la skill). Un diff sin hallazgos no es una entrega aprobada.
@@ -28,17 +31,15 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from auditoria import diff as lector, phi  # noqa: E402  el mismo lector de diff que atajos y el mismo criterio de PHI que auditar-tarea
+from auditoria import cierre, diff as lector, phi, secretos  # noqa: E402  el mismo lector de diff que atajos, el mismo criterio de PHI que auditar-tarea y el de secretos de todos
 
 OK, HALLAZGO, SIN_DATOS = 0, 1, 2
 
+# Lo propio de este script: una clave escrita entre comillas. Los formatos de token (y la URL con usuario y clave)
+# salen de auditoria/secretos.py, el criterio que comparten los cuatro scripts que buscan secretos.
 SECRETOS = [
     ('clave o contrasena escrita', re.compile(r'(?i)\b(password|passwd|pwd|secret|api[_-]?key|access[_-]?key|token|private[_-]?key|client[_-]?secret)\b\s*[:=]\s*["\'][^"\']{6,}["\']')),
-    ('clave privada', re.compile(r'-----BEGIN (RSA |EC |OPENSSH |PGP |DSA )?PRIVATE KEY')),
-    ('token JWT', re.compile(r'\beyJ[A-Za-z0-9_-]{15,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}')),
-    ('clave de proveedor de nube', re.compile(r'\b(AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{30,}|glpat-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|sk-[A-Za-z0-9]{32,})\b')),
-    ('URL con usuario y clave', re.compile(r'[a-z][a-z0-9+.-]*://[^/\s:@]+:[^/\s@]{3,}@')),
-]
+] + [(nombre, rx) for nombre, rx in secretos.FORMATOS]
 # Lo propio del codigo y de los archivos de datos. En los de datos se suma lo de auditoria/phi.py (el mismo criterio
 # que en las tarjetas: CUIT o CUIL con guiones, DNI con puntos, telefono argentino); en el codigo no, porque ahi un
 # 1000-2000 o un 1.234.567 son casi siempre otra cosa.
@@ -68,7 +69,7 @@ def main():
     ap.add_argument('--json', action='store_true')
     a = ap.parse_args()
 
-    rama = None
+    rama, mensajes = None, None
     if a.archivo:
         with open(a.archivo, 'r', encoding='utf-8', errors='replace', newline='') as h:
             diff = h.read()
@@ -84,6 +85,13 @@ def main():
         diff += '\n' + (pend if rc == 0 else '')
         rc, rama = git(a.repo, 'branch', '--show-current')
         rama = rama.strip()
+        # los mensajes de los commits de la rama: el PRIMER rango que git resuelve, aunque venga vacio (una rama sin
+        # commits propios no tiene mensajes). Nunca HEAD~1..HEAD: ese commit puede ser un merge ajeno de la base.
+        for rango in (a.base + '..HEAD', '@{upstream}..HEAD', 'main..HEAD'):
+            rc, out = git(a.repo, 'log', '--format=%h%x1f%B%x1e', rango)
+            if rc == 0:
+                mensajes = [m.split('\x1f', 1) for m in out.split('\x1e') if '\x1f' in m]
+                break
     else:
         print('SIN DATOS -- falta --repo o --archivo.')
         return SIN_DATOS
@@ -112,6 +120,10 @@ def main():
                 vistos += ['un CUIT o CUIL'] if phi.cuits(t) else []
             for nombre in dict.fromkeys(vistos):
                 avisos.append('%s:%d: posible %s (leerlo: si es un dato real, es PHI)' % (f, n, nombre))
+    for sha, texto in (mensajes or []):
+        for _, encontrado in cierre.cierres(texto):
+            hallazgos.append('mensaje de commit %s: "%s" cierra la tarjeta al mergear, por afuera de sus GATEs '
+                             '(enlazar sin cerrar: AB#N o Related to #N)' % (sha.strip(), encontrado))
     if all(DOCS.search(f) for f in archivos):
         avisos.append('el diff solo toca documentacion: revisar si corresponde la auditoria de entrega')
     if a.id and rama is not None and a.id not in rama:
@@ -120,7 +132,8 @@ def main():
     estado = HALLAZGO if hallazgos else OK
     salida = {'estado': 'HALLAZGO' if hallazgos else 'OK', 'archivos': archivos, 'lineas_agregadas': len(agregadas),
               'rama': rama, 'hallazgos': hallazgos, 'avisos': avisos[:50],
-              'no_mira': ['el contrato contra el codigo', 'los limites de modulo', 'la cobertura de la lista de tests']}
+              'no_mira': ['el contrato contra el codigo', 'los limites de modulo', 'la cobertura de la lista de tests']
+              + ([] if mensajes is not None else ['los mensajes de commit (solo con --repo)'])}
     if a.json:
         print(json.dumps(salida, ensure_ascii=True, indent=1))
     else:

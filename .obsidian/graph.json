@@ -1,0 +1,20 @@
+{
+  "search": "",
+  "showTags": false,
+  "showAttachments": false,
+  "hideUnresolved": true,
+  "showOrphans": true,
+  "colorGroups": [
+    { "query": "[tipo:decisiones]", "color": { "a": 1, "rgb": 14767961 } },
+    { "query": "[tipo:reglas-de-negocio]", "color": { "a": 1, "rgb": 15896107 } },
+    { "query": "[tipo:funcional] OR [tipo:flujo]", "color": { "a": 1, "rgb": 5142951 } },
+    { "query": "[tipo:pendientes]", "color": { "a": 1, "rgb": 15583560 } },
+    { "query": "[tipo:aplicacion]", "color": { "a": 1, "rgb": 5873999 } },
+    { "query": "[tipo:extraccion-reunion]", "color": { "a": 1, "rgb": 11565729 } },
+    { "query": "[tipo:operacion] OR [tipo:runbook] OR [tipo:incidente]", "color": { "a": 1, "rgb": 16752039 } },
+    { "query": "[tipo:seguridad]", "color": { "a": 1, "rgb": 3099516 } },
+    { "query": "path:cerebro-digital/configuracion-ia", "color": { "a": 1, "rgb": 12234924 } },
+    { "query": "path:tablero", "color": { "a": 1, "rgb": 7780274 } },
+    { "query": "path:cerebro-digital", "color": { "a": 1, "rgb": 10253663 } }
+  ]
+}

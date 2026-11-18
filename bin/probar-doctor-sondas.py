@@ -121,6 +121,76 @@ def main():
         doctor.ROOT, doctor.SRC_SKILLS, doctor.git = raiz_vieja
         shutil.rmtree(tmp2, ignore_errors=True)
 
+    # La puerta de seguridad reconoce los analizadores abiertos, no solo uno comercial (M-050): un proyecto con
+    # Semgrep o con el escaner del nucleo en el pipeline tiene la puerta puesta, y la sonda decia que no.
+    import codigo  # noqa: E402
+    tmp3 = tempfile.mkdtemp(prefix='probar-doctor-seg-')
+    ctx_viejo = codigo.CTX
+    try:
+        app = os.path.join(tmp3, 'back', 'app')
+        os.makedirs(app)
+        with open(os.path.join(app, 'package.json'), 'w', encoding='utf-8') as h:
+            h.write('{"name": "app"}\n')
+        codigo.CTX = {'root': tmp3.replace('\\', '/'), 'alcance': None, 'res': doctor.res, 'leer': doctor.leer,
+                      'rel': doctor.rel, 'git': doctor.git, 'cierre': '', 'slots': ['back']}
+
+        def puerta(pipeline, otros=None):
+            for viejo in ('.gitlab-ci.yml', '.trivyignore', 'app.py'):
+                if os.path.isfile(os.path.join(app, viejo)):
+                    os.remove(os.path.join(app, viejo))
+            with open(os.path.join(app, '.gitlab-ci.yml'), 'w', encoding='utf-8', newline='\n') as h:
+                h.write(pipeline)
+            for nombre, texto in (otros or {}).items():
+                with open(os.path.join(app, nombre), 'w', encoding='utf-8', newline='\n') as h:
+                    h.write(texto)
+            filas = codigo.sonda_seguridad()['tabla'][1]
+            return dict((f[0].split(': ', 1)[1], f[3]) for f in filas)
+
+        base = 'stages: [verificar]\npruebas:\n  script:\n    - npm test\n'
+        caso('pipeline sin ningun analizador: el paso de analisis es HALLAZGO',
+             puerta(base).get('paso de SAST en el pipeline') == 'HALLAZGO')
+        for nombre, paso in (('Veracode', '    - java -jar pipeline-scan.jar\n'), ('Semgrep', '    - semgrep ci\n'),
+                             ('Opengrep', '    - opengrep scan --config auto\n'), ('OSV-Scanner', '    - osv-scanner scan source .\n'),
+                             ('Gitleaks', '    - gitleaks git --redact\n'), ('Bandit', '    - bandit -r src\n'),
+                             ('Trivy', '    - trivy fs --scanners vuln .\n'),
+                             ('el escaner del nucleo', '    - python -I bin/escanear-seguridad.py --repo .\n')):
+            caso('pipeline con %s: la puerta esta puesta (OK)' % nombre,
+                 puerta(base + paso).get('paso de SAST en el pipeline') == 'OK')
+        caso('un analizador nombrado solo en un comentario no cuenta: HALLAZGO',
+             puerta(base + '    # pendiente: sumar semgrep y gitleaks\n').get('paso de SAST en el pipeline') == 'HALLAZGO')
+        caso('una palabra que contiene el nombre de un analizador (bandita, trivyal) no cuenta',
+             puerta(base + '    - echo bandita trivyal\n').get('paso de SAST en el pipeline') == 'HALLAZGO')
+        # F2 10: un analizador nombrado en un comentario al final, en un echo o en un job apagado no es una puerta
+        caso('un analizador nombrado solo en un comentario al final de la linea no cuenta: HALLAZGO',
+             puerta(base + '    - mvn package  # TODO: sumar semgrep\n').get('paso de SAST en el pipeline') == 'HALLAZGO')
+        caso('un analizador nombrado solo en un echo no cuenta: HALLAZGO',
+             puerta(base + '    - echo "falta sumar semgrep al pipeline"\n').get('paso de SAST en el pipeline') == 'HALLAZGO')
+        caso('un echo encadenado con el analizador de verdad (echo x && semgrep ci) si cuenta: OK',
+             puerta(base + '    - echo "analizando" && semgrep ci\n').get('paso de SAST en el pipeline') == 'OK')
+        caso('un job con el analizador y when: never no cuenta: HALLAZGO',
+             puerta(base + 'sast:\n  script:\n    - semgrep ci\n  when: never\n').get('paso de SAST en el pipeline') == 'HALLAZGO')
+        caso('un job con el analizador y todas sus rules en when: never no cuenta: HALLAZGO',
+             puerta(base + 'sast:\n  script:\n    - semgrep ci\n  rules:\n    - when: never\n').get('paso de SAST en el pipeline') == 'HALLAZGO')
+        caso('un job con una rule que lo prende (if) y when: never de cierre si cuenta: OK',
+             puerta(base + 'sast:\n  script:\n    - semgrep ci\n  rules:\n    - if: $CI_COMMIT_BRANCH == "main"\n    - when: never\n')
+             .get('paso de SAST en el pipeline') == 'OK')
+        # Las supresiones se juzgan con normalizar.revisar_supresiones: motivo Y vencimiento, entrada por entrada
+        sup = 'supresiones con motivo y vencimiento'
+        caso('un archivo de supresiones de un escaner abierto sin motivo escrito: HALLAZGO',
+             puerta(base + '    - trivy fs .\n', {'.trivyignore': 'CVE-2026-0001\n'}).get(sup) == 'HALLAZGO')
+        caso('el mismo archivo con su motivo pero sin vencimiento: HALLAZGO (la palabra motivo no alcanza)',
+             puerta(base + '    - trivy fs .\n', {'.trivyignore': '# motivo: no aplica, la funcion no se usa\nCVE-2026-0001\n'}).get(sup) == 'HALLAZGO')
+        caso('una entrada con motivo y vencimiento y otra sin nada en el mismo archivo: HALLAZGO (se juzga por entrada)',
+             puerta(base + '    - trivy fs .\n', {'.trivyignore': '# motivo: no aplica, la funcion no se usa\nCVE-2026-0001 exp:2999-01-01\n\n'
+                                                                  'CVE-2026-0002\n'}).get(sup) == 'HALLAZGO')
+        caso('el mismo archivo con motivo y vencimiento vigente: OK',
+             puerta(base + '    - trivy fs .\n', {'.trivyignore': '# motivo: no aplica, la funcion no se usa\nCVE-2026-0001 exp:2999-01-01\n'}).get(sup) == 'OK')
+        caso('un # nosec sin motivo en el codigo: HALLAZGO (antes no se miraba)',
+             puerta(base + '    - semgrep ci\n', {'app.py': 'x = eval(y)  # nosec\n'}).get(sup) == 'HALLAZGO')
+    finally:
+        codigo.CTX = ctx_viejo
+        shutil.rmtree(tmp3, ignore_errors=True)
+
     fallas = [n for n, ok, _ in ESPERADOS if not ok]
     print()
     print('%s -- %d de %d casos dieron lo esperado.' % ('OK' if not fallas else 'FALLA', len(ESPERADOS) - len(fallas), len(ESPERADOS)))

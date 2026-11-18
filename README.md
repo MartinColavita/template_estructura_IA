@@ -29,6 +29,9 @@ Acá viven el **Cerebro Digital** (la fuente única de verdad del negocio, en fo
     `/doctor prompt-audit` en Claude Code; lo que salga se propone en `mejoras.md`, nunca se saca solo.
  8. **Diseñar una pantalla**: «diseñá la pantalla de X» (Google Stitch por MCP, `disenar-con-stitch`).
  9. **Al cerrar un slice o la app**: «documentá la app» (guía de uso + documentación técnica y funcional, `documentar-aplicacion`).
+10. **Infraestructura, despliegue, servidores, seguridad o GitLab**: pedilo como siempre («armá el pipeline», «auditá el
+    servidor», «escaneá la seguridad»); cada función tiene su puerta y sus barreras. Para ver el Cerebro como un grafo,
+    abrí la raíz del repositorio en Obsidian (`INSTALACION.md`).
 
 ## 📂 Estructura del repositorio
 
@@ -39,12 +42,13 @@ Acá viven el **Cerebro Digital** (la fuente única de verdad del negocio, en fo
 | `entregables/` | Artefactos ya promovidos desde `borrador/` (diseños, especificaciones técnicas; presentaciones sólo en local) | Sí |
 | `borrador/` | 🧪 Borrador de trabajo (mockups, docs, presentaciones en curso, lotes de tickets). Nunca se versiona | No |
 | `tablero/` | 🎫 Toolkit para derivar tickets desde el Cerebro, para cualquier tablero (local por archivos, Azure DevOps, Jira u otro; `DEC-006`): método, plantillas, checklists, ejemplos e histórico por referencia | Sí |
-| `bin/` | Scripts: sincronizar espejos, integración semanal, enviar notas, auditorías mecánicas de tickets, modo lote, pruebas de reglas, instanciación del template | Sí |
+| `bin/` | Scripts: sincronizar espejos, auditorías mecánicas de tickets, modo lote, pruebas de reglas, instanciación del template, y los de infraestructura, despliegue, servidores, seguridad y GitLab (`bin/README.md`) | Sí |
 | `doctor/` | 🩺 El Doctor: diagnóstico de salud del repositorio (y del código clonado), sólo lectura, informe HTML | Sí (menos `salida/`) |
 | `back/` · `front/` | Carpetas donde se **clonan** los repos de código. Sólo aportan su README y las skills scoped de desarrollo | Sólo README y skills |
 | `qa/` | Las **pruebas de punta a punta** del proyecto (`qa/e2e/`, o `qa/<app>-e2e/` con varias aplicaciones), versionadas acá (M-045) | Sí |
 | `.gitlab-ci.yml` y `.github/workflows/verificar.yml` | Pipeline del propio repositorio del Cerebro, en GitLab o en GitHub: espejos, conteos, pruebas de `bin/` y el Doctor | Sí |
 | `.githooks/` | Hook pre-commit: espejos de skills, conteos, BOM y caracteres de control | Sí |
+| `.obsidian/` | La configuración compartida para ver el Cerebro en Obsidian (qué se oculta, colores del grafo); lo demás de esa carpeta es de cada máquina | Sólo `app.json` y `graph.json` |
 
 ## 📊 Informe visual del esqueleto
 
@@ -65,16 +69,19 @@ regenerarlo después de cambiar skills, scripts o decisiones.
 | `configuracion-ia/orquestador-desarrollo.md` | Diseño del orquestador de código (Tareas listas → Merge Request) |
 | `modulo-ejemplo/funcional/` · `metodologia/` · `arquitectura/` | Tres pilares del módulo: el qué, el cómo trabajamos y el cómo se construye |
 | `modulo-ejemplo/aplicacion/` | El cuarto pilar, la memoria viva de la aplicación construida: `mapa.md` (qué existe), `aprendizajes.md` (`AP-nnn`) y `deuda.md` (`DT-nnn`); nace vacío y lo llena el desarrollo |
+| `modulo-ejemplo/operacion/` | El quinto pilar, lo que corre: el inventario de servidores, clusters y URLs autorizados para la IA, los cambios hechos, los runbooks (`RB-nnn`) y los incidentes (`INC-nnn`) |
+| `modulo-ejemplo/seguridad/` | El sexto pilar: la política de seguridad, el registro de vulnerabilidades (`V-nnn`) y los modelos de amenazas |
 | `modulo-ejemplo/pendientes.md` | Preguntas abiertas (`P-nnn`) |
 | `modulo-ejemplo/extraccion-reuniones/` | Insumo crudo de reuniones, sin consolidar |
 | `diseno/diseno-sistema.md` | Tokens y componentes visuales del producto |
 
-## 🛠️ Skills del Ecosistema (33 habilidades)
+## 🛠️ Skills del Ecosistema (38 habilidades)
 
 Registradas en `cerebro-digital/configuracion-ia/skills/` (fuente canónica) y reflejadas en los
 espejos versionados `.claude/skills/` y `.agents/skills/`: **9 del Cerebro Digital** + **13 del
-pipeline del tablero** (Azure DevOps por MCP o el tablero local) + **10 de desarrollo, QA y evolución** + **1 externa
-vendorizada** (Archify).
+pipeline del tablero** (Azure DevOps por MCP o el tablero local) + **10 de desarrollo, QA y evolución** + **5 puertas
+de función** (arquitectura e infraestructura, despliegue continuo, operación de servidores, seguridad, GitLab) + **1
+externa vendorizada** (Archify).
 
 ### Cerebro Digital (9)
 
@@ -116,6 +123,17 @@ vendorizada** (Archify).
 - `caracterizar-comportamiento`: la red antes de tocar: corpus de casos desde la radiografía (`bin/armar-corpus.py`), golden grabado y firmado contra la app vieja (`bin/paridad.py grabar`), tests `test(caracterizacion)` si es refactor. Nunca PHI.
 - `modernizar-slice`: ejecuta un slice de punta a punta: contrato del código viejo, construcción por el pipeline normal, paridad (`bin/paridad.py comparar`), clasificación de diferencias con una persona, corte sólo con `bin/mapa-modernizacion.py corte` en OK, apagado con «sí». Variantes: refactor en el lugar, código muerto, subir de versión.
 - `mejorar-ecosistema`: autocorrección consultada: la IA registra en `mejoras.md` lo que detecta mal en arquitectura, reglas, skills o scripts y lo pregunta de a una; nunca lo aplica sola.
+
+### Puertas de función (5)
+
+Una skill por función, que es además el rol de su orquestador (`claude --agent orquestador-<función>`, en
+`INSTALACION.md`) y rutea adentro por el objeto del pedido. Las barreras de todo lo que corre están en `AGENTS.md`.
+
+- `arquitectura-e-infraestructura`: diseñar y documentar la arquitectura de una aplicación (vista C4, decisiones) y escribir su infraestructura como código; la revisa otro agente con `bin/auditar-iac.py` y `bin/resumir-plan.py`. Escribe y verifica; el `plan` contra un ambiente real y el `apply` los corre el pipeline.
+- `despliegue-continuo`: armar y revisar el pipeline (GitHub Actions, GitLab CI, Azure Pipelines) con `bin/verificar-pipeline.py`, y preparar la promoción de una versión o su vuelta atrás con `bin/gate-despliegue.py` y `bin/clasificar-migraciones.py`. Prepara; despliega una persona, en la plataforma.
+- `operacion-de-servidores`: la salud de un servidor (`bin/salud-host.py`, `bin/vigencia-certificados.py`), el mantenimiento con su plan y su vuelta atrás (`bin/gate-operacion.py`), un incidente operativo y sus runbooks. Sólo lo que figura en el inventario autorizado, y hasta el nivel que le da.
+- `seguridad`: escanear la aplicación (`bin/escanear-seguridad.py`), modelar amenazas, probar un ambiente que corre (`bin/escanear-ambiente.py`), auditar y endurecer un servidor (`bin/auditar-host.py`, `bin/escanear-imagenes.py`), priorizar vulnerabilidades (`bin/priorizar-vulnerabilidades.py`) y atender un incidente de seguridad (`bin/juntar-evidencia.py`). Evalúa y propone; no arregla sola.
+- `gestion-de-gitlab`: GitLab como plataforma, en GitLab.com o en una instancia propia: la configuración del proyecto y del grupo, su CI, sus runners, la instancia y el camino hasta los servidores, auditados en sólo lectura con `bin/auditar-gitlab.py`. Prepara el cambio exacto; lo aplica una persona.
 
 ### Externa, vendorizada (1)
 

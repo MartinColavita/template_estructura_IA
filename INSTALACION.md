@@ -40,7 +40,7 @@ Es el instalador del Cerebro (Python 3, biblioteca estándar, idempotente): comp
 Skills: cero pasos en las cuatro herramientas (viajan con el clone). **Agentes: los materializa el
 instalador** (o `bin/sync-agents.sh` / `.ps1` a mano) una sola vez después de clonar.
 
-- **Claude Code**: `.claude/skills/` ya trae las **33 skills** — invocables con `/nombre-de-la-skill`. `CLAUDE.md` carga las reglas de `AGENTS.md` automáticamente (Claude Code leería `AGENTS.md` solo únicamente si no hubiera ningún `CLAUDE.md`, desde la v2.1.277, y un `CLAUDE.local.md` también lo apaga; con el import funciona en toda versión). `/context` muestra qué cargó y `/doctor prompt-audit` revisa que las instrucciones no hayan envejecido. Los agentes (`/agents` o invocación automática) requieren haber corrido el instalador.
+- **Claude Code**: `.claude/skills/` ya trae las **38 skills** — invocables con `/nombre-de-la-skill`. `CLAUDE.md` carga las reglas de `AGENTS.md` automáticamente (Claude Code leería `AGENTS.md` solo únicamente si no hubiera ningún `CLAUDE.md`, desde la v2.1.277, y un `CLAUDE.local.md` también lo apaga; con el import funciona en toda versión). `/context` muestra qué cargó y `/doctor prompt-audit` revisa que las instrucciones no hayan envejecido. Los agentes (`/agents` o invocación automática) requieren haber corrido el instalador.
 - **Antigravity**: lee `AGENTS.md` nativamente y las skills desde `.agents/skills/`. Los agentes los materializa el instalador.
 - **opencode**: auto-descubre `AGENTS.md` (vía `"instructions"` en `opencode.json`, versionado) y escanea por defecto tanto `.agents/skills/` como `.claude/skills/`.
 - **Gemini CLI**: `GEMINI.md` en la raíz importa las reglas con `@AGENTS.md`, igual que `CLAUDE.md`, y las skills se auto-descubren de `.agents/skills/` (alias documentado de `.gemini/skills/`). `gemini skills list` o `/skills` en la sesión muestran lo que cargó. No hay que pegar nada a mano (Gemini leería `AGENTS.md` sólo si cada persona lo agrega a `context.fileName`). Que un modelo cumpla las reglas se mide con `bin/probar-reglas.*`.
@@ -77,6 +77,59 @@ A partir de ahí, si lo que vas a commitear deja algún espejo de skills distint
 **En el servidor:** `.gitlab-ci.yml` (GitLab) y `.github/workflows/verificar.yml` (GitHub) corren en cada push los espejos, la especificación, el conteo y las listas de skills, el BOM y los caracteres de control (`bin/verificar-staged.py --todo`), las pruebas de `bin/` y el Doctor, con sólo Python y git: el hook es local y se saltea con `--no-verify`, el servidor no. En otra plataforma se traducen esos tres pasos.
 
 > `opencode` puede reportar la ubicación de una skill de forma inconsistente entre sesiones (tiene el mismo contenido en dos rutas) — no afecta el comportamiento y puede degradar su cacheo de prompt; es un trade-off aceptado. opencode escanea `.opencode/skills/`, `.claude/skills/` y `.agents/skills/` y no documenta una variable para apagar una ruta.
+
+## Un orquestador por función (sesión dedicada, opcional)
+
+Cada función tiene una skill «puerta», que es el rol de su orquestador. En la sesión de siempre la puerta se carga
+cuando el pedido es de su función: la nombran `AGENTS.md` y la skill `cerebro-orquestador`, así que no depende de que
+su descripción entre en el listado de skills. Para un trabajo largo de una sola función se puede abrir una **sesión
+dedicada** con su agente:
+
+| Función | Sesión dedicada | Puerta que carga |
+|---|---|---|
+| Conocimiento | `claude --agent orquestador-conocimiento` | `cerebro-orquestador` |
+| Arquitectura e infraestructura | `claude --agent orquestador-arquitectura` | `arquitectura-e-infraestructura` |
+| CI/CD y despliegue | `claude --agent orquestador-despliegue` | `despliegue-continuo` |
+| Operación de servidores | `claude --agent orquestador-operacion` | `operacion-de-servidores` |
+| Seguridad | `claude --agent orquestador-seguridad` | `seguridad` |
+| GitLab | `claude --agent orquestador-gitlab` | `gestion-de-gitlab` |
+
+El orquestador coordina y no debe escribir archivos (la lista negra no alcanza a la terminal): delega en `nucleo-productor` y en `nucleo-verificador` (éste, en sólo
+lectura y con contexto limpio). Hace falta haber corrido el instalador, que materializa los agentes. Es propio de
+Claude Code: en las otras tres herramientas se usa la puerta en la sesión de siempre. Los orquestadores de las cinco
+funciones nuevas no tienen instrucciones propias (su archivo es sólo la cabecera): por eso **no se usan como
+subagentes**. ⚠ Sin probar en una sesión interactiva: que el orquestador pregunte con la herramienta nativa de
+preguntas; si no la tiene, pregunta en el texto y espera.
+
+**Cómo se sabe qué skill corrió.** Al cerrar cada sesión, `bin/registrar-sesion.py` anota en
+`cerebro-digital/configuracion-ia/sesiones.jsonl` qué skills se usaron y cuántas veces; `python -B
+bin/medir-uso-skills.py` lo junta de todas las sesiones de la máquina y dice cuáles no se usaron nunca. Y que cada
+skill tenga su ruta escrita (para no depender de su descripción) lo verifica `bin/verificar-skills.py` en el hook y
+en el servidor.
+
+## Ver el Cerebro en Obsidian (opcional)
+
+Obsidian es un **visor**: muestra el Cerebro como un grafo de notas enlazadas. No es otra fuente ni otro camino de
+escritura (al Cerebro lo escribe `cerebro-curator`) y no hace falta para nada más.
+
+1. Instalar Obsidian y elegir **Open folder as vault** sobre **la raíz de este repositorio**. No sobre
+   `cerebro-digital/`: se cortarían los enlaces a `tablero/` y a `AGENTS.md`.
+2. Abrir la vista de grafo. La configuración viaja con el repositorio (`.obsidian/app.json` y
+   `.obsidian/graph.json`): oculta lo que no es conocimiento (`borrador/`, `documentos/`, el código clonado, las
+   skills) y pinta cada nota según su `tipo` y su carpeta.
+3. Nada más: no se instala ningún plugin de la comunidad ni ningún MCP. Claude Code ya lee esos mismos archivos.
+
+Qué conviene saber:
+
+- Un enlace a una skill por su nombre (`[[comentar-tarea]]`) **no resuelve** en Obsidian, porque el archivo de toda
+  skill se llama `SKILL.md`; el grafo los oculta. Las skills, los scripts y las decisiones se ven en
+  `INFORME-ESQUELETO.html`.
+- Obsidian reescribe `graph.json` cuando se toca el panel del grafo: ese cambio no se commitea salvo que se acuerde.
+  Lo demás que Obsidian guarda en `.obsidian/` es de cada máquina y git lo ignora.
+- Una edición hecha desde Obsidian pasa igual por el hook y por la revisión.
+- ⚠ **Sin probar en una instalación real**: el formato de `graph.json` y de la lista de carpetas ocultas sale de
+  fuentes de terceros que coinciden entre sí, no de la ayuda oficial. Si algo no se ve como dice acá, se ajusta
+  desde la interfaz (Settings → Files and links → Excluded files) y se commitea el archivo que queda.
 
 ## Integraciones externas
 

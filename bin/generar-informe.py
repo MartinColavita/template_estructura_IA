@@ -37,10 +37,13 @@ GRUPOS = [
                                'cargar-a-azure', 'tomar-tarea', 'comentar-tarea', 'desarrollar-asignadas',
                                'atender-hallazgos']),
     ('Desarrollo, QA y evolución', ['arrancar-proyecto', 'desarrollo', 'absorber-aplicacion', 'planificar-modernizacion', 'caracterizar-comportamiento', 'modernizar-slice', 'disenar-pruebas', 'automatizar-e2e', 'mejorar-ecosistema', 'documentar-aplicacion']),
+    ('Puertas de función', ['arquitectura-e-infraestructura', 'despliegue-continuo', 'operacion-de-servidores',
+                            'seguridad', 'gestion-de-gitlab']),
     ('Externa, vendorizada', ['archify']),
 ]
 ESCRIBEN_EN_EL_TABLERO = {'sincronizar-backlog', 'planificar-lote', 'cargar-a-azure', 'tomar-tarea', 'comentar-tarea', 'desarrollar-asignadas'}
-NUEVAS_HOY = {'disenar-pruebas', 'automatizar-e2e'}
+NUEVAS_HOY = {'arquitectura-e-infraestructura', 'despliegue-continuo', 'operacion-de-servidores', 'seguridad',
+              'gestion-de-gitlab'}
 
 BITACORA = [
     ('2026-10-22', 'Nace el template', 'Ingeniería inversa del proyecto de origen (rama develop): Cerebro OKF, 5 agentes, 26 skills, toolkit de Azure DevOps, Doctor, hook, scripts. Sin negocio ni lenguajes; placeholders e instanciador.'),
@@ -452,7 +455,7 @@ def generar(rapido):
     H.append('<section id="mapa"><h2>02 · Mapa del esqueleto</h2><p class="lead">Un repositorio de conocimiento y reglas; el código de la aplicación vive en repositorios propios que se clonan adentro de <code>back/</code> y <code>front/</code> (DEC-001); las pruebas de punta a punta, en <code>qa/</code>, versionadas acá.</p>')
     H.append('<table><tr><th>Carpeta</th><th>Qué es</th></tr>')
     for c, q in (('AGENTS.md · CLAUDE.md · GEMINI.md · opencode.json', 'Las reglas y las barreras, una sola fuente; los otros tres la importan para Claude Code, Gemini CLI y opencode. Antigravity la lee nativa.'),
-                 ('cerebro-digital/', 'El Cerebro Digital (OKF): contexto, fuentes, roadmap, log, el módulo con sus cuatro pilares, la configuración de IA (agentes, skills, orquestador, mejoras, integraciones MCP).'),
+                 ('cerebro-digital/', 'El Cerebro Digital (OKF): contexto, fuentes, roadmap, log, el módulo con sus seis pilares, la configuración de IA (agentes, skills, orquestador, mejoras, integraciones MCP).'),
                  ('.claude/skills · .agents/skills', 'Espejos versionados de las skills, idénticos a la fuente (el hook y el instalador lo verifican). Los agentes se materializan por máquina.'),
                  ('bin/', 'Scripts determinísticos (Python, biblioteca estándar, exit 0/1/2) y sus pruebas; instalador, instanciador, sincronizadores.'),
                  ('doctor/', 'El Doctor: 23 sondas sobre el repositorio y, si hay código clonado, sobre el código.'),
@@ -462,7 +465,7 @@ def generar(rapido):
                  ('.githooks/ · .gitlab-ci.yml', 'El hook pre-commit (espejos, conteos, BOM, control chars, especificación de skills) y el pipeline opcional del propio Cerebro.')):
         H.append('<tr><td><code>%s</code></td><td>%s</td></tr>' % (html.escape(c), q))
     H.append('</table><h3>El Cerebro, por dentro</h3>' + arbol_cerebro())
-    H.append('<p>Los cuatro pilares del módulo: <b>funcional/</b> (el qué: reglas <code>RN-&lt;MOD&gt;-nnn</code>, flujos con su bloque <code>## Derivación a backlog</code>), <b>metodologia/</b> (cómo trabaja el equipo), <b>arquitectura/</b> (cómo se construye: <code>DEC-nnn</code>, esqueleto, C1..C8) y <b>aplicacion/</b> (qué existe y qué se aprendió: <code>mapa.md</code>, <code>AP-nnn</code>, <code>DT-nnn</code>). <code>pendientes.md</code> (<code>P-nnn</code>) cruza a los cuatro.</p></section>')
+    H.append('<p>Los seis pilares del módulo: <b>funcional/</b> (el qué: reglas <code>RN-&lt;MOD&gt;-nnn</code>, flujos con su bloque <code>## Derivación a backlog</code>), <b>metodologia/</b> (cómo trabaja el equipo), <b>arquitectura/</b> (cómo se construye: <code>DEC-nnn</code>, esqueleto, C1..C8) , <b>aplicacion/</b> (qué existe y qué se aprendió: <code>mapa.md</code>, <code>AP-nnn</code>, <code>DT-nnn</code>), <b>operacion/</b> (lo que corre: el inventario autorizado, <code>RB-nnn</code>, <code>INC-nnn</code>) y <b>seguridad/</b> (política, <code>V-nnn</code>, modelos de amenazas). <code>pendientes.md</code> (<code>P-nnn</code>) cruza a todos.</p></section>')
 
     # 3 bucles
     H.append('<section id="bucles"><h2>03 · Los tres bucles</h2><p class="lead">Construir, autocorregirse y alimentar el Cerebro. Cada uno con un «sí» humano en el punto que importa.</p>' + bucles())

@@ -10,8 +10,7 @@ description: >-
   y el conocimiento no se mezclan, nada sale del repositorio sin un "sí", el lenguaje lo pone
   el repositorio; lo que no se puede verificar es SIN DATOS, que no es aprobado. Usar cuando se
   pida "programá esto", "hacé el endpoint", "escribí los tests", "revisá el código", "arreglá
-  este bug", "por qué falla", "revisá la seguridad", "migrá la base", "preparemos la entrega",
-  "/desarrollo". Español (Argentina).
+  este bug", "por qué falla", "migrá la base", "/desarrollo". Español (Argentina).
 ---
 
 # Desarrollo — el método propio del proyecto
@@ -108,6 +107,19 @@ estándar diría, porque eso es inventar un estándar ajeno.
 | **Rendimiento** — no se optimiza sin medir. Los 4 sospechosos | [rendimiento.md](references/metodo/rendimiento.md) |
 | **Incidentes** en producción — contener antes de entender | [incidentes.md](references/metodo/incidentes.md) |
 | **Entender código ajeno** — y el arranque de alguien nuevo | [entender-codigo-ajeno.md](references/metodo/entender-codigo-ajeno.md) |
+
+### Cuando el código es infraestructura, un pipeline o toca lo que corre
+
+El ciclo (rama, test primero donde se pueda, Merge Request, verificador distinto, nada sale sin «sí») es el de acá.
+Lo específico lo pone la puerta de cada función, con sus barreras ([[AGENTS]]):
+
+| Tema | Puerta |
+|---|---|
+| El código de **infraestructura** (IaC, Dockerfile, Compose, manifiestos) y la **arquitectura** que lo decide | [[arquitectura-e-infraestructura]] |
+| El **pipeline** de CI/CD y el **despliegue** de una versión | [[despliegue-continuo]] |
+| Un **servidor**: su salud, su mantenimiento, un incidente operativo | [[operacion-de-servidores]] |
+| **Seguridad**: escanear, modelar amenazas, auditar y endurecer | [[seguridad]] |
+| El proyecto en **GitLab**: su configuración, su CI y sus runners | [[gestion-de-gitlab]] |
 
 Bibliografía (ideas tomadas con atribución, nunca texto): [referencias-externas.md](references/referencias-externas.md).
 

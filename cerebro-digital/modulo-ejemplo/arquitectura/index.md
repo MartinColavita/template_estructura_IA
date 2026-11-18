@@ -26,4 +26,8 @@ técnicas* sobre cómo construimos el software.
 
 * [[decisiones]]: decisiones arquitectónicas y funcionales confirmadas por el equipo (`DEC-nnn`). Vienen con el template `DEC-001` (el código no vive acá) y `DEC-002` (módulos de dominio con capas, confirmada; su materialización en el stack, ⚠ hasta `DEC-003`); `DEC-003` (el stack) es la primera que hay que tomar. Se nutre de las reuniones en `../extraccion-reuniones/`.
 * [[esqueleto-proyectos]]: estructura base de los repositorios de código (back, front y despliegue), convenciones de código (C8 del verificador) y su bloque de derivación a backlog.
+* [[infraestructura]]: los recursos de cada ambiente, la convención de nombres y etiquetas, dónde vive el estado, cómo entran los secretos y la vista de despliegue (`DEC-007`; skill `arquitectura-e-infraestructura`).
+* [[ambientes]]: los ambientes uno por fila (nombre exacto en la plataforma, si es protegido, quién aprueba y dónde), que lee `bin/gate-despliegue.py` (`DEC-007`; skill `despliegue-continuo`).
+* [[gitlab]]: el GitLab del proyecto: el destino autorizado que lee `bin/auditar-gitlab.py`, el plan, los runners por alias y las identidades (`DEC-010`; skill `gestion-de-gitlab`).
+* Lo que **corre** (servidores, clusters y URLs autorizados, cambios, runbooks, incidentes) no va acá: va al pilar `../operacion/`; la seguridad, al pilar `../seguridad/`.
 * `frontend/` (opcional): si el proyecto tiene front, acá va su arquitectura: un `index.md` con qué leer antes de tocar qué, las reglas duras numeradas y un documento por área.

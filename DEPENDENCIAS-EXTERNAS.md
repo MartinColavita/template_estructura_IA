@@ -63,6 +63,37 @@ propósito. Lo que vigila que no queden viejas es el detector de deriva, con el 
 | **tbls** / **SchemaCrawler** (opcionales) | [k1LoW/tbls](https://github.com/k1LoW/tbls) · [schemacrawler](https://www.github.com/schemacrawler/SchemaCrawler) | MIT · EPL/GPL/LGPL (sólo se ejecutan) | Documentar el esquema real de una base que no es SQLite (Postgres, MySQL, SQL Server) a Markdown y Mermaid, cuando `bin/esquema-base.py` no alcanza con el DDL exportado | Por máquina, con acceso de **sólo lectura**; nunca se vendorizan | No leen datos: sólo esquema. Lo que entra al Cerebro es el Markdown, de donde salga |
 | **Google Stitch** | `stitch.withgoogle.com` | Servicio de Google, con sus términos; no se vendoriza | Diseño UX/UI: generar y pulir pantallas, exportar HTML/CSS y capturas | Por máquina: API key en `STITCH_API_KEY` y el servidor MCP remoto (`integracion-stitch-mcp/00-index.md`); sin MCP, modo manual pegando el prompt | No decide reglas (el Cerebro gana a la maqueta); la clave nunca en un archivo; sin PHI en prompts ni pantallas |
 
+### Herramientas que ejecutan los scripts de las funciones (por máquina, opcionales)
+
+Los scripts de arquitectura, despliegue, operación, seguridad y GitLab **no instalan nada y no bajan nada de
+internet**. Una herramienta de esta tabla la corren sólo si está instalada en la máquina y se la piden; si falta, esa
+parte del veredicto es `SIN DATOS`, nunca OK. Ninguna se vendoriza. **Se instalan por versión exacta y se verifica su
+hash** (en marzo de 2026 publicaron versiones de Trivy comprometidas: un escáner es cadena de suministro como
+cualquier otra). **La versión y el hash los fija cada proyecto** (en `DEC-007` y `DEC-009`) y se verifican al
+instalar: el template no puede fijarlos por todos. Los scripts informan la versión que corrió y rechazan sólo la de
+Trivy comprometida. En el CI, las acciones y las plantillas van por SHA. Qué idea se tomó de cada fuente, en
+`cerebro-digital/configuracion-ia/referencias-externas/`.
+
+| Herramienta | Origen | Licencia | La ejecuta | Lo que el script nunca le pasa |
+|---|---|---|---|---|
+| Terraform **u** OpenTofu | hashicorp/terraform · opentofu/opentofu | BSL 1.1 · MPL-2.0 | `auditar-iac.py` (`fmt -check`, `validate -json`) | `init`, `plan`, `apply`, `test` |
+| TFLint | terraform-linters/tflint | MPL-2.0 | `auditar-iac.py` | `--fix`, `--init` |
+| Checkov | bridgecrewio/checkov | Apache-2.0 | `auditar-iac.py` | Corre con `--skip-download` |
+| Trivy | aquasecurity/trivy | Apache-2.0 | `auditar-iac.py` (`config`), `escanear-imagenes.py` | `--exit-code`; corre sin bajar su base. Nunca la 0.69.4 ni las imágenes 0.69.5 y 0.69.6 |
+| hadolint | hadolint/hadolint | GPL-3.0 (sólo se ejecuta) | `auditar-iac.py` | — |
+| kubeconform | yannh/kubeconform | Apache-2.0 | `auditar-iac.py` | Sin esquemas locales no corre (bajaría los de internet) |
+| zizmor · actionlint · poutine | zizmorcore/zizmor · rhysd/actionlint · boostsecurityio/poutine | MIT · MIT · Apache-2.0 | `verificar-pipeline.py --profundo` (lee sus reportes) | `--fix`; `analyze_org`; un token |
+| Opengrep **o** Semgrep CE | opengrep/opengrep · semgrep/semgrep | LGPL-2.1 | `escanear-seguridad.py` | Métricas encendidas; las reglas comunitarias no viajan en el template |
+| Bandit | PyCQA/bandit | Apache-2.0 | `escanear-seguridad.py` | — |
+| OSV-Scanner | google/osv-scanner | Apache-2.0 (los datos, según cada ecosistema: sin verificar) | `escanear-seguridad.py` | `fix`; la base la baja una persona, con fecha |
+| Gitleaks | gitleaks/gitleaks | MIT | `escanear-seguridad.py` | Nada que imprima el secreto: va con `--redact` |
+| ZAP (imagen) | zaproxy/zaproxy | Apache-2.0 | `escanear-ambiente.py`, sólo contra la URL del inventario | Una URL que no sea la de la fila; la imagen va por digest, sin bajarla (`--pull never`) |
+| Grype | anchore/grype | Apache-2.0 | `escanear-imagenes.py` | `--fail-on`; corre sin actualizar su base |
+| ssh-audit | jtesta/ssh-audit | MIT | `auditar-host.py`, desde afuera | `--dheat`, `--conn-rate-test`, `-T` |
+| Lynis | CISOfy/lynis | GPL-3.0 (sólo se ejecuta) | **La corre una persona** en el servidor; `auditar-host.py` lee su reporte | — |
+| Cliente OpenSSH y las herramientas base del servidor (`df`, `systemctl`, `timedatectl`, `journalctl`…) | Las del sistema | Las del sistema (sin relevar) | `salud-host.py` y el colector `operacion-de-servidores/assets/colector-salud.sh`, que una persona instala en el servidor | Comandos que no sean el colector: la identidad de lectura sólo puede correr ése |
+| `@zereight/mcp-gitlab` | zereight/gitlab-mcp | MIT | El MCP de GitLab de cada persona (`integracion-gitlab-mcp/00-index.md`) | Versión `2.3.22` con su `integrity` del registro de npm; el servidor de escritura, nunca en modo `full` |
+
 ## Dónde está el resto
 
 | Qué | Dónde |
@@ -70,3 +101,4 @@ propósito. Lo que vigila que no queden viejas es el detector de deriva, con el 
 | El método de desarrollo y sus guardarraíles | `cerebro-digital/configuracion-ia/skills/desarrollo/SKILL.md` |
 | La bibliografía del método | `…/desarrollo/references/referencias-externas.md` |
 | Las reglas y las barreras | `AGENTS.md` |
+| De dónde salió cada idea de las funciones de arquitectura, despliegue, operación, seguridad y GitLab | `cerebro-digital/configuracion-ia/referencias-externas/00-index.md` |

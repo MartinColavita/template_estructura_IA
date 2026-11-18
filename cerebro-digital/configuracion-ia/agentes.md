@@ -62,3 +62,27 @@ Rol: Coordinador del trabajo de desarrollo del proyecto. Toma Tareas **ya listas
 7. Los umbrales de cuándo delegar, auditar o replanificar salen de `cerebro-orquestador` §«Orquestación de sub-agentes», no del criterio del momento.
 
 **DoD:** el checklist completo vive en el archivo del agente enlazado arriba (fuente única; acá no se duplica).
+
+---
+
+## 6. Los orquestadores por función (sesión dedicada)
+
+Uno por función: `orquestador-arquitectura`, `orquestador-despliegue`, `orquestador-operacion`,
+`orquestador-seguridad` y `orquestador-gitlab`. Cada archivo es **sólo la cabecera**
+([`agentes/orquestador-seguridad.md`](agentes/orquestador-seguridad.md) y sus pares): abre una sesión con
+`claude --agent orquestador-<función>`, carga la skill puerta de la función —que es su rol y la fuente única de
+sus reglas— y no debe escribir archivos (la lista negra no alcanza a la terminal). El cuerpo vacío es a propósito: así la sesión conserva las instrucciones
+de la herramienta. **No se usan como subagentes.**
+
+**DoD:** el de la skill puerta de cada función (su sección «Veredicto» y «Qué queda dónde»).
+
+---
+
+## 7. nucleo-productor y nucleo-verificador (workers de las funciones nuevas)
+
+Instrucción del sistema: [`configuracion-ia/agentes/nucleo-productor.md`](agentes/nucleo-productor.md) y
+[`configuracion-ia/agentes/nucleo-verificador.md`](agentes/nucleo-verificador.md). El primero produce (borradores en
+`borrador/`, código en su repositorio, los scripts que la misión nombra); el segundo verifica en sólo lectura y con
+contexto limpio, y cierra con el bloque de veredicto. Ninguno delega ni le pregunta a la persona.
+
+**DoD:** el checklist completo vive en el archivo de cada agente (fuente única; acá no se duplica).

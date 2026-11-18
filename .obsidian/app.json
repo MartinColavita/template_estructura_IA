@@ -1,0 +1,16 @@
+{
+  "alwaysUpdateLinks": false,
+  "userIgnoreFilters": [
+    "borrador/",
+    "documentos/",
+    "back/",
+    "front/",
+    "qa/",
+    "doctor/salida/",
+    "entregables/presentaciones/",
+    "cerebro-digital/configuracion-ia/skills/",
+    ".claude/",
+    ".agents/",
+    ".gemini/"
+  ]
+}

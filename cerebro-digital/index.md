@@ -27,8 +27,8 @@ Vocabulario cerrado para el frontmatter de todo archivo del OKF (`cerebro-digita
 - `F-Draft`: contenido en revisión, sujeto a cambios.
 - `F-Verified`: validado por el equipo funcional/técnico (o gate de proceso explícito, como una prueba puntual — dejarlo aclarado en el propio documento si aplica).
 
-**`tipo:`** — 16 valores en uso:
-`guia`, `contexto`, `diseno`, `fuentes`, `indice`, `log`, `concepto`, `reporte`, `roadmap`, `decisiones`, `extraccion-reunion`, `funcional`, `flujo`, `reglas-de-negocio`, `pendientes`, `aplicacion`.
+**`tipo:`** — 21 valores en uso:
+`guia`, `contexto`, `diseno`, `fuentes`, `indice`, `log`, `concepto`, `reporte`, `roadmap`, `decisiones`, `extraccion-reunion`, `funcional`, `flujo`, `reglas-de-negocio`, `pendientes`, `aplicacion`, `operacion`, `runbook`, `incidente`, `seguridad`, `tablero`.
 El toolkit `tablero/` (que no es parte del Cerebro) usa además `plantilla`, `checklist` y `referencia`.
 
 **`modulo:`** — `general`, `diseno`, o el slug de un módulo (`modulo-ejemplo`; se agregan acá al crear uno nuevo).
@@ -51,6 +51,9 @@ Va inmediatamente después del contenido de esa regla/decisión puntual (no al f
 - **Fuentes:** `[DOC-nn]`, consecutivas en [[fuentes]].
 - **Aprendizajes de la aplicación:** `AP-nnn`, consecutivos en `aplicacion/aprendizajes.md` del módulo; cada uno con su fuente y con lo que cambió.
 - **Deuda técnica:** `DT-nnn`, consecutivos en `aplicacion/deuda.md` del módulo; cada una con cuándo se paga.
+- **Runbooks:** `RB-nnn`, uno por archivo en `operacion/runbooks/` del módulo.
+- **Incidentes:** `INC-nnn`, uno por archivo en `operacion/incidentes/` del módulo, sea operativo o de seguridad.
+- **Vulnerabilidades:** `V-nnn`, consecutivas en `seguridad/vulnerabilidades.md` del módulo.
 
 ## 🧠 Estructura del Cerebro Digital (OKF)
 
@@ -65,12 +68,15 @@ El conocimiento validado se organiza por módulos funcionales dentro de `cerebro
 - **`configuracion-ia/orquestador-desarrollo.md`**: diseño del orquestador de código.
 - **`configuracion-ia/mejoras.md`**: registro de propuestas de mejora del ecosistema (autocorrección consultada).
 - **`configuracion-ia/integracion-azure-mcp/`**, **`integracion-gitlab-mcp/`** e **`integracion-stitch-mcp/`**: setup de los MCP (tablero, repositorios, diseño UX/UI).
+- **`configuracion-ia/referencias-externas/`**: de dónde salió cada idea de las funciones de arquitectura, despliegue, operación, seguridad y GitLab (bibliografía con su licencia; nada se instala ni se copia).
 
 ### 📦 Módulo: `modulo-ejemplo` (renombrar al instanciar)
 -   **`modulo-ejemplo/funcional/`**: el **qué**: reglas de negocio, glosario, flujos y pantallas. Una ficha por flujo, con su bloque `## Derivación a backlog`.
 -   **`modulo-ejemplo/metodologia/`**: el **cómo trabaja el equipo**: ramas, commits, Merge Requests, DoR/DoD.
--   **`modulo-ejemplo/arquitectura/`**: el **cómo se construye**: `decisiones.md` (DEC-nnn) y `esqueleto-proyectos.md` (estructura de los repos, convenciones de código, derivación a backlog).
+-   **`modulo-ejemplo/arquitectura/`**: el **cómo se construye**: `decisiones.md` (DEC-nnn), `esqueleto-proyectos.md` (estructura de los repos, convenciones de código, derivación a backlog), `infraestructura.md` (qué recursos hay en cada ambiente y cómo entran los secretos) y `ambientes.md` (los ambientes y quién aprueba en cada uno).
 -   **`modulo-ejemplo/aplicacion/`**: la **memoria viva de la aplicación construida**: `mapa.md` (qué existe hoy, módulo por módulo, con sus Historias y su estado), `aprendizajes.md` (`AP-nnn`: bugs y sus causas, trampas del stack, patrones, decisiones revertidas) y `deuda.md` (`DT-nnn`). Lo alimentan el cierre de cada Tarea, la absorción y los hallazgos aceptados del Doctor; nace vacío.
+-   **`modulo-ejemplo/operacion/`**: lo que **corre**: `inventario.md` (los servidores, clusters y URLs que la IA puede tocar, por alias, y hasta qué nivel), `cambios.md` (cada cambio hecho), los runbooks (`RB-nnn`) y los incidentes (`INC-nnn`). Nace vacío: sin una fila en el inventario, nada está autorizado.
+-   **`modulo-ejemplo/seguridad/`**: la política de seguridad, el registro de vulnerabilidades (`V-nnn`) y los modelos de amenazas.
 -   **`modulo-ejemplo/extraccion-reuniones/`**: insumo crudo de reuniones, sin consolidar (se promueve a los pilares cuando corresponde).
 -   **`modulo-ejemplo/pendientes.md`**: preguntas abiertas del módulo, transversal a los pilares (la deuda técnica no va acá: va a `aplicacion/deuda.md`).
 
@@ -92,8 +98,9 @@ Un segundo módulo se crea copiando esta misma estructura con otro slug y agreg�
 -   `configuracion-ia/skills/cerebro-meet-analyst/`: análisis de transcripciones de reuniones y extracción al OKF.
 -   `configuracion-ia/skills/cognitive-doc-design/`: patrones de documentación cognitiva.
 -   `configuracion-ia/skills/engram-memory-protocol/`: Engram, sólo para la continuidad entre sesiones.
+-   `configuracion-ia/skills/disenar-con-stitch/`: diseño de pantallas en Google Stitch (MCP o manual) desde la ficha; la exportación es la maqueta vigente (`fuente_maqueta`) y baja al front por `cerebro-architect-ui`.
 
-**Pipeline Azure DevOps (14):**
+**Pipeline del tablero (13):**
 -   `configuracion-ia/skills/redactar-tarea/`: redacta un ticket suelto (Historia/Tarea/Bug/Habilitador); no toca el board.
 -   `configuracion-ia/skills/estimar-story-points/`: calcula los Puntos de historia; no toca el board.
 -   `configuracion-ia/skills/consultar-backlog/`: consulta y audita el board (cobertura, desfase); sólo lectura.
@@ -116,8 +123,16 @@ Un segundo módulo se crea copiando esta misma estructura con otro slug y agreg�
 -   `configuracion-ia/skills/modernizar-slice/`: ejecuta un slice: contrato, construcción, paridad, corte con barrera (`bin/mapa-modernizacion.py corte`), apagado.
 -   `configuracion-ia/skills/mejorar-ecosistema/`: autocorrección consultada: propone mejoras al ecosistema de a una, registradas en `configuracion-ia/mejoras.md`; nunca las aplica sola.
 -   `configuracion-ia/skills/arrancar-proyecto/`: la puerta de entrada: pregunta lo básico del proyecto en un mensaje y, con el «sí», lo arranca por script (`bin/arrancar-proyecto.py`).
--   `configuracion-ia/skills/disenar-con-stitch/`: diseño de pantallas en Google Stitch (MCP o manual) desde la ficha; la exportación es la maqueta vigente (`fuente_maqueta`) y baja al front por `cerebro-architect-ui`.
 -   `configuracion-ia/skills/disenar-pruebas/`: el tester: plan de pruebas de aceptación desde el Gherkin de una Historia, sin depender de la herramienta.
 -   `configuracion-ia/skills/automatizar-e2e/`: QA automatización: pruebas de punta a punta con el motor del tipo de aplicación (`DEC-003`); esqueleto por `bin/armar-e2e.py`, cobertura por `bin/cobertura-e2e.py`.
 -   `configuracion-ia/skills/documentar-aplicacion/`: la guía de uso y la documentación técnica y funcional de la aplicación, generadas desde el Cerebro (`bin/generar-documentacion.py`) al cerrar un slice o la app.
+
+**Puertas de función (5)** (cada una es el rol de su orquestador; las barreras, en `AGENTS.md`):
+-   `configuracion-ia/skills/arquitectura-e-infraestructura/`: arquitectura de la aplicación e infraestructura como código; escribe y verifica, nunca aplica.
+-   `configuracion-ia/skills/despliegue-continuo/`: el pipeline y la promoción de una versión o su vuelta atrás; despliega una persona.
+-   `configuracion-ia/skills/operacion-de-servidores/`: salud, mantenimiento e incidentes operativos de lo que figura en `operacion/inventario.md`.
+-   `configuracion-ia/skills/seguridad/`: escanear la aplicación y los servidores, amenazas, vulnerabilidades e incidentes de seguridad; evalúa y propone.
+-   `configuracion-ia/skills/gestion-de-gitlab/`: GitLab como plataforma (proyecto, CI, runners, instancia propia), en sólo lectura; el cambio lo aplica una persona.
+
+**Externa, vendorizada (1):**
 -   `configuracion-ia/skills/archify/`: skill externa vendorizada (Apache-2.0, Node, versión 3.2): diagramas interactivos HTML de arquitectura, flujos, secuencias, ERD y estados; entregable de `borrador/`, el Cerebro guarda Mermaid.

@@ -23,6 +23,10 @@ Y una vez, sobre la fuente: que el numero de skills que anuncian AGENTS.md, READ
 y que README.md y cerebro-digital/index.md las nombren a todas (CONTEOS y LISTAS). Un numero afirmado que nadie
 verifica envejece en silencio. Antes este control estaba copiado en el hook, los dos CI y el Doctor; ahora lo
 hace esto, y el Doctor toma de aca sus patrones.
+Y el RUTEO ESCRITO: que cada skill de la fuente este nombrada (entre acentos graves o doble corchete) en un
+texto que se carga siempre: AGENTS.md o la skill del orquestador. Claude Code lista las skills con un cupo (el
+1% del contexto) y, cuando se desborda, saca las DESCRIPCIONES de las menos usadas y deja solo el nombre: una
+skill que depende solo de su descripcion deja de dispararse, y nadie se entera (code.claude.com/docs, skills).
 
 QUE NO HACE. No lee el cuerpo ni juzga si la skill esta bien escrita. No modifica nada. Solo biblioteca
 estandar. ASCII puro.
@@ -49,6 +53,8 @@ CONTEOS = (('AGENTS.md', r'\*\*([0-9]+) habilidades\*\*'),
            ('README.md', r'Skills del Ecosistema \(([0-9]+) habilid'),
            ('INSTALACION.md', r'[Ll]as \*\*([0-9]+) skills\*\*'))
 LISTAS = ('README.md', 'cerebro-digital/index.md')
+ORQUESTADOR = 'cerebro-orquestador'
+RUTEO = ('AGENTS.md', RAICES[0] + '/' + ORQUESTADOR + '/SKILL.md')
 
 
 def documentos_de_conteo(raiz):
@@ -84,6 +90,22 @@ def conteo(raiz):
         if faltan:
             res.append('%s no nombra estas skills: %s (va el nombre en la lista, no solo el numero)' % (arch, ' '.join(faltan)))
     return res
+
+
+def ruteo(raiz):
+    """Skills de la fuente que ningun texto de RUTEO nombra, o None si no hay orquestador (nada que verificar)."""
+    fuente = os.path.join(raiz, RAICES[0])
+    if not os.path.isfile(os.path.join(fuente, ORQUESTADOR, 'SKILL.md')):
+        return None
+    texto = ''
+    for arch in RUTEO:
+        ruta = os.path.join(raiz, arch)
+        if os.path.isfile(ruta):
+            with open(ruta, encoding='utf-8', errors='replace') as h:
+                texto += h.read() + ' '
+    nombres = sorted(d for d in os.listdir(fuente) if os.path.isdir(os.path.join(fuente, d)) and not d.startswith('.'))
+    return [n for n in nombres
+            if not re.search(r'`%s`|\[\[%s(\]\]|[|#])' % (re.escape(n), re.escape(n)), texto)]
 
 
 def frontmatter(texto):
@@ -203,17 +225,24 @@ def main():
     con_hallazgo = [x for x in resultados if x['hallazgos']]
     con_aviso = [x for x in resultados if x['avisos']]
     conteos = conteo(raiz)
-    veredicto = 'HALLAZGO' if (con_hallazgo or conteos) else 'OK'
+    sin_ruteo = ruteo(raiz)
+    veredicto = 'HALLAZGO' if (con_hallazgo or conteos or sin_ruteo) else 'OK'
     if a.json:
-        print(json.dumps({'veredicto': veredicto, 'skills': len(resultados), 'resultados': resultados, 'conteo': conteos},
-                         ensure_ascii=True, indent=1))
+        print(json.dumps({'veredicto': veredicto, 'skills': len(resultados), 'resultados': resultados, 'conteo': conteos,
+                          'ruteo': sin_ruteo}, ensure_ascii=True, indent=1))
     else:
-        print('%s -- %d SKILL.md revisados, %d con hallazgo, %d con aviso; conteos y listas: %s' % (
+        print('%s -- %d SKILL.md revisados, %d con hallazgo, %d con aviso; conteos y listas: %s; ruteo: %s' % (
             veredicto, len(resultados), len(con_hallazgo), len(con_aviso),
             '%d problema(s)' % len(conteos) if conteos else
-            ('al dia' if documentos_de_conteo(raiz) else 'no se verificaron (no hay documentos que los anuncien)')))
+            ('al dia' if documentos_de_conteo(raiz) else 'no se verificaron (no hay documentos que los anuncien)'),
+            'no se verifico (no hay skill %s)' % ORQUESTADOR if sin_ruteo is None else
+            ('%d sin ruteo escrito' % len(sin_ruteo) if sin_ruteo else 'al dia')))
         for h in conteos:
             print('  HALLAZGO conteo: %s' % h)
+        if sin_ruteo:
+            print('  HALLAZGO ruteo: %s no esta(n) nombrada(s) en AGENTS.md ni en la skill %s: su unico disparo es la '
+                  'descripcion, que se cae del listado cuando hay muchas skills. Va una linea de ruteo, con el nombre '
+                  'entre acentos graves.' % (' '.join(sin_ruteo), ORQUESTADOR))
         for x in con_hallazgo:
             for h in x['hallazgos']:
                 print('  HALLAZGO %s: %s' % (x['skill'], h))
@@ -221,7 +250,7 @@ def main():
             for v in x['avisos']:
                 print('  AVISO    %s: %s' % (x['skill'], v))
         print('  Regla: name == carpeta, [a-z0-9-], <= %d; description 1..%d caracteres; sin BOM; sin frases muertas (%s). Fuente: agentskills.io/specification' % (MAX_NOMBRE, MAX_DESC, ', '.join(FRASES_MUERTAS)))
-    return HALLAZGO if (con_hallazgo or conteos) else OK
+    return HALLAZGO if (con_hallazgo or conteos or sin_ruteo) else OK
 
 
 if __name__ == '__main__':
