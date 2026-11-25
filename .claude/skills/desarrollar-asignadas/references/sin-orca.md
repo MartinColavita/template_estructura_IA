@@ -67,7 +67,7 @@ despacho (decisión de diseño del template). Un hueco o un gris de la Tarea que
   depende. Además se informan las dependencias **fuera del lote** que todavía no mergearon:
   cambian de qué rama conviene salir (GATE de WORKTREE). Dos Tareas que tocan el mismo archivo
   van **en serie** (⚠ regla candidata del GATE de WORKTREE).
-- **Repo destino:** [[desarrollar-asignadas]] paso 3.2 (evidencia en la tarjeta) y 3.3 (cómo se
+- **Repo destino:** `references/repo-destino.md` §3.2 (evidencia en la tarjeta) y §3.3 (cómo se
   decide), salvo su viñeta de Orca, que acá no aplica.
 - **Dónde se buscan los repos — ⚠ decisión abierta.** El Cerebro tiene escrito que se clonan
   **adentro** de este repositorio, en `back/<repo>` y `front/<app>`
@@ -159,7 +159,7 @@ Por cada Tarea libre, con el "sí" del paso 5 sobre la base de **esa** Tarea:
   si se llegó al techo, **se frena** y se avisa.
 
 ### 8. Despachar el worker
-**Misión autocontenida** ([[cerebro-orquestador]] §«Compresión de handoffs»): objetivo, rutas y
+**Misión autocontenida** (`cerebro-digital/configuracion-ia/skills/cerebro-orquestador/references/orquestacion-de-sub-agentes.md` §«Compresión de handoffs»): objetivo, rutas y
 resultado esperado. Nada del historial del chat. Las skills **no se heredan**: van por ruta
 absoluta. En lo que sigue, `<núcleo>` es la ruta absoluta de este repositorio: el worker está
 parado en otro repo, así que una ruta relativa no le sirve.

@@ -18,7 +18,9 @@ scoped de back/ y front/, las que existan):
   - name: obligatorio, 1..64, ^[a-z0-9]+(-[a-z0-9]+)*$, igual al nombre de la carpeta;
   - description: obligatoria, 1..1024 caracteres (el texto ya plegado, como lo lee la herramienta);
   - sin BOM (rompe el frontmatter);
-  - AVISO (no frena) si el cuerpo pasa de 500 lineas: la especificacion recomienda mover detalle a references/.
+  - AVISO (no frena) si el cuerpo pasa de 500 lineas: la especificacion recomienda mover detalle a references/;
+  - el TAMANO frente a la compactacion: Claude Code re-inyecta cada skill usada hasta ~5.000 tokens y corta el final;
+    mas de 12500 caracteres (~5.000 tokens medidos) es HALLAZGO y mas de 12000, AVISO (salvo las VENDIDAS).
 Y una vez, sobre la fuente: que el numero de skills que anuncian AGENTS.md, README.md e INSTALACION.md sea el real,
 y que README.md y cerebro-digital/index.md las nombren a todas (CONTEOS y LISTAS). Un numero afirmado que nadie
 verifica envejece en silencio. Antes este control estaba copiado en el hook, los dos CI y el Doctor; ahora lo
@@ -43,6 +45,13 @@ RAICES = ('cerebro-digital/configuracion-ia/skills', '.agents/skills', '.claude/
           'back/.claude/skills', 'back/.agents/skills', 'front/.claude/skills', 'front/.agents/skills')
 NOMBRE = re.compile(r'^[a-z0-9]+(-[a-z0-9]+)*$')
 MAX_NOMBRE, MAX_DESC, MAX_LINEAS = 64, 1024, 500
+# Compactacion: Claude Code re-inyecta cada skill usada hasta 5.000 tokens (25.000 entre todas; la mas vieja se cae
+# primero) y corta el FINAL (code.claude.com/docs, context-window). Sin tokenizador se mide en caracteres. Medido el
+# 2026-11-25 con el modelo (uso de tokens de claude -p con y sin el archivo): nuestras skills, en castellano con
+# markdown, dan ~2,6 caracteres por token (cerebro-orquestador: 21.354 car. = ~8.350 tokens; 14.990 = ~5.690).
+# 5.000 tokens son ~12.800 caracteres con la peor relacion medida (2,56): mas de 12500 es HALLAZGO (se pierde el
+# final); mas de 12000, AVISO (margen).
+MAX_CARACTERES, AVISO_CARACTERES = 12500, 12000
 # Frases que quedaron de una fusion a medias o del proyecto de origen. Si una skill las dice, manda a un
 # flujo que ya no existe o contradice a DEC-005/DEC-006. Se buscan en todos los .md de la skill (SKILL.md
 # y references/), salvo en las skills vendidas de terceros (VENDIDAS), que no se editan.
@@ -200,7 +209,15 @@ def revisar(carpeta, raiz_rel):
     lineas = texto.count('\n') + 1
     if lineas > MAX_LINEAS:
         avisos.append('SKILL.md de %d lineas (la especificacion recomienda menos de %d; mover detalle a references/)' % (lineas, MAX_LINEAS))
-    return {'skill': rel, 'name': nombre, 'description_len': len(desc), 'lineas': lineas,
+    caracteres = len(texto)
+    if nombre_carpeta not in VENDIDAS:
+        if caracteres > MAX_CARACTERES:
+            hallazgos.append('SKILL.md de %d caracteres (maximo %d, ~5.000 tokens): al compactar, Claude Code la re-inyecta '
+                             'cortada y se pierde el final; lo que no se negocia, arriba, y el detalle a references/' % (caracteres, MAX_CARACTERES))
+        elif caracteres > AVISO_CARACTERES:
+            avisos.append('SKILL.md de %d caracteres (mas de %d): cerca del tope de %d que sobrevive a la compactacion'
+                          % (caracteres, AVISO_CARACTERES, MAX_CARACTERES))
+    return {'skill': rel, 'name': nombre, 'description_len': len(desc), 'lineas': lineas, 'caracteres': caracteres,
             'hallazgos': hallazgos, 'avisos': avisos}
 
 

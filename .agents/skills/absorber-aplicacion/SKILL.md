@@ -34,6 +34,18 @@ el lugar, migración, subir de versión o nada) lo decide la persona en [[planif
   *regla candidata* (`⚠`), no una regla: puede ser un bug. Se marca de dónde sale y se pregunta.
 - **No escribe en el Cerebro** por su cuenta: lo hace `cerebro-curator` con lo validado.
 
+## Barreras
+
+- **Sólo lectura sobre la aplicación existente**, siempre. Si hay que clonarla, afuera de este repositorio y en una carpeta que se pregunta.
+- **Nada entra al Cerebro sin la Consulta Interactiva por ítem** (o la tabla por módulo con su "sí").
+- **Una regla sacada del código es candidata `⚠` hasta que una persona la confirme.** El código puede estar mal.
+- **Sin PHI**: datos reales encontrados en código, fixtures o bases se describen con marcadores y se reportan como riesgo.
+- **Refactor o migración lo decide el humano** con la tabla a la vista (`DEC-004`). La skill no arranca el plan sin esa decisión.
+- **Un inventario o una radiografía que no corrieron son `SIN DATOS`**, no una descripción de memoria.
+- **Una regla candidata sin `archivo:línea` y sin fragmento no se presenta**: es una impresión.
+- **La base y los logs se consultan sólo con un "sí"**, por esquema, conteos y agregados; nunca filas con datos de personas.
+- Todo en español (Argentina).
+
 ## Fase 0 — Encuadre (un turno)
 
 Antes de leer nada, se confirma con el humano, en criollo:
@@ -122,27 +134,17 @@ registran en `fuentes.md` como `[DOC-nn] Código de <app>, commit <sha>`.
 **Sin PHI.** Si en el código, los fixtures o la base hay datos reales de personas, **no se copian al
 borrador**: se describe la estructura con marcadores y se anota como riesgo.
 
-## Lo que sigue (otras skills, no ésta)
+## Lo que sigue
 
-Con el Cerebro poblado y la matriz de cobertura entregada, esta skill **termina**. Lo que viene tiene dueño:
-
-| Qué | Skill | Qué produce |
-|---|---|---|
-| Comparar estrategias con la tabla medida, curar cada regla (migrar / descartar / decide el humano), escribir `DEC-004`, ordenar los slices | [[planificar-modernizacion]] | `DEC-004` confirmada, fichas por slice, la tabla de `aplicacion/modernizacion.md` |
-| Ponerle la red a un slice: corpus desde la radiografía, golden grabado contra la vieja, tests de caracterización | [[caracterizar-comportamiento]] | `corpus.json`, `golden.json` firmado, commits `test(caracterizacion)` |
-| Ejecutar un slice: contrato del código viejo, construcción, paridad, corte con barrera, apagado | [[modernizar-slice]] | el slice avanza en `modernizacion.md` con su evidencia |
+Con el Cerebro poblado y la matriz de cobertura entregada, esta skill termina. Qué skill toma cada paso
+siguiente ([[planificar-modernizacion]], [[caracterizar-comportamiento]], [[modernizar-slice]]):
+`references/lo-que-sigue.md` (leerlo al cerrar la fase 2).
 
 Las filas medibles de la decisión ya las trae el inventario (bloque «Para DEC-004»); el método de cada Tarea es
 [refactor-y-migracion.md](../../skills/desarrollo/references/metodo/refactor-y-migracion.md). **Sin `DEC-004` confirmada no se arma ningún plan.**
 
-## Barreras
+## Cuándo leer cada referencia
 
-- **Sólo lectura sobre la aplicación existente**, siempre. Si hay que clonarla, afuera de este repositorio y en una carpeta que se pregunta.
-- **Nada entra al Cerebro sin la Consulta Interactiva por ítem** (o la tabla por módulo con su "sí").
-- **Una regla sacada del código es candidata `⚠` hasta que una persona la confirme.** El código puede estar mal.
-- **Sin PHI**: datos reales encontrados en código, fixtures o bases se describen con marcadores y se reportan como riesgo.
-- **Refactor o migración lo decide el humano** con la tabla a la vista (`DEC-004`). La skill no arranca el plan sin esa decisión.
-- **Un inventario o una radiografía que no corrieron son `SIN DATOS`**, no una descripción de memoria.
-- **Una regla candidata sin `archivo:línea` y sin fragmento no se presenta**: es una impresión.
-- **La base y los logs se consultan sólo con un "sí"**, por esquema, conteos y agregados; nunca filas con datos de personas.
-- Todo en español (Argentina).
+| Referencia | Cuándo |
+|---|---|
+| `references/lo-que-sigue.md` | Al cerrar la fase 2: qué skill sigue y qué produce cada una |

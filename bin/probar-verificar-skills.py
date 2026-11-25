@@ -46,6 +46,18 @@ def main():
     os.makedirs(d_ref)
     open(os.path.join(d_ref, 'nota.md'), 'w', encoding='utf-8').write('Fuera de Orca se usa trabajar-con-intellij.\n')
     skill(tmp, 'muy-larga', '---\nname: muy-larga\ndescription: x\n---\n' + ('linea\n' * 520))
+    # Tamano frente a la compactacion: Claude Code re-inyecta cada skill usada hasta ~5.000 tokens.
+    # Los bordes, exactos (un mutante > por >= tiene que caer): el archivo entero, frontmatter incluido.
+    def de_tamano(nombre, total, crlf=False):
+        cab = '---\nname: %s\ndescription: x\n---\n' % nombre
+        texto = cab + 'a' * (total - len(cab))
+        skill(tmp, nombre, texto.replace('\n', '\r\n') if crlf else texto)
+    de_tamano('pesada', 12501)
+    de_tamano('tope-justo', 12500)
+    de_tamano('gorda', 12001)
+    de_tamano('justa', 12000)
+    de_tamano('archify', 20000)
+    de_tamano('con-crlf', 12000, crlf=True)   # 12000 contando \n: con \r\n pesaria mas, y no tiene que avisar
     rc, out = correr(tmp, '--json')
     d = json.loads(out)
     por = {x['skill'].split('/')[-2]: x for x in d['resultados']}
@@ -59,6 +71,13 @@ def main():
     caso('con BOM', any('BOM' in h for h in por['con-bom']['hallazgos']))
     caso('frase muerta en SKILL.md y en references/: dos hallazgos con archivo y linea', sorted(h.split(' en ')[1].split(':')[0] for h in por['con-frase-muerta']['hallazgos'] if 'frase muerta' in h) == ['SKILL.md', 'references/nota.md'], str(por['con-frase-muerta']['hallazgos']))
     caso('mas de 500 lineas es AVISO, no hallazgo', por['muy-larga']['hallazgos'] == [] and any('500' in v for v in por['muy-larga']['avisos']))
+    caso('12501 caracteres es HALLAZGO y dice que se corta al compactar', any('12500' in h and 'compact' in h for h in por['pesada']['hallazgos']), str(por['pesada']))
+    caso('12500 justos no es hallazgo (es AVISO)', por['tope-justo']['hallazgos'] == [] and any('12000' in v for v in por['tope-justo']['avisos']), str(por['tope-justo']))
+    caso('12001 caracteres es AVISO, no hallazgo', por['gorda']['hallazgos'] == [] and any('12000' in v for v in por['gorda']['avisos']), str(por['gorda']))
+    caso('12000 justos no dice nada del tamano', por['justa']['hallazgos'] == [] and por['justa']['avisos'] == [], str(por['justa']))
+    caso('con CRLF se mide como LF (12000 no avisa)', por['con-crlf']['avisos'] == [] and por['con-crlf'].get('caracteres') == 12000, str(por['con-crlf']))
+    caso('una skill vendida no se mide por tamano (no se edita)', not any('compact' in h for h in por['archify']['hallazgos'] + por['archify']['avisos']), str(por['archify']))
+    caso('el reporte trae los caracteres de cada SKILL.md', por['pesada'].get('caracteres') == 12501)
 
     solo_bien = tempfile.mkdtemp(prefix='probar-skills-ok-')
     skill(solo_bien, 'bien', '---\nname: bien\ndescription: "Hace algo util."\n---\n')

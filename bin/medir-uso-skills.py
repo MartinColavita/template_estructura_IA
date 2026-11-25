@@ -47,7 +47,7 @@ def skills_del_ecosistema():
                     chars = sum(os.path.getsize(f) for f in glob.glob(os.path.join(base, d, '**', '*.md'), recursive=True))
                 except OSError:
                     chars = 0
-                out.setdefault(d, {'nombre': d, 'origen': [], 'tokens_aprox': chars // 4})
+                out.setdefault(d, {'nombre': d, 'origen': [], 'tokens_aprox': int(chars / 2.6)})  # bytes: estimacion, la relacion medida del Doctor
                 out[d]['origen'].append(origen)
     return out
 

@@ -250,13 +250,13 @@ que no se pudo leer va `⚠ sin dato`.
 |---|---|
 | **El orquestador coordina, no ejecuta** | Rutea y adjudica; el trabajo lo hacen los workers ([[cerebro-orquestador]] §«Orquestación de sub-agentes») |
 | **Misión autocontenida** | El worker recibe objetivo + rutas + resultado esperado; el padre recibe solo el resumen final. Evita inflar el contexto |
-| **Las skills se pasan explícitamente** | No se heredan al delegar. Un worker sin `guiar-tdd` trabaja sin disciplina y **todo parece correcto igual** ([[cerebro-orquestador]] §«Herramientas y skills NO se heredan») |
+| **Las skills se pasan explícitamente** | No se heredan al delegar. Un worker sin `guiar-tdd` trabaja sin disciplina y **todo parece correcto igual** (`cerebro-digital/configuracion-ia/skills/cerebro-orquestador/references/orquestacion-de-sub-agentes.md` §«Herramientas y skills NO se heredan») |
 | **Paralelo solo si es independiente** | Las dependencias van en serie. Back y front pueden ir en paralelo **porque el contrato ya está cerrado en la Tarea** |
 | **Quien verifica ≠ quien produce** | Si el mismo agente codea y se aprueba, no hay control: hay una declaración. Verifica otro agente, en sólo lectura y sobre el mismo worktree: el otro LLM si hay dos; uno del mismo motor con contexto limpio si hay uno (`DEC-005`) |
 | **El orquestador queda atento** | Delegar no es irse: escucha a los workers hasta que el último termina, contesta sus preguntas al llegar y le avisa al humano de cada uno que termina. Si deja de escuchar, el aviso de terminado se pierde y el flujo se corta |
 | **Base al día antes de enviar** | Todo lo que se envía contempla lo último de la base, sin importar cuándo se empezó: antes de despachar un worker o verificador (también sobre un worktree existente) y antes de abrir o actualizar el MR se hace `fetch`, y si `develop` avanzó se trae con merge —nunca rebase—, se corre la suite completa y se anota el nuevo SHA de base. Si el conflicto cambia comportamiento o la suite se pone en rojo, se frena. Caso real: un ajuste sobre una rama con base vieja dejó el MR en conflicto con otro ya mergeado ([[desarrollar-asignadas]] §6, [[desarrollar-asignadas]] §«Modo sin Orca» §7) |
 | **Todo en español** | Cada misión lo dice: un sub-agente no hereda el idioma de la conversación |
-| **Umbrales de parada** | Cuándo delegar, auditar o replanificar sale de [[cerebro-orquestador]] §«Orquestación de sub-agentes», no del criterio del momento |
+| **Umbrales de parada** | Cuándo delegar, auditar o replanificar sale de la tabla de umbrales de [[cerebro-orquestador]] §«Orquestación de sub-agentes», no del criterio del momento |
 
 ## Lo que NO hace
 

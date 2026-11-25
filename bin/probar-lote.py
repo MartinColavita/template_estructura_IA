@@ -343,6 +343,17 @@ def probar(base):
             (c, rel_lote + '/H-01-criterios.html' in mc, rel_lote + '/auditorias/H-01-auditor.md'
              in mc, '**plantillas/historia-de-usuario**' in mc, '**redaccion-de-tickets**' in mc, bc1 == bc2,
              re.findall(r'\{[a-z_]+\}', mc)), (0, True, True, True, True, True, []))
+    # Las skills que se achicaron mudaron su detalle a references/: el worker lo recibe en la mision.
+    sk = 'cerebro-digital/configuracion-ia/skills/'
+    chequeo('mision: lista las references/ que el worker necesita (DoR, chequeos, reparar Historia)',
+            (sk + 'redactar-tarea/references/dor-tarea.md' in m1,
+             sk + 'redactar-tarea/references/bloques-por-tipo.md' in m1,
+             sk + 'redactar-tarea/references/autochequeo.md' in m1,
+             sk + 'auditar-tarea/references/chequeos.md' in ma,
+             sk + 'auditar-historia/references/chequeos.md' in mh,
+             sk + 'redactar-tarea/references/reparar-historia.md' in mc,
+             sk + 'redactar-tarea/references/autochequeo.md' in mc),
+            (True, True, True, True, True, True, True))
     c, mp, _ = correr('mision', L, 'redactar', 'T-04')
     chequeo('mision redactar (PISA): le pasa el ANTES de la tarjeta', (c, rel_lote +
             '/antes/125280.html' in mp), (0, True))
@@ -839,6 +850,16 @@ def probar(base):
     chequeo('archivos: auditar.md pide la Huella y documenta el formato de F y P',
             [x in leer(os.path.join(MISIONES, 'auditar.md')) for x in
              ('**Huella:** {huella}', '## F', '## P', '`F:`')], [True] * 4)
+    # Renombrar una skill o una de sus references/ no puede dejar una mision apuntando a la nada.
+    sys.dont_write_bytecode = True
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('lote_bajo_prueba', LOTE_PY)
+    lote = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(lote)
+    chequeo('archivos: cada ruta de lote.SKILLS existe en el repo (las que faltan, abajo)',
+            sorted(r for r in lote.SKILLS.values() if not os.path.isfile(os.path.join(RAIZ, *r.split('/')))), [])
+    chequeo('archivos: cada skill que nombra lote.SKILLS_DE esta en lote.SKILLS',
+            sorted(set(s for t in lote.SKILLS_DE.values() for s in t) - set(lote.SKILLS)), [])
 
 
 if __name__ == '__main__':

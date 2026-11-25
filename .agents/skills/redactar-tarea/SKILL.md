@@ -82,63 +82,18 @@ Tomar la estructura del dominio y las convenciones de [[conocimiento/00-index]]
 (glosario, roles, DoR/DoD, estimación, RNF, antipatrones) y llenar la plantilla
 del tipo elegido.
 
-- **Historia (los 4 bloques, ver [[plantillas/historia-de-usuario]]):** (1)
-  **Funcionalidad** "Como `<rol>` quiero `<qué>` para `<para qué>`" + contexto +
-  alcance; (2) **Criterios de aceptación** en Gherkin español (Dado/Cuando/Entonces);
-  (3) **Reglas de negocio** con **referencia al OKF** (ruta#ancla) por cada `[RN-…]`;
-  (4) **Casos de uso** (alcance de pruebas, mapeados a `[RN-…]`). Siempre la línea
-  **Documento fuente**. Y las **Notas para QA** con sus cinco líneas fijas (pantalla y ruta, rol y usuario de
-  prueba, datos iniciales con marcadores, identificadores estables que expone el front, ambiente): es lo que la
-  prueba de punta a punta necesita y el Gherkin no dice; lo que no se sabe va `⚠`, no se inventa. Debe servir a
-  Desarrollo y a Testing sin que nadie tenga que volver a preguntar.
-- **Bug:** el cuerpo lleve SIEMPRE los tres bloques:
-  1. **Resultado esperado** — qué debería pasar.
-  2. **Resultado obtenido** — qué pasa hoy.
-  3. **Por qué / contexto** — pasos para reproducir, ambiente, alcance.
-  Más severidad/gravedad si el board la usa.
-- **Tarea / Habilitador (el detalle que necesita el dev, según la complejidad):**
-  siempre el **objetivo**, el **alcance**, la **Definición de terminado** y el
-  **Parent**. **Solo para desarrollo pesado** sumá el **vertical slice** + **capa**
-  (`api`/`application`/`domain`/`infra`, o front), el **Contrato técnico (entrada/salida)**
-  —que para capa `api` se escribe como **fragmento OpenAPI (YAML), no en prosa**—, la
-  **especificación cerrada (SDD)** con sus `[RN-…]`, la **lista de "Tests a escribir
-  PRIMERO" (TDD test-first)** y si **requiere test de integración**. Para una tarea
-  chica **no infles** con secciones que no aplican (ver [[plantillas/tarea]]).
+Lo que lleva cada tipo —los 4 bloques y las Notas para QA de la Historia, los tres bloques del Bug, el
+detalle de Tarea/Habilitador sin inflar una tarea chica—: `references/bloques-por-tipo.md` (leerlo antes
+de redactar).
 
 ### 3.1 DoR de la Tarea — "lista para desarrollar" (bloqueante)
 Una **Tarea** de capa `api`/`application`/`domain` (algo que otro código va a **llamar**)
 **no se entrega como "lista"** sin estas cuatro piezas cerradas:
-- **Contrato técnico (entrada/salida) cerrado** — así se llama la sección en
-  [[plantillas/tarea]]. Para capa `api` va como **fragmento OpenAPI (YAML) parseable**;
-  si no es HTTP, la firma entrada/salida. Es lo que después `armar-swagger` consolida y
-  el dev implementa.
-- **Especificación cerrada (SDD)** con la **tabla de Escenarios de la Historia** que
-  esta Tarea cubre, y **qué test verifica cada uno**. Es la **bisagra entre BDD y TDD**: la
-  Historia trae el Gherkin (loop externo), la Tarea trae los tests (loop interno), y sin esa
-  tabla los dos loops quedan sueltos — nadie puede responder si los tests de la Tarea
-  alcanzan para cerrar un Escenario. Los títulos de Escenario se copian **textuales** del
-  campo Criterios de aceptación del padre.
-- **Lista de "Tests a escribir PRIMERO" (test-first), numerada** — un caso por cada validación y por
-  cada fila de "Casos de error". Es lo que después `guiar-tdd` ejecuta en Red-Green-Refactor.
-  Va numerada porque la tabla de Escenarios los referencia por número. **Una línea por test**,
-  y **30 tests o menos**: si la lista completa no entra, la Tarea es demasiado grande y se
-  parte, no se recorta la lista ([[plantillas/tarea]] §«Tamaño y forma»). **Cada ítem enumera un solo
-  comportamiento**; si trae dos del mismo contrato (una lista que filtra y la misma con una bandera que no
-  filtra), se escriben como dos ítems o se dice en el ítem que son dos aserciones del mismo test. Un ítem que
-  va a **nacer verde** por construcción (una idempotencia que ya da el esqueleto, un caso que cubre el verde
-  mínimo de otro) se declara **guardarraíl** en la lista, para que el worker no tenga que descubrirlo. Si la
-  Tarea toca una **migración de base**, el contrato dice qué pasa con las filas viejas y con las que el código
-  viejo inserta durante la ventana (default o `NULL`, y cómo las lee el repositorio), y cómo se arma en un test
-  una base «hasta la versión n» (helper de test o parámetro del migrador).
-- **Bloque "Modos de falla evaluados"** — una línea por familia (**estado, concurrencia,
-  autorización, dependencia caída, límites, idempotencia**), y cada una **o cubierta por un
-  test de arriba, o descartada con su motivo escrito**. «Cubierta por el test n» vale sólo si el ítem n
-  **enumera ese caso**; si no lo enumera, el caso es un ítem nuevo de la lista, no una nota al pie. Nunca ausente: un «no aplica porque…»
-  es una afirmación auditable, el silencio no lo es. Es el bloque que evita que una familia
-  entera se escape sin que nadie lo note — en las tres primeras Tareas reales del proyecto de origen, que
-  no lo tenían, quedaron **trece familias en silencio** entre las tres, incluida la
-  autorización de un endpoint que devuelve datos sensibles. Lo chequea [[auditar-tarea]]
-  (chequeo 11).
+**Contrato técnico (entrada/salida) cerrado** (OpenAPI en YAML para capa `api`) · **Especificación
+cerrada (SDD)** con la tabla de Escenarios del padre y qué test cubre cada uno · **Lista de "Tests a
+escribir PRIMERO"** numerada, una línea por test, 30 o menos · **Bloque "Modos de falla evaluados"**,
+cada familia cubierta o descartada con su motivo, nunca ausente. Las cuatro, en detalle (y la exención
+parcial de la Tarea de front): `references/dor-tarea.md` (leerlo antes de redactar o corregir una Tarea).
 
 **Dos chequeos de coherencia, además, antes de dar la Tarea por lista:**
 - Si el Alcance técnico dice «Requiere test de integración: **sí**», tiene que haber
@@ -157,30 +112,11 @@ su recomendación. Un `⚠` declarado **no** saca a la Tarea de «lista para des
 pendiente a confirmar en la tarjeta ([[comentar-tarea]] §«Pendientes a confirmar»). Lo que sí la deja **NO lista** es que falte una de
 las cuatro piezas.
 
-**Exención parcial de la Tarea de front.** Una Tarea de **solo UI/config** (una columna
-nueva en una grilla, un texto) está exenta del contrato y del bloque entero. Pero una Tarea
-de front que **implementa un Escenario de la Historia** —aunque no tenga capa
-`api`/`application`/`domain`— **igual lleva la tabla de Escenarios**: es la mitad visible de
-un comportamiento que el back solo cubre a medias, y sin la tabla ese Escenario queda sin
-dueño del lado del usuario. Lo que la Tarea de front **no** define es contrato propio:
-consume el de las Tareas de backend.
+### 3.2 Reparar una Historia existente
 
-### 3.2 Reparar una Historia existente (cuando [[auditar-historia]] la marcó CON HUECOS)
-
-Esta skill es también la que **cierra el Gherkin de una Historia ya creada**. Es un caso de
-uso propio, no un efecto colateral: un veredicto que bloquea y **no tiene destinatario**
-termina en que alguien inventa los Escenarios para desbloquear — exactamente lo que todo
-este aparato viene a impedir.
-
-- Se toma la Historia por su `#ID` (lectura) más el **reporte de la auditoría**, y se
-  reescriben **solo** los bloques observados: Criterios de aceptación, *Casos de uso*,
-  *Datos y estados*.
-- **Lo que la IA no puede saber NO se completa:** una regla que no está en el Cerebro, un
-  comportamiento ambiguo o un estado sin nombre salen como **pregunta `⚠`**. Proponer la
-  regla que falta para destrabar es el defecto que la auditoría persigue.
-- Se entrega pegable; escribirlo en el board es otro turno ([[cargar-a-azure]]). El sello
-  anterior queda vencido, porque cambiaron sus Criterios de aceptación; volver a auditarla es
-  opcional.
+Cuando [[auditar-historia]] la marcó CON HUECOS, esta skill cierra su Gherkin: se reescriben sólo
+los bloques observados, y lo que la IA no puede saber va como pregunta `⚠`, nunca se completa. El
+procedimiento: `references/reparar-historia.md` (leerlo antes de reparar una Historia).
 
 ### 4. Marcar lo pendiente y preguntar
 Todo dato faltante se deja como `⚠ pendiente: <qué falta>` **dentro** del ticket
@@ -203,34 +139,22 @@ ilegible. En el chat se puede mostrar además cómo se va a ver, pero lo que se 
 en HTML listo para insertar —una fila `<tr>…</tr>`, un `<li>…</li>`—, nunca una fila con `|`.
 
 **Autochequeo antes de entregar** (mecánico; si uno falla, se corrige antes de mostrar):
+una sola etiqueta · HTML sin markdown · cada `[RN-…]` existe y dice lo que se le atribuye (si el pedido
+choca con una regla, se frena y se pregunta) · se leyó la tarjeta que se corrige · lo que no se sabe va
+`⚠`, nunca un código o un número de regla que suene bien · no existe ya ([[deduplicacion-antes-de-crear]])
+· el tipo sale de la señal. Los siete, en detalle: `references/autochequeo.md` (leerlo antes de entregar).
 
-| # | Chequeo |
+## Cuándo leer cada referencia
+
+| Referencia | Cuándo |
 |---|---|
-| 1 | **Etiquetas: exactamente una.** No es un slice (`<slice-1>` · `<slice-2>` · `<slice-n>`), ni `<producto>`, ni `modulo-ejemplo`. Si el tema no tiene etiqueta acordada, va con `⚠` |
-| 2 | Descripción y Criterios **en HTML**; cero markdown |
-| 3 | Cada `[RN-…]` citada **existe en el Cerebro**, y se puede decir en qué archivo. **Y dice lo que se le atribuye**: se lee la regla, no alcanza con encontrar el número. Una regla con un sufijo agregado (`-REV`, `-CONF`) no es esa regla: es una inventada. **Si el pedido choca con una regla** (p. ej. pide validar algo que la regla deja fuera de esta etapa), se frena y se pregunta: no se redacta el arreglo igual |
-| 4 | Si el pedido era corregir una tarjeta existente, **se leyó su texto actual** (del tablero o pegado). Si no, no se reconstruyó: se pidió |
-| 5 | Todo lo que no se sabe está marcado `⚠`, no rellenado con lo esperable. En particular, **un código HTTP, un código de error o un número de regla** que no figura en la tarjeta ni en el Cerebro va `⚠ a definir`, nunca con un valor que suene bien: un código de estado típico, un nombre de error armado a partir del pedido, o un número de regla correlativo |
-| 6 | **No existe ya.** Si al leer el Cerebro aparece un ticket del mismo pedido (el bloque «Tickets derivados» de la ficha, o un `#ID` citado en el flujo), se frena y se pregunta si se actualiza ése: no se redacta uno nuevo en paralelo ([[deduplicacion-antes-de-crear]]) |
-| 7 | **El tipo sale de la señal, no del pedido.** Si lo que se describe como falla todavía no existe según el Cerebro (figura como pendiente o fuera de esta etapa), no es un Bug: es una Historia o mejora, y se dice por qué |
+| `references/bloques-por-tipo.md` | Antes de redactar: qué lleva cada tipo de ticket |
+| `references/dor-tarea.md` | Antes de redactar o corregir una Tarea: las cuatro piezas del DoR y la exención parcial de la Tarea de front |
+| `references/autochequeo.md` | Antes de entregar: los siete chequeos mecánicos |
+| `references/reparar-historia.md` | Antes de reparar una Historia que [[auditar-historia]] marcó CON HUECOS |
+| `references/ejemplo.md` | Para ver un ticket pobre convertido en uno pegable |
 
 ## Contexto adicional
 
 - Checklist DoR/DoD y antipatrones: [[conocimiento/00-index]]
 - Ejemplos antes → después: [[ejemplos/00-index]]
-
----
-
-### Ejemplo (genérico)
-
-> Entrada pobre en el tablero: *"Un listado tira error,
-> ver adjunto"*. La skill clasifica como **Bug**, y redacta:
-> **Esperado:** al abrir un listado se muestran los resultados del filtro.
-> **Obtenido:** error técnico 500 al aplicar el filtro por `<documento>`.
-> **Por qué / pasos:** 1) entrar al listado; 2) filtrar por documento;
-> 3) se corta con 500. Ambiente TEST, versión FE_x.y.z. Gravedad `2-High`.
-> ⚠ pendiente: ¿el error es con cualquier documento o solo con uno puntual?
->
-> Los datos reales de la persona se enmascaran con `<documento>` (PHI). El ticket queda
-> pegable en los campos del board (*Pasos para reproducir*, *Gravedad*), sin tocar
-> Azure hasta que el humano confirme.

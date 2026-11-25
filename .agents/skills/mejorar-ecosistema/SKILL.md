@@ -23,6 +23,16 @@ nadie tiene, una decisión del Cerebro que el código contradice. Esta skill con
 > todos los agentes a partir de ese momento; un cambio de arquitectura cambia el código que se va a
 > escribir. Son decisiones de equipo. Que la IA las vea es el valor; que las aplique sola es el riesgo.
 
+## Barreras
+
+- **Nunca se aplica una propuesta sin su "sí" explícito**, ni por lote, ni porque "es obvia", ni porque ya se aprobó una parecida.
+- **Nunca se cambia una skill o un script sin la prueba que lo cubra en OK.**
+- **Una propuesta no se repite** si ya fue rechazada con motivo; se cita la fila.
+- **No se proponen cambios al negocio por esta vía**: una regla de negocio nueva o cambiada sigue el flujo de curaduría (Vigilancia Semántica), no el de mejoras.
+- **Lo que es de la aplicación y no del ecosistema tampoco va acá**: un bug y su causa, una trampa del stack, una deuda aceptada son `AP-nnn` o `DT-nnn` en `<modulo>/aplicacion/`. Acá entra sólo lo que cambia cómo trabajan los agentes: reglas, skills, scripts, arquitectura.
+- **Se propone de a una.** Diez propuestas juntas son una lista que nadie lee; una por vez es una decisión.
+- Todo en español (Argentina).
+
 ## De dónde salen las señales
 
 | Señal | Dónde aparece | Qué suele indicar |
@@ -77,18 +87,10 @@ veredictos, qué fricciones) y propone **un** ajuste, como siempre: la persona d
 se escribe sin preguntar es la línea de métricas. Los hooks viajan en el `settings.json` de la carpeta `.claude/` (sin secretos) y
 `bin/instalar.py` avisa si faltan. Detalle completo: `python bin/tendencia.py` (sin `--breve`).
 
-## El ritual mensual (quince minutos)
+## El ritual mensual
 
-```
-python -B bin/medir-uso-skills.py --dias 60 --proyecto <ruta del núcleo>   # qué se usó, qué no, qué pesa
-bash doctor/bin/doctor.sh --comparar                                         # cómo venimos
-python -B bin/verificar-skills.py                                            # la especificación
-/doctor                     (en Claude Code: skills, MCP y plugins sin uso frente a su costo; CLAUDE.md derivable)
-/doctor prompt-audit        (en Claude Code: instrucciones viejas o contradictorias, con ediciones propuestas)
-```
-
-Lo que salga se convierte en propuestas, **de a una**, y se decide. Las dos herramientas de Claude Code informan
-primero y piden confirmación antes de tocar: encajan en esta regla sin cambiarla.
+Los comandos de la revisión mensual (uso de skills, Doctor comparado, especificación, `/doctor` de Claude Code):
+`references/ritual-mensual.md` (leerlo cuando toca la revisión mensual). Lo que salga se propone de a una.
 
 ## El registro: `cerebro-digital/configuracion-ia/mejoras.md`
 
@@ -137,12 +139,8 @@ Antes y después de aplicar:
 - **Antes de publicar, dos revisiones por otro agente con contexto limpio**: corrección, y sobregiro y redundancia.
 - **Un archivo generado** (`INFORME-ESQUELETO.html`) se regenera con su script; nunca a mano.
 
-## Barreras
+## Cuándo leer cada referencia
 
-- **Nunca se aplica una propuesta sin su "sí" explícito**, ni por lote, ni porque "es obvia", ni porque ya se aprobó una parecida.
-- **Nunca se cambia una skill o un script sin la prueba que lo cubra en OK.**
-- **Una propuesta no se repite** si ya fue rechazada con motivo; se cita la fila.
-- **No se proponen cambios al negocio por esta vía**: una regla de negocio nueva o cambiada sigue el flujo de curaduría (Vigilancia Semántica), no el de mejoras.
-- **Lo que es de la aplicación y no del ecosistema tampoco va acá**: un bug y su causa, una trampa del stack, una deuda aceptada son `AP-nnn` o `DT-nnn` en `<modulo>/aplicacion/`. Acá entra sólo lo que cambia cómo trabajan los agentes: reglas, skills, scripts, arquitectura.
-- **Se propone de a una.** Diez propuestas juntas son una lista que nadie lee; una por vez es una decisión.
-- Todo en español (Argentina).
+| Referencia | Cuándo |
+|---|---|
+| `references/ritual-mensual.md` | En la revisión mensual del ecosistema, o cuando la persona pide revisarlo entero |

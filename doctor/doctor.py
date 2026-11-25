@@ -279,11 +279,11 @@ SRC_SKILLS = ROOT + "/cerebro-digital/configuracion-ia/skills"
 
 # Caracteres por token. Es una ESTIMACION, no una medicion: el tokenizador real
 # depende del modelo y traerlo seria una dependencia externa, que este proyecto no
-# admite. Para prosa en espanol con algo de codigo y markdown, la relacion ronda
-# 3,6 caracteres por token. Sirve para COMPARAR skills entre si y para tener un
-# orden de magnitud; no para facturar.
-CHARS_POR_TOKEN = 3.6
-TOPE_AGENTS = 7000   # tokens de AGENTS.md; arriba de esto, la sonda de tamano avisa que volvio a crecer
+# admite. Medido el 2026-11-25 con el modelo (uso de tokens de claude -p con y sin el
+# archivo), nuestras skills en espanol con markdown dan ~2,6 caracteres por token (antes
+# se suponia 3,6). Sirve para COMPARAR skills entre si y para tener un orden de magnitud.
+CHARS_POR_TOKEN = 2.6
+TOPE_AGENTS = 9700   # tokens de AGENTS.md (~25.200 caracteres, el mismo tope de antes medido a 2,6)
 
 
 def tokens_aprox(texto):
@@ -801,7 +801,9 @@ def sonda_tamano():
         importa="El numero que conviene vigilar es el primero, porque se paga en CADA consulta, "
                 "aunque no se use ninguna skill. El segundo se paga una vez y solo si la skill "
                 "hace falta. Que una skill sea grande NO es un error si su descripcion es corta y "
-                "precisa: se carga poco y cuando se carga, sirve.",
+                "precisa: se carga poco y cuando se carga, sirve. Con un tope: despues de compactar, "
+                "Claude Code vuelve a cargar cada skill usada hasta ~5.000 tokens y corta el final; "
+                "un SKILL.md que pase ese tope lo frena bin/verificar-skills.py (MAX_CARACTERES).",
         acciones=[] if estado == "OK" else [
             {"paso": "Mira las que pasan el umbral en el grafico. Preguntate si mezclan dos "
                      "trabajos distintos que en realidad son dos skills."},

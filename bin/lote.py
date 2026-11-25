@@ -146,7 +146,7 @@ DEL_SET = ('ALTA', 'PISA', 'EXISTE')
 TIPOS_MISION = ('redactar', 'auditar', 'corregir')
 PALABRAS = {'redactar': 150, 'auditar': 200, 'corregir': 120}
 VEREDICTOS = ('COMPLETA', 'CON HUECOS', 'NO AUDITABLE', 'CIERRA')
-# (fase, minimo, maximo) en minutos: la tabla "Tiempos esperados" de planificar-lote.
+# (fase, minimo, maximo) en minutos: la tabla "Tiempos esperados" de planificar-lote (references/por-que-y-tiempos.md).
 FASES = (('preparar', 5, 5), ('arranque', 5, 5), ('redactar', 10, 12), ('auditar', 5, 8),
          ('cierre', 5, 5), ('escribir', 5, 5))
 NOMBRES_FASES = ', '.join(f for f, _, _ in FASES)
@@ -181,25 +181,37 @@ _SK = 'cerebro-digital/configuracion-ia/skills/'
 _AZ = 'tablero/'
 SKILLS = {
     'redactar-tarea': _SK + 'redactar-tarea/SKILL.md',
+    # El detalle que las skills mudaron a references/ (para que SKILL.md entre entero al compactar): el worker
+    # lo necesita para redactar o auditar, asi que la mision lo lista igual que la skill.
+    'redactar-tarea/bloques-por-tipo': _SK + 'redactar-tarea/references/bloques-por-tipo.md',
+    'redactar-tarea/dor-tarea': _SK + 'redactar-tarea/references/dor-tarea.md',
+    'redactar-tarea/autochequeo': _SK + 'redactar-tarea/references/autochequeo.md',
+    'redactar-tarea/reparar-historia': _SK + 'redactar-tarea/references/reparar-historia.md',
     'redaccion-de-tickets': _AZ + 'conocimiento/redaccion-de-tickets.md',
     'plantillas/tarea': _AZ + 'plantillas/tarea.md',
     'plantillas/historia-de-usuario': _AZ + 'plantillas/historia-de-usuario.md',
     'checklists/mapa-campos-azure': _AZ + 'checklists/mapa-campos-azure.md',
     'estimar-story-points': _SK + 'estimar-story-points/SKILL.md',
     'auditar-tarea': _SK + 'auditar-tarea/SKILL.md',
+    'auditar-tarea/chequeos': _SK + 'auditar-tarea/references/chequeos.md',
     'auditar-historia': _SK + 'auditar-historia/SKILL.md',
+    'auditar-historia/chequeos': _SK + 'auditar-historia/references/chequeos.md',
     'analizar-tareas': _SK + 'analizar-tareas/SKILL.md',
 }
 SKILLS_DE = {
-    ('redactar', 'Tarea'): ('redactar-tarea', 'redaccion-de-tickets', 'plantillas/tarea', 'checklists/mapa-campos-azure',
-                            'estimar-story-points'),
-    ('redactar', 'Historia'): ('redactar-tarea', 'redaccion-de-tickets', 'plantillas/historia-de-usuario',
+    ('redactar', 'Tarea'): ('redactar-tarea', 'redactar-tarea/bloques-por-tipo', 'redactar-tarea/dor-tarea',
+                            'redactar-tarea/autochequeo', 'redaccion-de-tickets', 'plantillas/tarea',
+                            'checklists/mapa-campos-azure', 'estimar-story-points'),
+    ('redactar', 'Historia'): ('redactar-tarea', 'redactar-tarea/bloques-por-tipo', 'redactar-tarea/autochequeo',
+                               'redaccion-de-tickets', 'plantillas/historia-de-usuario',
                                'checklists/mapa-campos-azure', 'estimar-story-points'),
-    ('auditar', 'Tarea'): ('auditar-tarea',),
-    ('auditar', 'Historia'): ('auditar-historia',),
+    ('auditar', 'Tarea'): ('auditar-tarea', 'auditar-tarea/chequeos'),
+    ('auditar', 'Historia'): ('auditar-historia', 'auditar-historia/chequeos'),
     ('auditar', 'set'): ('analizar-tareas',),
-    ('corregir', 'Tarea'): ('redactar-tarea', 'redaccion-de-tickets', 'plantillas/tarea', 'checklists/mapa-campos-azure'),
-    ('corregir', 'Historia'): ('redactar-tarea', 'redaccion-de-tickets', 'plantillas/historia-de-usuario',
+    ('corregir', 'Tarea'): ('redactar-tarea', 'redactar-tarea/dor-tarea', 'redactar-tarea/autochequeo',
+                            'redaccion-de-tickets', 'plantillas/tarea', 'checklists/mapa-campos-azure'),
+    ('corregir', 'Historia'): ('redactar-tarea', 'redactar-tarea/reparar-historia', 'redactar-tarea/autochequeo',
+                               'redaccion-de-tickets', 'plantillas/historia-de-usuario',
                                'checklists/mapa-campos-azure'),
 }
 

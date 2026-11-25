@@ -283,8 +283,8 @@ Por eso **una skill grande no es automáticamente mala**: si su descripción es 
 se carga poco, y cuando se carga es porque sirve. Lo que conviene mirar primero es la columna
 de "pesan siempre".
 
-> **Son una estimación, no una medición.** Se calculan a razón de **3,6 caracteres por token**,
-> que es lo típico para prosa en español con algo de código. El tokenizador real depende del
+> **Son una estimación, no una medición.** Se calculan a razón de **2,6 caracteres por token**,
+> lo que se midió con el modelo para nuestras skills en español con markdown (antes se suponía 3,6). El tokenizador real depende del
 > modelo y traerlo sería una dependencia externa, que acá no se admite. Sirven para **comparar
 > skills entre sí** y tener un orden de magnitud — no para facturar.
 

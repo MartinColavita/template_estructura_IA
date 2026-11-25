@@ -11,7 +11,7 @@ sólo lo auditás.
 
 No leas `CONTEXTO.md` ni el informe de quien redactó: la auditoría es independiente.
 
-## Cargá esta skill (no se hereda)
+## Cargá esta skill y su referencia (no se heredan)
 
 {skills}
 
