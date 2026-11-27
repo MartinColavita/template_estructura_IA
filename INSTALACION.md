@@ -98,8 +98,19 @@ El orquestador coordina y no debe escribir archivos (la lista negra no alcanza a
 lectura y con contexto limpio). Hace falta haber corrido el instalador, que materializa los agentes. Es propio de
 Claude Code: en las otras tres herramientas se usa la puerta en la sesión de siempre. Los orquestadores de las cinco
 funciones nuevas no tienen instrucciones propias (su archivo es sólo la cabecera): por eso **no se usan como
-subagentes**. ⚠ Sin probar en una sesión interactiva: que el orquestador pregunte con la herramienta nativa de
+subagentes**, y `.claude/settings.json` los bloquea como tales (`permissions.deny` con `Agent(orquestador-…)`): lanzado
+como subagente, un orquestador perdería su lista de herramientas. Ese bloqueo no impide abrirlo con `claude --agent`
+(probado). `python -I bin/sesion-proyecto.py --verificar` controla que ningún agente de sesión principal quede sin
+bloquear. ⚠ Sin probar en una sesión interactiva: que el orquestador pregunte con la herramienta nativa de
 preguntas; si no la tiene, pregunta en el texto y espera.
+
+**Sesión aislada del proyecto (recomendada en una máquina con muchos plugins o MCP).** `python -I
+bin/sesion-proyecto.py` abre Claude Code sin tu configuración de usuario (ni plugins ni skills personales), con sólo
+los MCP del `.mcp.json` del proyecto y sin los conectores de claude.ai; `python -I bin/sesion-proyecto.py --agent
+orquestador-seguridad` hace lo mismo con la sesión de una función. Así las descripciones de las puertas entran en el
+listado y no quedan a mano herramientas de otros proyectos (en una máquina real: de 45 servidores MCP y 119 skills a
+0 y 62). `--verificar --en-vivo` abre una sesión corta y comprueba qué cargó. Quien quiera sus plugins en este
+proyecto abre `claude` como siempre.
 
 **Cómo se sabe qué skill corrió.** Al cerrar cada sesión, `bin/registrar-sesion.py` anota en
 `cerebro-digital/configuracion-ia/sesiones.jsonl` qué skills se usaron y cuántas veces; `python -B

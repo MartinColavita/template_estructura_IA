@@ -22,5 +22,15 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "deny": [
+      "Agent(orquestador-arquitectura)",
+      "Agent(orquestador-conocimiento)",
+      "Agent(orquestador-despliegue)",
+      "Agent(orquestador-gitlab)",
+      "Agent(orquestador-operacion)",
+      "Agent(orquestador-seguridad)"
+    ]
   }
 }

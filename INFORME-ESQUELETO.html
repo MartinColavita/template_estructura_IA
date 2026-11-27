@@ -45,7 +45,7 @@ footer{color:var(--muted);font-size:13px;padding:24px 48px;border-top:1px solid 
 </style></head><body>
 <header class="portada"><h1>TEMPLATE ESTRUCTURA IA — informe del esqueleto</h1>
 <p>Qué tiene, cómo fluye, qué mide y qué falta. Un Cerebro Digital (OKF) con agentes, skills y scripts determinísticos para crear, absorber, refactorizar o migrar aplicaciones con IA, con un «sí» humano en cada barrera.</p>
-<p class="meta">Generado el 2026-11-25 19:36 por bin/generar-informe.py (pruebas y Doctor corridos hoy) · carpeta: TEMPLATE ESTRUCTURA IA</p></header>
+<p class="meta">Generado el 2026-11-27 13:36 por bin/generar-informe.py (pruebas y Doctor corridos hoy) · carpeta: TEMPLATE ESTRUCTURA IA</p></header>
 <section id="prompt" class="prompt-maestro"><h2>00 · Prompt maestro — para pegar en Claude Code con el template abierto</h2>
 <p class="lead">Copiá el template a la carpeta del proyecto, abrí Claude Code ahí y pegá esto. Reemplazá cada <code>&lt;…&gt;</code>; borrá los bloques que no apliquen. Lo que no completes, la skill <code>arrancar-proyecto</code> lo pregunta en un solo mensaje y no inventa nada. Fuente única: <code>cerebro-digital/configuracion-ia/skills/arrancar-proyecto/references/prompt-maestro.md</code>.</p>
 <ol class="pasos-previos"><li>Copiá la carpeta del template a la carpeta donde va a vivir el núcleo del proyecto (fuera de OneDrive si vas a trabajar con git). El template original queda intacto como molde.</li><li>Abrí Claude Code parado en esa carpeta nueva y pegá el prompt.</li></ol>
@@ -109,9 +109,9 @@ pendiente marcado. Nada de datos de personas. Todo en español.</pre>
 <div class="tiles">
 <div class="tile"><b>38</b><span>skills canónicas</span></div>
 <div class="tile"><b>11</b><span>skills scoped back/front</span></div>
-<div class="tile"><b>51</b><span>scripts determinísticos</span></div>
-<div class="tile"><b>52</b><span>suites de prueba</span></div>
-<div class="tile"><b>855</b><span>casos en OK hoy</span></div>
+<div class="tile"><b>52</b><span>scripts determinísticos</span></div>
+<div class="tile"><b>53</b><span>suites de prueba</span></div>
+<div class="tile"><b>876</b><span>casos en OK hoy</span></div>
 <div class="tile"><b>23</b><span>sondas del Doctor</span></div>
 <div class="tile"><b>28</b><span>documentos de método</span></div>
 <div class="tile"><b>66</b><span>propuestas de mejora</span></div>
@@ -378,8 +378,8 @@ VEREDICTO-FIN</pre>
 <tr><td><b>M-062</b></td><td>Pedido del dueño: «una sección de arquitectura… no veo la carpeta, otra de devops y de seguridad»</td><td>Secciones transversales visibles en el Cerebro: `cerebro-digital/arquitectura/`, `devops/` y `seguridad/`, cada una con su portada (qué cubre, cómo se pide, guías, scripts, decisiones, dónde va lo del proyecto) y sus fuentes, mudadas desde `configuracion-ia/re</td><td><span class="badge ok">aceptada 2026-11-18 · aplicada 2026-11-1</span></td></tr>
 <tr><td><b>M-063</b></td><td>Pedido del dueño: «otra de networking»</td><td>Sección `cerebro-digital/networking/` (portada y fuentes, con investigación en la web), las guías `disenar-red.md` (puerta `arquitectura-e-infraestructura`) y `diagnosticar-red.md` (puerta `operacion-de-servidores`), la ficha `arquitectura/red.md` del módulo, </td><td><span class="badge ok">aceptada 2026-11-18 · aplicada 2026-11-1</span></td></tr>
 <tr><td><b>M-064</b></td><td>Revisión de la Puerta de Skills contra la documentación de Claude Code (compactación)</td><td>Ninguna `SKILL.md` pasa de ~5.000 tokens: `bin/verificar-skills.py` marca HALLAZGO arriba de 12.500 caracteres y AVISO arriba de 12.000 (salvo las vendidas), medido con el modelo (~2,6 caracteres por token en nuestro castellano con markdown, no 3,6 como suponí</td><td><span class="badge ok">aceptada 2026-11-25 · aplicada 2026-11-2</span></td></tr>
-<tr><td><b>M-065</b></td><td>Pedido del dueño: «que no agarre nada por fuera del proyecto»</td><td>Capa 0 de la Puerta: una sesión aislada del proyecto. `disableClaudeAiConnectors: true` en `.claude/settings.json` (se respeta desde cualquier alcance) y un lanzador que abra `claude --setting-sources project,local --strict-mcp-config --mcp-config .mcp.json` (</td><td><span class="badge warn">propuesta</span></td></tr>
-<tr><td><b>M-066</b></td><td>Revisión de agentes y subagentes contra la documentación de Claude Code</td><td>Que los `orquestador-&lt;función&gt;` no se puedan lanzar como subagentes (`deny: Agent(orquestador-…)` en el proyecto, si se confirma que no impide `claude --agent`; si lo impide, que su puerta frene cuando no corre como sesión principal)</td><td><span class="badge warn">propuesta</span></td></tr>
+<tr><td><b>M-065</b></td><td>Pedido del dueño: «que no agarre nada por fuera del proyecto»</td><td>Capa 0 de la Puerta: una sesión aislada del proyecto. `disableClaudeAiConnectors: true` en `.claude/settings.json` (se respeta desde cualquier alcance) y un lanzador que abra `claude --setting-sources project,local --strict-mcp-config --mcp-config .mcp.json` (</td><td><span class="badge ok">aceptada 2026-11-27 · aplicada 2026-11-2</span></td></tr>
+<tr><td><b>M-066</b></td><td>Revisión de agentes y subagentes contra la documentación de Claude Code</td><td>Que los `orquestador-&lt;función&gt;` no se puedan lanzar como subagentes (`deny: Agent(orquestador-…)` en el proyecto, si se confirma que no impide `claude --agent`; si lo impide, que su puerta frene cuando no corre como sesión principal)</td><td><span class="badge ok">aceptada 2026-11-27 · aplicada 2026-11-2</span></td></tr>
 </table></section>
 <section id="skills"><h2>08 · Skills (38 canónicas + 11 scoped)</h2><p class="lead">Una pregunta por skill, sin solapes. La fuente es <code>cerebro-digital/configuracion-ia/skills/</code>; los espejos se regeneran con <code>bin/sync-skills</code> y el hook exige que sean idénticos y que cada <code>SKILL.md</code> cumpla la especificación abierta (nombre igual a la carpeta, descripción de hasta 1024 caracteres).</p>
 <h3>Cerebro Digital (9)</h3><div class="cards">
@@ -447,7 +447,7 @@ VEREDICTO-FIN</pre>
 <tr><td><code>verificar-tdd</code></td><td>(Repos de front · desarrollo) Auditar la evidencia del ciclo TDD de una Tarea: que cada ítem de la lista &quot;Tests a escribir PRIMERO&quot; tenga su prueba de rojo (el test fall…</td></tr>
 </table></div>
 </div><p>El método de desarrollo vive en <code>desarrollo/references/metodo/</code> (28 documentos): <code>accesibilidad.md</code>, <code>adoptar-proyecto-existente.md</code>, <code>armar-la-suite.md</code>, <code>arrancar-funcionalidad.md</code>, <code>arreglar-un-bug.md</code>, <code>code-review.md</code>, <code>contrato-openapi.md</code>, <code>crear-endpoint.md</code>, <code>dependencias-y-config.md</code>, <code>depurar.md</code>, <code>entender-codigo-ajeno.md</code>, <code>entregar-a-produccion.md</code>, <code>incidentes.md</code>, <code>ingenieria-inversa.md</code>, <code>merge-request.md</code>, <code>migracion-de-base.md</code>, <code>observabilidad.md</code>, <code>pruebas-de-aceptacion.md</code>, <code>ramas-y-commits.md</code>, <code>refactor-y-migracion.md</code>, <code>refactor.md</code>, <code>rendimiento.md</code>, <code>seguridad-y-datos-sensibles.md</code>, <code>simular-api-desde-el-contrato.md</code>, <code>tdd-ciclo-y-evidencia.md</code>, <code>tdd-stack-back.md</code>, <code>tdd-stack-front.md</code>, <code>tests-unitarios.md</code>.</p></section>
-<section id="scripts"><h2>09 · Scripts determinísticos (51)</h2><p class="lead">Python, biblioteca estándar, salida en tres estados: 0 OK, 1 HALLAZGO, 2 SIN DATOS. Lo que cuentan no lo discute el modelo; lo que no corrió es SIN DATOS.</p><table><tr><th>Script</th><th>Qué hace</th></tr>
+<section id="scripts"><h2>09 · Scripts determinísticos (52)</h2><p class="lead">Python, biblioteca estándar, salida en tres estados: 0 OK, 1 HALLAZGO, 2 SIN DATOS. Lo que cuentan no lo discute el modelo; lo que no corrió es SIN DATOS.</p><table><tr><th>Script</th><th>Qué hace</th></tr>
 <tr><td><code>bin/activo-autorizado.py</code></td><td>GATE de SERVIDOR, en datos duros: si un servidor, un cluster o una URL esta autorizado, y hasta donde. SOLO LECTURA</td></tr>
 <tr><td><code>bin/adoptar-proyecto.py</code></td><td>Enchufa un proyecto que YA existe (una carpeta en el Escritorio, con o sin Claude Code) a este nucleo, en un comando</td></tr>
 <tr><td><code>bin/analizar-tareas.py</code></td><td>Analisis MECANICO del SET de Tareas de una Historia: lo que de analizar-tareas es CONTEO</td></tr>
@@ -490,6 +490,7 @@ VEREDICTO-FIN</pre>
 <tr><td><code>bin/relevar-config-ia.py</code></td><td>Releva la configuracion de IA que YA tiene un proyecto (Claude Code, Gemini, Cursor, Copilot, opencode)</td></tr>
 <tr><td><code>bin/resumir-plan.py</code></td><td>Resumen de un plan de Terraform u OpenTofu para la aprobacion: que crea, cambia, reemplaza y borra. SOLO LECTURA</td></tr>
 <tr><td><code>bin/salud-host.py</code></td><td>Salud de un servidor, leida del reporte fijo del colector. SOLO LECTURA</td></tr>
+<tr><td><code>bin/sesion-proyecto.py</code></td><td>Abre una sesion de Claude Code que carga SOLO lo del proyecto, y verifica que asi sea</td></tr>
 <tr><td><code>bin/sync-espejos.py</code></td><td>Regenera los espejos desde su fuente sin dejarlos a medias y sin pisar lo que se edito en el espejo</td></tr>
 <tr><td><code>bin/tablero-local.py</code></td><td>Tablero LOCAL: el backlog como archivos markdown en el Cerebro, sin MCP ni servidor. Para trabajar solo</td></tr>
 <tr><td><code>bin/tendencia.py</code></td><td>Dice en una frase si el ecosistema viene MEJOR o PEOR, comparando las ultimas sesiones con las anteriores</td></tr>
@@ -545,6 +546,7 @@ VEREDICTO-FIN</pre>
 <tr><td><code>probar-salud-host.py</code></td><td><span class="badge ok">OK</span></td><td>OK -- 76 casos, 0 fallas</td></tr>
 <tr><td><code>probar-scripts-git.py</code></td><td><span class="badge ok">OK</span></td><td>60 de 60 casos</td></tr>
 <tr><td><code>probar-secretos.py</code></td><td><span class="badge ok">OK</span></td><td>OK -- 12 casos, 0 fallas</td></tr>
+<tr><td><code>probar-sesion-proyecto.py</code></td><td><span class="badge ok">OK</span></td><td>21 de 21 casos</td></tr>
 <tr><td><code>probar-sync-espejos.py</code></td><td><span class="badge ok">OK</span></td><td>30 de 30 casos</td></tr>
 <tr><td><code>probar-tablero-local.py</code></td><td><span class="badge ok">OK</span></td><td>25 de 25 casos</td></tr>
 <tr><td><code>probar-tendencia.py</code></td><td><span class="badge ok">OK</span></td><td>10 de 10 casos</td></tr>
@@ -553,7 +555,7 @@ VEREDICTO-FIN</pre>
 <tr><td><code>probar-verificar-skills.py</code></td><td><span class="badge ok">OK</span></td><td>29 de 29 casos</td></tr>
 <tr><td><code>probar-verificar-staged.py</code></td><td><span class="badge ok">OK</span></td><td>12 de 12 casos</td></tr>
 <tr><td><code>probar-vigencia-certificados.py</code></td><td><span class="badge ok">OK</span></td><td>OK -- 42 casos, 0 fallas</td></tr>
-</table><p><b>51 suites en OK, 855 casos.</b></p></section>
+</table><p><b>52 suites en OK, 876 casos.</b></p></section>
 <section id="doctor"><h2>10 · El Doctor</h2><p class="lead"><code>doctor/doctor.py</code> revisa el repositorio en reposo (13 sondas) y, si hay código clonado en back/ o front/, el código (10 sondas). Es periódico y manual, nunca por Tarea; sus hallazgos se atienden uno por uno con <code>atender-hallazgos</code>. También existe <code>bin/verificar-skills.py</code> para la especificación de las skills y <code>bin/instalar.py</code> para el estado de un clone.</p>
 <table><tr><th>#</th><th>Sonda</th><th>Qué mira</th><th>Hoy</th></tr>
 <tr><td>1</td><td><b>Guardarraíles</b></td><td>Que el hook esté activo en este clone, guardado como ejecutable en git (100755: si no, Linux y macOS lo ignoran en silencio), y que tenga sus cuatro guardas; y que los `.sh` de `bin/` y `doctor/bin/` también sean ejecuta</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">Los guardarrailes del repositorio estan activos.</span></td></tr>
@@ -567,7 +569,7 @@ VEREDICTO-FIN</pre>
 <tr><td>9</td><td><b>Andamiaje obsoleto</b></td><td>`.gitkeep` en carpetas que ya tienen contenido</td><td><span class="badge bad">HALLAZGO</span><br><span style="color:var(--muted);font-size:12px">1 archivo(s) .gitkeep; 1 ya no hace(n) falta.</span></td></tr>
 <tr><td>10</td><td><b>Costo de contexto</b></td><td>Tokens por skill, en dos cifras (ver abajo)</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">38 skills · ~19290 tokens pesan SIEMPRE (las descripciones y AGENTS.md) · ~125796 tokens si se cargaran todas enteras, que no pasa.</span></td></tr>
 <tr><td>11</td><td><b>Deuda declarada</b></td><td>Marcas de pendiente, y qué archivos con pendientes nadie toca hace meses</td><td><span class="badge bad">HALLAZGO</span><br><span style="color:var(--muted);font-size:12px">434 marca(s) de pendiente en la documentacion (405 archivo(s) son copia byte identica de otro -los espejos de skills- y se contaron una sola vez). No </span></td></tr>
-<tr><td>12</td><td><b>Cómo venimos</b></td><td>Si los hallazgos **subieron o bajaron** respecto de la corrida anterior. Sale del histórico, y no corre con `--solo`</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">Contra la corrida del 25-11-2026. 0 mejoraron · 0 empeoraron · 12 sin cambios.</span></td></tr>
+<tr><td>12</td><td><b>Cómo venimos</b></td><td>Si los hallazgos **subieron o bajaron** respecto de la corrida anterior. Sale del histórico, y no corre con `--solo`</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">Contra la corrida del 27-11-2026. 0 mejoraron · 0 empeoraron · 12 sin cambios.</span></td></tr>
 <tr><td>13</td><td><b>Autocontrol del informe</b></td><td>El Doctor revisándose a sí mismo (ver abajo)</td><td><span class="badge ok">OK</span><br><span style="color:var(--muted);font-size:12px">39 chequeos de coherencia sobre las otras sondas. todos pasan.</span></td></tr>
 <tr><td>14</td><td><b>Repos conectados</b></td><td>Qué repositorios están clonados hoy, con qué stack y qué slices. Corre **siempre**: es la que explica a las otras ocho</td><td><span class="badge ">SIN DATOS</span><br><span style="color:var(--muted);font-size:12px">0 de 2 carpeta(s) con codigo. Mientras falte codigo, estas nueve sondas quedan dormidas: limites del diseno, contrato declarado vs implementado, la co</span></td></tr>
 <tr><td>15</td><td><b>Límites del diseño</b></td><td>En el back, las reglas de dependencia del monolito modular (DEC-002): adentro del módulo `api → application, domain` · `application → domain` · `infra → application, domain` · `domain →` nada · `exceptions/` la usan toda</td><td>—</td></tr>
@@ -660,4 +662,4 @@ for t in bin/probar-*.py; do python -B "$t"; done</pre>
 </table></section>
 <section id="regenerar"><h2>14 · Cómo se regenera este informe</h2><pre>python -B bin/generar-informe.py              # corre pruebas y Doctor; tarda unos minutos
 python -B bin/generar-informe.py --rapido     # sin correr nada: estructura y catálogo</pre><p>Las skills, los scripts, las sondas, las propuestas y las decisiones se leen de sus archivos; la bitácora y los pendientes se editan en el propio script, en un solo lugar. Los diagramas son SVG embebido: el informe no depende de nada externo y se abre en cualquier navegador o se imprime.</p></section>
-</main></div><footer>TEMPLATE ESTRUCTURA IA · informe generado el 2026-11-25 19:36 · bin/generar-informe.py · sin dependencias externas</footer></body></html>
+</main></div><footer>TEMPLATE ESTRUCTURA IA · informe generado el 2026-11-27 13:36 · bin/generar-informe.py · sin dependencias externas</footer></body></html>
