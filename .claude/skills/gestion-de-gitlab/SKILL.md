@@ -7,6 +7,9 @@ description: >-
   ramas?", "armá el proyecto en GitLab", "auditá el runner", "¿hay que actualizar el GitLab?", "revisá este texto
   antes de subirlo a GitLab", "/gestion-de-gitlab". NO es para el YAML del pipeline ni para desplegar (eso es
   despliegue-continuo). Español (Argentina).
+metadata:
+  seccion: gitlab
+  rol: puerta
 ---
 
 # Gestión de GitLab — la puerta y el rol del orquestador

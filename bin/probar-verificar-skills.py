@@ -147,6 +147,87 @@ def main():
     caso('sin la skill del orquestador no hay ruteo que verificar: lo dice y no frena', rc == 0 and 'ruteo: no se verifico' in out, out[:300])
     shutil.rmtree(rut, ignore_errors=True)
 
+    # Puerta de Skills: una skill con metadata.seccion se rutea por la puerta de su seccion (la puerta la conoce por su
+    # indice generado); y los problemas de la Puerta (bin/puerta-skills.py) llegan aca como HALLAZGO.
+    pu = tempfile.mkdtemp(prefix='probar-skills-puerta-')
+
+    def con_seccion(n, seccion, puerta=False, apunta=True):
+        # la puerta de una seccion de varias skills apunta a su indice (si no, HALLAZGO puerta-sin-indice)
+        skill(pu, n, '---\nname: %s\ndescription: Hace %s.\nmetadata:\n  seccion: %s\n%s---\n%s'
+              % (n, n, seccion, '  rol: puerta\n' if puerta else '',
+                 '\nLas otras skills: `references/indice-seccion.md`.\n' if (puerta and apunta) else ''))
+
+    def generar():
+        r = subprocess.run([sys.executable, '-I', os.path.join(AQUI, 'puerta-skills.py'), '--generar', '--raiz', pu],
+                           capture_output=True, text=True, encoding='utf-8', errors='replace')
+        return r.returncode
+
+    con_seccion('cerebro-orquestador', 'conocimiento', puerta=True)
+    con_seccion('una', 'conocimiento')
+    con_seccion('otra', 'tickets', puerta=True)
+    con_seccion('tercera', 'tickets')
+    with open(os.path.join(pu, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write('**4 habilidades**\n\nToda solicitud pasa por `cerebro-orquestador`. Lo de tickets, por [[otra]].\n')
+    os.makedirs(os.path.join(pu, '.claude'))
+    with open(os.path.join(pu, '.claude', 'settings.json'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write('{\n  "hooks": {}\n}\n')
+    caso('puerta: el repo de mentira se genera', generar() == 0)
+    rc, out = correr(pu, '--json')
+    d = json.loads(out)
+    caso('ruteo por la puerta: una skill no nombrada pasa si la puerta de su seccion esta nombrada',
+         rc == 0 and d.get('ruteo') == [] and d.get('puerta', {}).get('problemas') == [], out[:400])
+    rc, out = correr(pu)
+    caso('puerta al dia: lo dice el resumen', rc == 0 and 'puerta: al dia' in out, out[:300])
+    con_seccion('cuarta', 'diseno', puerta=True)
+    con_seccion('quinta', 'diseno')
+    with open(os.path.join(pu, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write('**6 habilidades**\n\nToda solicitud pasa por `cerebro-orquestador`. Lo de tickets, por [[otra]].\n')
+    generar()
+    rc, out = correr(pu, '--json')
+    d = json.loads(out)
+    caso('ruteo por la puerta: ni la skill ni su puerta nombradas: HALLAZGO, las dos',
+         rc == 1 and 'quinta' in d.get('ruteo', []) and 'cuarta' in d.get('ruteo', []) and 'tercera' not in d.get('ruteo', []),
+         out[:400])
+    with open(os.path.join(pu, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write('**6 habilidades**\n\nToda solicitud pasa por `cerebro-orquestador`. Tickets, [[otra]]. Diseno, `cuarta`.\n')
+    os.remove(os.path.join(pu, 'cerebro-digital', 'configuracion-ia', 'skills', 'otra', 'references', 'indice-seccion.md'))
+    rc, out = correr(pu, '--json')
+    d = json.loads(out)
+    caso('un problema de la Puerta (indice ausente) llega como HALLAZGO',
+         rc == 1 and d.get('veredicto') == 'HALLAZGO' and d.get('ruteo') == []
+         and [p[0] for p in d.get('puerta', {}).get('problemas', [])] == ['indice'], out[:400])
+    rc, out = correr(pu)
+    caso('el problema de la Puerta se lee en el texto, con como arreglarlo',
+         rc == 1 and 'HALLAZGO puerta' in out and '--generar' in out, out[:600])
+    generar()
+    con_seccion('otra', 'tickets', puerta=True, apunta=False)
+    rc, out = correr(pu, '--json')
+    d = json.loads(out)
+    caso('una puerta que no apunta a su indice llega como HALLAZGO (el ruteo por la puerta no vale sin eso)',
+         rc == 1 and [p[0] for p in d.get('puerta', {}).get('problemas', [])] == ['puerta-sin-indice'], out[:400])
+    con_seccion('otra', 'tickets', puerta=True)
+    con_seccion('sin-puerta-escrita', 'modernizacion')
+    with open(os.path.join(pu, 'AGENTS.md'), 'w', encoding='utf-8', newline='\n') as h:
+        h.write('**7 habilidades**\n\n`cerebro-orquestador`, [[otra]], `cuarta`, `sin-puerta-escrita`.\n')
+    rc, out = correr(pu, '--json')
+    d = json.loads(out)
+    caso('una seccion sin puerta llega como HALLAZGO aunque la skill este nombrada',
+         rc == 1 and 'sin-puerta' in [p[0] for p in d.get('puerta', {}).get('problemas', [])], out[:400])
+    shutil.rmtree(pu, ignore_errors=True)
+
+    rc, out = correr(solo_bien)
+    caso('la Puerta no adoptada (ninguna metadata.seccion): no frena y lo dice', rc == 0 and 'puerta: no adoptada' in out,
+         out[:300])
+
+    # Si bin/puerta-skills.py no se puede cargar, esa parte es SIN DATOS: nunca OK.
+    sin_mod = tempfile.mkdtemp(prefix='probar-skills-sin-puerta-')
+    shutil.copy(SCRIPT, os.path.join(sin_mod, 'verificar-skills.py'))
+    r = subprocess.run([sys.executable, '-I', os.path.join(sin_mod, 'verificar-skills.py'), solo_bien],
+                       capture_output=True, text=True, encoding='utf-8', errors='replace')
+    caso('sin bin/puerta-skills.py al lado: SIN DATOS (2), no OK', r.returncode == 2 and 'puerta' in r.stdout,
+         r.stdout[:300])
+    shutil.rmtree(sin_mod, ignore_errors=True)
+
     for d_ in (tmp, solo_bien, vacio):
         shutil.rmtree(d_, ignore_errors=True)
     fallas = [n for n, ok, _ in ESPERADOS if not ok]

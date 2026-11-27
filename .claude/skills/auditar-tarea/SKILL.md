@@ -12,6 +12,8 @@ description: >-
   para arrancar el desarrollo (lo que encuentre queda como pendiente en la tarjeta). NO
   redacta, NO corrige, NO escribe en el board: devuelve hallazgos y preguntas. Español
   (Argentina).
+metadata:
+  seccion: tickets
 ---
 
 # Auditar tarea

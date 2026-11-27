@@ -11,6 +11,8 @@ description: >-
   (Dado/Cuando/Entonces). PHI PROHIBIDO (marcadores). NO inventa: lo faltante se
   marca "pendiente" y se pregunta, esperando confirmación humana. SOLO redacta:
   no escribe en Azure (para eso está la skill cargar-a-azure).
+metadata:
+  seccion: tickets
 ---
 
 # Redactar tarea

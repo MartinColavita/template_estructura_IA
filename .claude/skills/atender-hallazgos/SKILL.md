@@ -10,6 +10,8 @@ description: >-
   se verifico no esta hecho. Usar cuando se pida "atendamos los hallazgos", "vamos uno por uno
   con el informe", "arreglemos lo que encontro el Doctor", "/atender-hallazgos". Espanol
   (Argentina).
+metadata:
+  seccion: conocimiento
 ---
 
 # Atender hallazgos

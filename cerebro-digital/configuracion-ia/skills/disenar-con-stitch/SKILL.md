@@ -1,14 +1,17 @@
 ---
 name: disenar-con-stitch
 description: >-
-  Diseñar las pantallas del producto con Google Stitch (por MCP o pegando el prompt): armar el brief
-  desde la ficha del Cerebro (propósito, pasos, reglas, estados, glosario, tokens), generar la pantalla
-  en Stitch, dejar que la persona la pula allá, exportar HTML y captura a borrador/disenos/, promover con
-  un "sí" a entregables/disenos/ como maqueta vigente (fuente_maqueta en la ficha), llevar los tokens al
-  design system y darle bajada al front por cerebro-architect-ui. Usar cuando se pida "diseñá la
-  pantalla de X", "armá el diseño en Stitch", "pasá la ficha a Stitch", "exportá las pantallas",
-  "/disenar-con-stitch". Sin PHI en prompts ni pantallas. No escribe código del front. Español
-  (Argentina).
+  Puerta del diseño: las pantallas del producto con Google Stitch (por MCP o pegando el prompt), el
+  HTML o prototipo hecho a mano y las presentaciones. Arma el brief desde la ficha del Cerebro
+  (propósito, pasos, reglas, estados, glosario, tokens), genera la pantalla en Stitch, deja que la
+  persona la pula, exporta HTML y captura a borrador/disenos/, promueve con un "sí" a
+  entregables/disenos/ como maqueta vigente y le da bajada al front por cerebro-architect-ui. Usar
+  cuando se pida "diseñá la pantalla de X", "armá el diseño en Stitch", "pasá la ficha a Stitch",
+  "exportá las pantallas", "armá una presentación", "/disenar-con-stitch". Sin PHI. No escribe código
+  del front. Español (Argentina).
+metadata:
+  seccion: diseno
+  rol: puerta
 ---
 
 # Diseñar con Stitch
@@ -17,6 +20,10 @@ Stitch es donde **nace y se pule lo visual**. Esta skill no dibuja: convierte lo
 de una pantalla en un brief que Stitch entiende, deja que la persona itere allá, y trae de vuelta la
 maqueta como dato del Cerebro para que el front la baje. Setup y herramientas:
 [[integracion-stitch-mcp/00-index]].
+
+Es la puerta del diseño: también un HTML o prototipo a mano (`cerebro-mockup-design`), la bajada a especificación
+(`cerebro-architect-ui`) y una presentación (`cerebro-ppt-generator`). Las skills de esta sección, con para qué sirve
+cada una: `references/indice-seccion.md` (lo genera `bin/puerta-skills.py`); leelo cuando el pedido no nombra la skill.
 
 ## Precondición
 

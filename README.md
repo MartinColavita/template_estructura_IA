@@ -75,10 +75,10 @@ regenerarlo después de cambiar skills, scripts o decisiones.
 | `modulo-ejemplo/extraccion-reuniones/` | Insumo crudo de reuniones, sin consolidar |
 | `diseno/diseno-sistema.md` | Tokens y componentes visuales del producto |
 
-## 🛠️ Skills del Ecosistema (38 habilidades)
+## 🛠️ Skills del Ecosistema (39 habilidades)
 
 Registradas en `cerebro-digital/configuracion-ia/skills/` (fuente canónica) y reflejadas en los
-espejos versionados `.claude/skills/` y `.agents/skills/`: **9 del Cerebro Digital** + **13 del
+espejos versionados `.claude/skills/` y `.agents/skills/`: **9 del Cerebro Digital** + **14 del
 pipeline del tablero** (Azure DevOps por MCP o el tablero local) + **10 de desarrollo, QA y evolución** + **5 puertas
 de función** (arquitectura e infraestructura, despliegue continuo, operación de servidores, seguridad, GitLab) + **1
 externa vendorizada** (Archify).
@@ -87,7 +87,7 @@ externa vendorizada** (Archify).
 
 - `disenar-con-stitch`: las pantallas se diseñan y se pulen en Google Stitch (por MCP o pegando el prompt) a partir de la ficha; la exportación es la maqueta vigente y baja al front por `cerebro-architect-ui`.
 - `cerebro-knowledge`: directivas de consulta obligatoria del Cerebro Digital.
-- `cerebro-orquestador`: plan de ejecución, flujo de curaduría de 5 pasos, vigilancia semántica, ruteo del sub-flujo de tickets y umbrales de orquestación.
+- `cerebro-orquestador`: plan de ejecución, flujo de curaduría de 5 pasos, vigilancia semántica, ruteo a la puerta de cada función y umbrales de orquestación.
 - `cerebro-architect-ui`: análisis de maquetas contra reglas, sin fake toggles.
 - `cerebro-ppt-generator`: presentaciones HTML autocontenidas, sin compilar.
 - `cerebro-mockup-design`: design system y tokens para mockups HTML.
@@ -95,8 +95,9 @@ externa vendorizada** (Archify).
 - `cognitive-doc-design`: patrones de documentación cognitiva (progressive disclosure, tablas de decisión, bloque de derivación).
 - `engram-memory-protocol`: protocolo de memoria persistente en Engram.
 
-### Pipeline del tablero (13)
+### Pipeline del tablero (14)
 
+- `tickets`: la puerta de los tickets: rutea por el objeto del pedido (árbol o ítem; redactar, cargar, lote, consultar, tomar, comentar, cerrar, auditar, estimar) a la skill que corresponde.
 - `redactar-tarea`: redacta un ticket suelto; no toca el board.
 - `estimar-story-points`: Puntos de historia; no toca el board.
 - `consultar-backlog`: consulta y audita el board (cobertura y desfase); sólo lectura.

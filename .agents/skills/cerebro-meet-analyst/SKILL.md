@@ -11,6 +11,7 @@ license: Apache-2.0
 metadata:
   author: equipo
   version: "1.1"
+  seccion: conocimiento
 ---
 
 # cerebro-meet-analyst

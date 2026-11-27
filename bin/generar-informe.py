@@ -32,7 +32,7 @@ MET = os.path.join(SK, 'desarrollo', 'references', 'metodo')
 GRUPOS = [
     ('Cerebro Digital', ['cerebro-orquestador', 'cerebro-knowledge', 'cerebro-architect-ui', 'cerebro-mockup-design',
                          'cerebro-ppt-generator', 'cerebro-meet-analyst', 'cognitive-doc-design', 'engram-memory-protocol', 'disenar-con-stitch']),
-    ('Pipeline Azure DevOps', ['redactar-tarea', 'estimar-story-points', 'consultar-backlog', 'analizar-tareas',
+    ('Pipeline Azure DevOps', ['tickets', 'redactar-tarea', 'estimar-story-points', 'consultar-backlog', 'analizar-tareas',
                                'auditar-historia', 'auditar-tarea', 'sincronizar-backlog', 'planificar-lote',
                                'cargar-a-azure', 'tomar-tarea', 'comentar-tarea', 'desarrollar-asignadas',
                                'atender-hallazgos']),

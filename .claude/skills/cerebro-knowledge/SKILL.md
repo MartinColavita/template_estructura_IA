@@ -1,10 +1,12 @@
 ---
 name: cerebro-knowledge
 description: >
-  Directivas de consulta obligatoria del Cerebro Digital (OKF) del proyecto: qué se lee, en qué
-  orden y cómo se cita. Trigger: cualquier pregunta sobre el dominio, una regla de negocio, una
+  Responder una pregunta del dominio, una regla, una decisión o el avance leyendo el Cerebro Digital
+  (OKF): qué se lee, en qué orden y cómo se cita. Trigger: cualquier pregunta sobre el dominio, una regla de negocio, una
   decisión, un pendiente o el estado de avance del proyecto.
 license: Apache-2.0
+metadata:
+  seccion: conocimiento
 ---
 
 ## Cuándo se usa

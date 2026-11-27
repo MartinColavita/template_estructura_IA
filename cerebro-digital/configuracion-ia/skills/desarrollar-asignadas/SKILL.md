@@ -13,6 +13,8 @@ description: >-
   mis tareas asignadas", "arrancá con lo que tengo asignado", "poné a trabajar el tablero",
   "/desarrollar-asignadas". Español (Argentina); no inventa: #ID, estados y dependencias son
   dato duro.
+metadata:
+  seccion: desarrollo
 ---
 
 # Desarrollar asignadas (Orca o sin Orca + tablero)

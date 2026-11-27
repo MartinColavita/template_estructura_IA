@@ -104,7 +104,7 @@ Un segundo módulo se crea copiando esta misma estructura con otro slug y agreg�
 
 **Cerebro Digital (9):**
 -   `configuracion-ia/skills/cerebro-knowledge/`: instrucciones para que las IA consulten este OKF.
--   `configuracion-ia/skills/cerebro-orquestador/`: coordinación del ecosistema, plan de ejecución, vigilancia semántica y ruteo de tickets.
+-   `configuracion-ia/skills/cerebro-orquestador/`: coordinación del ecosistema, plan de ejecución, vigilancia semántica y ruteo a la puerta de cada función.
 -   `configuracion-ia/skills/cerebro-architect-ui/`: mapeo UI ↔ reglas del arquitecto.
 -   `configuracion-ia/skills/cerebro-ppt-generator/`: presentaciones interactivas en HTML.
 -   `configuracion-ia/skills/cerebro-mockup-design/`: design system y tokens para mockups HTML.
@@ -113,7 +113,8 @@ Un segundo módulo se crea copiando esta misma estructura con otro slug y agreg�
 -   `configuracion-ia/skills/engram-memory-protocol/`: Engram, sólo para la continuidad entre sesiones.
 -   `configuracion-ia/skills/disenar-con-stitch/`: diseño de pantallas en Google Stitch (MCP o manual) desde la ficha; la exportación es la maqueta vigente (`fuente_maqueta`) y baja al front por `cerebro-architect-ui`.
 
-**Pipeline del tablero (13):**
+**Pipeline del tablero (14):**
+-   `configuracion-ia/skills/tickets/`: la puerta de los tickets: rutea por el objeto del pedido a la skill del pipeline que corresponde.
 -   `configuracion-ia/skills/redactar-tarea/`: redacta un ticket suelto (Historia/Tarea/Bug/Habilitador); no toca el board.
 -   `configuracion-ia/skills/estimar-story-points/`: calcula los Puntos de historia; no toca el board.
 -   `configuracion-ia/skills/consultar-backlog/`: consulta y audita el board (cobertura, desfase); sólo lectura.

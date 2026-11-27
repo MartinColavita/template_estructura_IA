@@ -22,6 +22,8 @@ cómo se ata cada prueba a su Historia está en `qa/README.md`.
 | Tester | `disenar-pruebas` | El plan de pruebas de aceptación, como comentario corto en la Historia |
 | QA automatización | `automatizar-e2e` | Las pruebas de punta a punta en `qa/`, con el motor que fija `DEC-003` |
 
+Las dos se piden por la puerta `desarrollo`, que también las atiende.
+
 ## Qué cubre y qué no
 
 **Cubre:**

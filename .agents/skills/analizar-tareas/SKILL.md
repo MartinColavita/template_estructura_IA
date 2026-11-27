@@ -11,6 +11,8 @@ description: >-
   corre sólo si se pide, antes de confirmar el alta, y no frena nada: lo que encuentra lo
   devuelve COMO PREGUNTAS y, si no se contestan, queda como pendiente a confirmar en la
   tarjeta. NO inventa, NO escribe en el board. Español (Argentina).
+metadata:
+  seccion: tickets
 ---
 
 # Analizar tareas

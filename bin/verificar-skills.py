@@ -29,6 +29,12 @@ Y el RUTEO ESCRITO: que cada skill de la fuente este nombrada (entre acentos gra
 texto que se carga siempre: AGENTS.md o la skill del orquestador. Claude Code lista las skills con un cupo (el
 1% del contexto) y, cuando se desborda, saca las DESCRIPCIONES de las menos usadas y deja solo el nombre: una
 skill que depende solo de su descripcion deja de dispararse, y nadie se entera (code.claude.com/docs, skills).
+Con la Puerta de Skills adoptada, una skill que declara metadata.seccion (o esta en ASIGNADAS) tambien pasa si
+la PUERTA de su seccion esta nombrada ahi: la puerta la rutea por su indice generado.
+Y la PUERTA DE SKILLS (bin/puerta-skills.py, cargado como modulo): cada skill con su seccion, una puerta por
+seccion, el indice de cada puerta y skillOverrides de .claude/settings.json al dia. Sus problemas son HALLAZGO; si
+ninguna skill declara metadata.seccion, la Puerta no esta adoptada y no frena; si el modulo no se puede cargar, esa
+parte es SIN DATOS (2), nunca OK.
 
 QUE NO HACE. No lee el cuerpo ni juzga si la skill esta bien escrita. No modifica nada. Solo biblioteca
 estandar. ASCII puro.
@@ -101,8 +107,9 @@ def conteo(raiz):
     return res
 
 
-def ruteo(raiz):
-    """Skills de la fuente que ningun texto de RUTEO nombra, o None si no hay orquestador (nada que verificar)."""
+def ruteo(raiz, puerta_de=None):
+    """Skills de la fuente que ningun texto de RUTEO nombra, o None si no hay orquestador (nada que verificar).
+    puerta_de = {skill: la puerta de su seccion}: una skill tambien pasa si su puerta esta nombrada."""
     fuente = os.path.join(raiz, RAICES[0])
     if not os.path.isfile(os.path.join(fuente, ORQUESTADOR, 'SKILL.md')):
         return None
@@ -113,8 +120,28 @@ def ruteo(raiz):
             with open(ruta, encoding='utf-8', errors='replace') as h:
                 texto += h.read() + ' '
     nombres = sorted(d for d in os.listdir(fuente) if os.path.isdir(os.path.join(fuente, d)) and not d.startswith('.'))
-    return [n for n in nombres
-            if not re.search(r'`%s`|\[\[%s(\]\]|[|#])' % (re.escape(n), re.escape(n)), texto)]
+
+    def nombrada(n):
+        return bool(n) and re.search(r'`%s`|\[\[%s(\]\]|[|#])' % (re.escape(n), re.escape(n)), texto) is not None
+    puerta_de = puerta_de or {}
+    return [n for n in nombres if not nombrada(n) and not nombrada(puerta_de.get(n))]
+
+
+def puerta(raiz):
+    """La Puerta de Skills (bin/puerta-skills.py, cargado como modulo, como hace el Doctor con este script):
+    {'adoptada', 'problemas', 'notas', 'puerta_de'}, o {'error'} si no se pudo cargar o fallo (SIN DATOS, nunca OK)."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            'puerta_skills_para_verificar', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'puerta-skills.py'))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        secs = mod.secciones(raiz)
+        return {'adoptada': mod.adoptada(raiz), 'problemas': [list(p) for p in mod.problemas(raiz)],
+                'notas': mod.notas(raiz),
+                'puerta_de': {n: e['puerta'] for e in secs.values() if e['puerta'] for n in e['skills']}}
+    except Exception as e:  # noqa: BLE001 -- cualquier falla de esta parte es SIN DATOS de esta parte
+        return {'error': '%s: %s' % (type(e).__name__, e)}
 
 
 def frontmatter(texto):
@@ -242,24 +269,37 @@ def main():
     con_hallazgo = [x for x in resultados if x['hallazgos']]
     con_aviso = [x for x in resultados if x['avisos']]
     conteos = conteo(raiz)
-    sin_ruteo = ruteo(raiz)
-    veredicto = 'HALLAZGO' if (con_hallazgo or conteos or sin_ruteo) else 'OK'
+    pu = puerta(raiz)
+    sin_ruteo = ruteo(raiz, pu.get('puerta_de'))
+    probs_puerta = pu.get('problemas') or []
+    hay_hallazgo = bool(con_hallazgo or conteos or sin_ruteo or probs_puerta)
+    rc = HALLAZGO if hay_hallazgo else (SIN_DATOS if 'error' in pu else OK)
+    veredicto = ['OK', 'HALLAZGO', 'SIN DATOS'][rc]
     if a.json:
         print(json.dumps({'veredicto': veredicto, 'skills': len(resultados), 'resultados': resultados, 'conteo': conteos,
-                          'ruteo': sin_ruteo}, ensure_ascii=True, indent=1))
+                          'ruteo': sin_ruteo, 'puerta': {k: v for k, v in pu.items() if k != 'puerta_de'}},
+                         ensure_ascii=True, indent=1))
     else:
-        print('%s -- %d SKILL.md revisados, %d con hallazgo, %d con aviso; conteos y listas: %s; ruteo: %s' % (
+        print('%s -- %d SKILL.md revisados, %d con hallazgo, %d con aviso; conteos y listas: %s; ruteo: %s; puerta: %s' % (
             veredicto, len(resultados), len(con_hallazgo), len(con_aviso),
             '%d problema(s)' % len(conteos) if conteos else
             ('al dia' if documentos_de_conteo(raiz) else 'no se verificaron (no hay documentos que los anuncien)'),
             'no se verifico (no hay skill %s)' % ORQUESTADOR if sin_ruteo is None else
-            ('%d sin ruteo escrito' % len(sin_ruteo) if sin_ruteo else 'al dia')))
+            ('%d sin ruteo escrito' % len(sin_ruteo) if sin_ruteo else 'al dia'),
+            'SIN DATOS (no se pudo cargar bin/puerta-skills.py: %s)' % pu['error'] if 'error' in pu else
+            ('no adoptada (ninguna skill declara metadata.seccion)' if not pu['adoptada'] else
+             ('%d problema(s)' % len(probs_puerta) if probs_puerta else 'al dia'))))
         for h in conteos:
             print('  HALLAZGO conteo: %s' % h)
         if sin_ruteo:
-            print('  HALLAZGO ruteo: %s no esta(n) nombrada(s) en AGENTS.md ni en la skill %s: su unico disparo es la '
-                  'descripcion, que se cae del listado cuando hay muchas skills. Va una linea de ruteo, con el nombre '
-                  'entre acentos graves.' % (' '.join(sin_ruteo), ORQUESTADOR))
+            print('  HALLAZGO ruteo: %s no esta(n) nombrada(s) en AGENTS.md ni en la skill %s, ni la puerta de su '
+                  'seccion: su unico disparo es la descripcion, que se cae del listado cuando hay muchas skills. Va una '
+                  'linea de ruteo, con el nombre entre acentos graves (o el de la puerta, si la skill declara '
+                  'metadata.seccion).' % (' '.join(sin_ruteo), ORQUESTADOR))
+        for codigo, texto in probs_puerta:
+            print('  HALLAZGO puerta %s: %s' % (codigo, texto))
+        for n in pu.get('notas') or []:
+            print('  AVISO    puerta: %s' % n)
         for x in con_hallazgo:
             for h in x['hallazgos']:
                 print('  HALLAZGO %s: %s' % (x['skill'], h))
@@ -267,7 +307,7 @@ def main():
             for v in x['avisos']:
                 print('  AVISO    %s: %s' % (x['skill'], v))
         print('  Regla: name == carpeta, [a-z0-9-], <= %d; description 1..%d caracteres; sin BOM; sin frases muertas (%s). Fuente: agentskills.io/specification' % (MAX_NOMBRE, MAX_DESC, ', '.join(FRASES_MUERTAS)))
-    return HALLAZGO if (con_hallazgo or conteos or sin_ruteo) else OK
+    return rc
 
 
 if __name__ == '__main__':

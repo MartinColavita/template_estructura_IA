@@ -11,6 +11,8 @@ description: >-
   se pida "automatizá la Historia X", "escribí las pruebas de punta a punta", "qué cobertura e2e
   tenemos", "/automatizar-e2e". Sin datos de personas; secretos por variable de entorno. Español
   (Argentina).
+metadata:
+  seccion: desarrollo
 ---
 
 # Automatizar las pruebas de punta a punta

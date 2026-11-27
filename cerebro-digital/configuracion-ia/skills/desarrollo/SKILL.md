@@ -1,16 +1,17 @@
 ---
 name: desarrollo
 description: >-
-  Punto de entrada ÚNICO para escribir, revisar o migrar código del proyecto —back, front, base
-  de datos, seguridad, entrega—. Trae el método propio completo: TDD con evidencia del rojo,
-  endpoints con el contrato primero, simular la API, armar la suite, depurar, refactor,
-  revisión por dimensiones, accesibilidad, observabilidad, migraciones, dependencias y
-  secretos, Merge Request y entrega. Lo específico del stack vive en
-  references/metodo/tdd-stack-back.md y tdd-stack-front.md (DEC-003). Guardarraíles: el código
-  y el conocimiento no se mezclan, nada sale del repositorio sin un "sí", el lenguaje lo pone
-  el repositorio; lo que no se puede verificar es SIN DATOS, que no es aprobado. Usar cuando se
-  pida "programá esto", "hacé el endpoint", "escribí los tests", "revisá el código", "arreglá
-  este bug", "por qué falla", "migrá la base", "/desarrollo". Español (Argentina).
+  Puerta ÚNICA para escribir, revisar o migrar código del proyecto —back, front, base de datos,
+  seguridad, entrega—, para las pruebas de punta a punta (diseñarlas y automatizarlas) y para
+  desarrollar en paralelo las Tareas asignadas. Trae el método propio: TDD con evidencia del rojo,
+  contrato primero, revisión por dimensiones, migraciones, dependencias y secretos, Merge Request y
+  entrega; lo del stack, en references/metodo/tdd-stack-*.md (DEC-003). Usar cuando se pida
+  "programá esto", "hacé el endpoint",
+  "escribí los tests", "revisá el código", "arreglá este bug", "por qué falla", "migrá la base",
+  "diseñá las pruebas", "desarrollá mis tareas asignadas", "/desarrollo". Español (Argentina).
+metadata:
+  seccion: desarrollo
+  rol: puerta
 ---
 
 # Desarrollo — el método propio del proyecto
@@ -20,6 +21,10 @@ se escribe, qué cuenta como evidencia, quién verifica y qué frena la entrega.
 del tablero define (**qué** hay que hacer: contrato, Escenarios, tests a escribir primero) manda
 antes; recién después entra esto.
 
+Atiende también la QA (`disenar-pruebas`, `automatizar-e2e`) y el desarrollo en paralelo (`desarrollar-asignadas`).
+Las skills de esta sección, con para qué sirve cada una: `references/indice-seccion.md` (lo genera
+`bin/puerta-skills.py`); leelo cuando el pedido no nombra la skill.
+
 ## La idea, en tres frases
 
 1. **El contrato primero, el test después, el código al final.** Así el front y el back trabajan
@@ -28,8 +33,7 @@ antes; recién después entra esto.
    aserción**, antes del código, y lo verifica **otro agente**.
 3. **Tres estados, nunca dos.** OK / HALLAZGO / **SIN DATOS**, y SIN DATOS no es aprobado.
 
-**Todos los comandos de esta skill se corren parados en la raíz del repositorio del Cerebro.**
-Las rutas son relativas a ella.
+**Todos los comandos se corren parados en la raíz del repositorio del Cerebro**; las rutas, relativas a ella.
 
 ---
 
@@ -40,8 +44,8 @@ burocracia: una guía ajena aplicada suelta puede imponer una estructura de paqu
 técnica que **rompe los límites de módulo** del proyecto ([[decisiones#DEC-002]]), y eso se
 descubre recién cuando el código ya está escrito.
 
-Si una sesión aplicó otra guía sin pasar por acá, **eso es un hallazgo**: se avisa y se revisa lo
-que produjo contra la tabla de precedencia.
+Si una sesión aplicó otra guía sin pasar por acá, **es un hallazgo**: se avisa y se revisa lo
+producido contra la tabla de precedencia.
 
 ### Si la organización tiene un estándar corporativo
 
@@ -75,8 +79,7 @@ una misión.
 
 ### G2 — Punto de entrada único
 
-Ya dicho arriba. Se repite acá porque sostiene a los otros cinco: si alguien entra por la puerta
-de atrás, ninguna corrección se aplica.
+Ya dicho arriba: sostiene a los otros cinco; si se entra por atrás, ninguna corrección se aplica.
 
 ### G3 — La precedencia está escrita, no se deduce
 

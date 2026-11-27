@@ -8,6 +8,9 @@ description: >-
   dependencias vulnerables?", "modelo de amenazas", "hacé un pentest", "auditá el servidor", "¿qué
   parcheo primero?", "se filtró una clave", "/seguridad". NO es para escribir código seguro (eso es
   desarrollo) ni para la salud de un servidor (operacion-de-servidores). Español (Argentina).
+metadata:
+  seccion: seguridad
+  rol: puerta
 ---
 
 # Seguridad — la puerta y el rol del orquestador

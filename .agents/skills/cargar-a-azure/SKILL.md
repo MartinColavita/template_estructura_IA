@@ -9,6 +9,8 @@ description: >-
   muestra el diff/preview y se espera un "sí" humano explícito antes de escribir.
   Si no hay MCP o el PAT es de solo lectura, cae a "copiá y pegá a mano" con el
   texto pegable, avisando arriba que no se buscaron duplicados. No entra PHI real; respeta la jerarquía por persona del PAT.
+metadata:
+  seccion: tickets
 ---
 
 # Cargar a Azure
@@ -26,8 +28,7 @@ no se deshace solo; por eso el control humano es obligatorio.
 
 Las barreras de escritura son las de [[AGENTS]] («Automatización por MCP — barreras»), que se cargan en cada
 sesión: TABLERO, TARJETA CONGELADA (en modo equipo, y se chequea antes que las demás), deduplicación,
-confirmación, NIVEL y BORRADO / EDICIÓN DESTRUCTIVA. Valen como están escritas ahí; esta skill no las repite,
-dice cómo las aplica.
+confirmación, NIVEL y BORRADO / EDICIÓN DESTRUCTIVA. Valen como están escritas ahí; acá, cómo se aplican.
 
 - **Tablero y tarjeta congelada, antes de escribir.** Antes de `create_work_item`/`update_work_item` se verifica el
   destino ([[tablero-autorizado]]); antes de un `update_work_item` (en modo equipo) se leen `System.IterationPath` y

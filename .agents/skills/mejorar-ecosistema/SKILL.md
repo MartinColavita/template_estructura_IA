@@ -10,6 +10,8 @@ description: >-
   los canales normales (curator, sync-skills, tests), y lo deja asentado. Usar cuando se pida "¿qué
   mejorarías?", "revisá el ecosistema", "proponé mejoras", "/mejorar-ecosistema", y al cierre de
   cada Tarea o lote cuando quedaron señales acumuladas. Español (Argentina).
+metadata:
+  seccion: conocimiento
 ---
 
 # Mejorar el ecosistema — autocorrección consultada

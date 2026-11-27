@@ -10,7 +10,7 @@
 * **`entregables/`**: lo generado y ya promovido desde `borrador/`. El código de la aplicación no vive acá (`DEC-001` en `cerebro-digital/modulo-ejemplo/arquitectura/decisiones.md`).
 * **`borrador/`**: 🧪 borrador de trabajo; nunca se versiona (`borrador/README.md`).
 * **`tablero/`**: 🎫 método, plantillas y checklists para derivar tickets desde el Cerebro, para cualquier tablero (`DEC-006`).
-* **`cerebro-digital/configuracion-ia/skills/`**: ⚙️ **38 habilidades**, fuente canónica: se edita acá y `bin/sync-skills.*` regenera los espejos `.claude/skills/` y `.agents/skills/`, que el hook y el CI verifican (`INSTALACION.md`).
+* **`cerebro-digital/configuracion-ia/skills/`**: ⚙️ **39 habilidades**, fuente canónica: se edita acá y `bin/sync-skills.*` regenera los espejos `.claude/skills/` y `.agents/skills/`, que el hook y el CI verifican (`INSTALACION.md`).
 
 ---
 
@@ -35,7 +35,7 @@ Por si su descripción no llega al modelo: una **presentación** → `cerebro-pp
 `cerebro-mockup-design`; una **transcripción de reunión** → `cerebro-meet-analyst`; un **diagrama técnico** → `archify`;
 el **manual o la documentación de la aplicación** → `documentar-aplicacion`.
 
-**Por función**: arquitectura, infraestructura o el diseño de la red → `arquitectura-e-infraestructura`; el pipeline (y su YAML) o un
+**Por función**: **tickets** (redactar, cargar, bajar una ficha, lote, consultar, tomar, comentar, cerrar, auditar, estimar) → `tickets`; arquitectura, infraestructura o el diseño de la red → `arquitectura-e-infraestructura`; el pipeline (y su YAML) o un
 despliegue → `despliegue-continuo`; un servidor o «no llega, no resuelve» → `operacion-de-servidores`; seguridad → `seguridad`; **GitLab** (el
 proyecto, los ajustes de CI fuera del YAML, los runners, la instancia) → `gestion-de-gitlab`.
 
@@ -49,7 +49,7 @@ proyecto, los ajustes de CI fuera del YAML, los runners, la instancia) → `gest
 3.1. **Borrador antes que entregable**: todo documento funcional, mockup o presentación que genera un agente nace en `borrador/` (nunca versionado) y se promueve sólo cuando el usuario lo pide explícitamente: un mockup o una presentación a `entregables/`; una ficha o una regla, al Cerebro por `cerebro-curator`. **Nunca a `documentos/`**, que sólo recibe lo que se entrega. Nunca por iniciativa propia.
 4. **Entregas directas**: al grano, sin narrar qué herramientas se corrieron, sin perder el tono conversacional.
 5. **UTF-8 sin BOM y neutralidad**: se escribe con la herramienta nativa de escritura del entorno, y en reglas y skills se la nombra así («herramienta nativa de lectura/escritura»), nunca por su nombre en un entorno, para que valga igual en los cuatro (cómo carga cada uno: `INSTALACION.md` §«Carga por herramienta»).
-6. **Orquestación obligatoria**: toda solicitud pasa por la skill `cerebro-orquestador` (en una sesión dedicada, `claude --agent orquestador-<función>`, la puerta de la función hace de orquestador), con su Plan de Ejecución inicial (en modo lote, dentro del mensaje de arranque). Los tickets son un sub-flujo que el orquestador enruta a las skills del pipeline, que aplican además «Redacción y carga de tickets en Azure DevOps» (abajo).
+6. **Orquestación obligatoria**: toda solicitud pasa por la skill `cerebro-orquestador` (en una sesión dedicada, `claude --agent orquestador-<función>`, la puerta de la función hace de orquestador), con su Plan de Ejecución inicial (en modo lote, dentro del mensaje de arranque). Los tickets son un sub-flujo que el orquestador enruta a la puerta `tickets`; sus skills aplican además «Redacción y carga de tickets en Azure DevOps» (abajo).
 7. **Todo en español (Argentina)**, en todas las herramientas y en toda misión que se delegue: un subagente no hereda el idioma de la conversación.
 8. **Autocorrección consultada**: lo que la IA detecte mal o mejorable del propio ecosistema se registra como propuesta en `cerebro-digital/configuracion-ia/mejoras.md` y se pregunta **de a una**, con el cambio exacto y su impacto (skill `mejorar-ecosistema`). **Nunca aplica por su cuenta** un cambio de arquitectura, skills o scripts: sólo lo aprobado, con su prueba en OK. Una skill sin uso o redundante se propone sacar, nunca se saca sola.
 

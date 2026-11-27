@@ -7,6 +7,8 @@ description: >-
   cuando se pida "tomo esta HU", "voy a trabajar la #NNNN", "asigname / agarro la
   tarea", "empiezo con la historia X", "/tomar-tarea". Lee por MCP (solo lectura);
   la asignación y el cambio de estado se escriben con confirmación. Español (Argentina).
+metadata:
+  seccion: tickets
 ---
 
 # Tomar tarea (coordinación / evitar desincronización)

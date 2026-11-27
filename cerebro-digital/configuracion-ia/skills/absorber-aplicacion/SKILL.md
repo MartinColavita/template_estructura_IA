@@ -11,6 +11,8 @@ description: >-
   "absorbé esta app", "hacé ingeniería inversa de esta aplicación", "sacá todo lo que hace este repo
   y metelo en el Cerebro", "/absorber-aplicacion". NO modifica la aplicación: sólo la lee. Español
   (Argentina).
+metadata:
+  seccion: modernizacion
 ---
 
 # Absorber una aplicación existente

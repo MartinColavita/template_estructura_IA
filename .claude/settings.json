@@ -32,5 +32,37 @@
       "Agent(orquestador-operacion)",
       "Agent(orquestador-seguridad)"
     ]
+  },
+  "skillListingBudgetFraction": 0.02,
+  "skillOverrides": {
+    "absorber-aplicacion": "name-only",
+    "analizar-tareas": "name-only",
+    "archify": "name-only",
+    "arrancar-proyecto": "name-only",
+    "atender-hallazgos": "name-only",
+    "auditar-historia": "name-only",
+    "auditar-tarea": "name-only",
+    "automatizar-e2e": "name-only",
+    "caracterizar-comportamiento": "name-only",
+    "cargar-a-azure": "name-only",
+    "cerebro-architect-ui": "name-only",
+    "cerebro-knowledge": "name-only",
+    "cerebro-meet-analyst": "name-only",
+    "cerebro-mockup-design": "name-only",
+    "cerebro-ppt-generator": "name-only",
+    "cognitive-doc-design": "name-only",
+    "comentar-tarea": "name-only",
+    "consultar-backlog": "name-only",
+    "desarrollar-asignadas": "name-only",
+    "disenar-pruebas": "name-only",
+    "documentar-aplicacion": "name-only",
+    "engram-memory-protocol": "name-only",
+    "estimar-story-points": "name-only",
+    "mejorar-ecosistema": "name-only",
+    "modernizar-slice": "name-only",
+    "planificar-lote": "name-only",
+    "redactar-tarea": "name-only",
+    "sincronizar-backlog": "name-only",
+    "tomar-tarea": "name-only"
   }
 }

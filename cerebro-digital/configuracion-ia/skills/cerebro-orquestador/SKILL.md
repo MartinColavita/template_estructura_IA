@@ -1,12 +1,11 @@
 ---
 name: cerebro-orquestador
 description: >
-  Director ÚNICO del ecosistema de agentes de {{PROYECTO}}. Arma el Plan de Ejecución, aplica
-  el flujo de curaduría de 5 pasos, vigila la conversación para detectar conocimiento de
-  negocio nuevo o cambiado (Consulta Interactiva de Decisión, una por ítem), rutea cada
-  pedido a la puerta de su función y el sub-flujo de tickets de Azure de forma determinista,
-  y coordina sub-agentes con umbrales
-  objetivos: cuándo delegar, cuándo pausar, y que las skills NO se heredan al delegar.
+  Director ÚNICO del ecosistema de agentes de {{PROYECTO}} y puerta del conocimiento. Arma el
+  Plan de Ejecución, aplica el flujo de curaduría de 5 pasos, vigila la conversación para
+  detectar conocimiento de negocio nuevo o cambiado (Consulta Interactiva de Decisión, una por
+  ítem), rutea cada pedido a la puerta de su función (los tickets, a la puerta tickets) y
+  coordina sub-agentes con umbrales objetivos.
   Trigger: "planificá esto", "delegá el análisis", "coordiná", "armá el plan", "procesá esta
   documentación", "actualizá el cerebro", cualquier tarea multi-agente, y toda interacción
   del proyecto según AGENTS.md instrucción 6.
@@ -15,6 +14,8 @@ license: Apache-2.0
 metadata:
   author: equipo
   version: "2.0"
+  seccion: conocimiento
+  rol: puerta
 ---
 
 ## Cuándo se usa
@@ -76,8 +77,8 @@ línea, en [[AGENTS]]: así el disparo no depende de que la descripción de la s
 
 | El pedido es de… | Puerta | Frases típicas |
 |---|---|---|
-| **Conocimiento** (documentos, reuniones, reglas, el Cerebro) | esta skill | «procesá esta documentación», «actualizá el Cerebro» |
-| **Tickets** | el ruteo de la sección siguiente | «bajá la ficha al board», «redactá esta historia» |
+| **Conocimiento** (documentos, reuniones, reglas, el Cerebro; también arrancar un proyecto, documentar la aplicación, los hallazgos del Doctor y mejorar el ecosistema) | esta skill | «procesá esta documentación», «actualizá el Cerebro» |
+| **Tickets** (redactar, cargar, bajar una ficha, lote, consultar, tomar, comentar, cerrar, auditar, estimar) | **`tickets`** | «bajá la ficha al board», «redactá esta historia», «cerrá la #NNNN» |
 | **Código** de la aplicación | **`desarrollo`** | «programá esto», «arreglá este bug», «revisá el código» |
 | **Arquitectura e infraestructura** | **`arquitectura-e-infraestructura`** | «diseñá la arquitectura», «armá la infraestructura de la app», «dockerizá», «revisá este plan de infraestructura» |
 | **CI/CD y despliegue** (también el YAML del pipeline) | **`despliegue-continuo`** | «armá el pipeline», «desplegá a prueba», «pasá a producción», «volvé a la versión anterior» |
@@ -95,23 +96,18 @@ Cuando el pedido va a una puerta, el plan de la puerta cuenta como el Plan de Ej
 
 **Sesión dedicada** a una función (`claude --agent orquestador-<función>`): `references/orquestacion-de-sub-agentes.md`.
 
-## 🎫 Ruteo del sub-flujo Azure (tickets) — determinista
+## 🎫 Ruteo del sub-flujo Azure (tickets) y de otras skills — determinista
 
-El **objeto del pedido** decide la skill, no el gusto del modelo. Frases típicas y casos: `references/ruteo-de-tickets-y-otras-skills.md`, ante la duda.
+El **objeto del pedido** decide la skill, no el gusto del modelo. Frases típicas y casos: `references/ruteo-de-otras-skills.md`, ante la duda. Las skills de la sección conocimiento, con para qué sirve cada una: `references/indice-seccion.md` (lo genera `bin/puerta-skills.py`); leelo cuando el pedido no nombra la skill.
 
-- Una ficha/módulo del Cerebro al board → `sincronizar-backlog` (árbol; con más de una Historia, el método de `planificar-lote`)
-- Las Tareas de una o más Historias → `planificar-lote`
-- Un ticket suelto → `redactar-tarea`; escribirlo → `cargar-a-azure` (**un** ítem, nunca un árbol)
-- Consultar/auditar el board → `consultar-backlog`; tomar un `#ID` → `tomar-tarea`; comentarlo, cierre de un desarrollo o cerrar una Tarea → `comentar-tarea` (y, si no está congelada, `cargar-a-azure` con el GATE de edición destructiva)
+- **Todo lo de tickets** (redactar, cargar, bajar una ficha o un lote, consultar, tomar, comentar, cerrar, auditar, estimar; también el desempate entre árbol e ítem) → la puerta `tickets`
 - Desarrollar Tareas en paralelo, con o sin Orca → `desarrollar-asignadas`
 - Un diagrama → `archify`; una presentación → `cerebro-ppt-generator`; una pantalla → `disenar-con-stitch` (sólo esa: ella llama a `cerebro-mockup-design` y `cerebro-architect-ui`)
 - Arrancar un proyecto → `arrancar-proyecto`; documentar la aplicación → `documentar-aplicacion`
 - Pruebas de punta a punta: diseñarlas → `disenar-pruebas`; automatizarlas → `automatizar-e2e`
 - Una aplicación existente: absorberla → `absorber-aplicacion`; qué hacer → `planificar-modernizacion`; ponerle red → `caracterizar-comportamiento`; ejecutar un slice → `modernizar-slice`
 - Hallazgos del Doctor → `atender-hallazgos`; mejoras al ecosistema → `mejorar-ecosistema` (nunca sin el «sí»)
-- Segundo chequeo o estimación (a pedido, nunca requisito): `auditar-tarea`, `auditar-historia`, `analizar-tareas`, `estimar-story-points`
 - Pregunta de dominio o avance → `cerebro-knowledge`; un borrador funcional → `cognitive-doc-design`; sesión con Engram → `engram-memory-protocol`
-- **Desempate:** si el pedido nombra una ficha/módulo/documento del Cerebro → árbol; si nombra o describe **un** work item / `#ID` → 1 ítem. **Ante ambigüedad, preguntar** cuál — nunca asumir árbol ni ítem. Las barreras de escritura (tablero, dedup, confirmación, nivel/cardinalidad) las aplican las skills del pipeline (ver [[AGENTS]] §«Redacción y carga de tickets en Azure DevOps» (las barreras) y [[redaccion-de-tickets]] (el método)).
 
 ## 🤖 Orquestación de sub-agentes — umbrales objetivos
 
@@ -132,5 +128,6 @@ dedicada no escribe; la Entrega Directa nunca saca la Consulta Interactiva.
 | Referencia | Se lee cuando… |
 |---|---|
 | `references/vigilancia-semantica.md` | Aparece un candidato a conocimiento de negocio; siempre en modo lote |
-| `references/ruteo-de-tickets-y-otras-skills.md` | El índice de tickets y otras skills no alcanza para elegir destino |
+| `references/ruteo-de-otras-skills.md` | El índice de otras skills no alcanza para elegir destino (lo de tickets, en la puerta `tickets`) |
+| `references/indice-seccion.md` | El pedido es de conocimiento y no nombra la skill |
 | `references/orquestacion-de-sub-agentes.md` | Se delega o hay workers, se abre una sesión dedicada, se entrega lo de un sub-agente |

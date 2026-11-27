@@ -11,6 +11,8 @@ description: >-
   explícita (escribir en el board es IRREVERSIBLE). Registra los #ID en la ficha
   ("Tickets derivados") y en el historial, siempre POR REFERENCIA. TODO en español;
   PHI PROHIBIDO; no inventa (los #ID son dato duro, ⚠ hasta confirmar).
+metadata:
+  seccion: tickets
 ---
 
 # Sincronizar backlog

@@ -16,7 +16,8 @@ Cómo entra al Cerebro lo que se sabe del negocio: un documento, una reunión o 
 Esta sección es **transversal**: es la portada del flujo, que vive en los agentes y en las skills. El conocimiento
 en sí vive en los pilares de cada módulo (abajo, «Dónde va lo del proyecto»).
 
-La puerta es la skill `cerebro-orquestador`; en una sesión propia, `claude --agent orquestador-conocimiento`.
+La puerta es la skill `cerebro-orquestador`; en una sesión propia, `claude --agent orquestador-conocimiento`. Los
+tickets tienen su propia puerta, la skill `tickets` → [[cerebro-digital/tickets/index|Tickets]].
 
 | Quién | Qué hace | Lo que no se negocia |
 |---|---|---|

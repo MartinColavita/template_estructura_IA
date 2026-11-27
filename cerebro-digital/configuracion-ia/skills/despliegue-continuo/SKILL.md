@@ -7,6 +7,9 @@ description: >-
   IA prepara; despliega una persona. Usar cuando se pida "armá el pipeline", "revisá el workflow",
   "desplegá a prueba", "pasá a producción", "volvé a la versión anterior", "/despliegue-continuo". NO es
   para escribir la infraestructura (eso es arquitectura-e-infraestructura). Español (Argentina).
+metadata:
+  seccion: despliegue
+  rol: puerta
 ---
 
 # CI/CD y despliegue continuo — la puerta y el rol del orquestador

@@ -8,6 +8,9 @@ description: >-
   Y?", "armá la infraestructura", "dockerizá la app", "revisá este plan de infraestructura",
   "/arquitectura-e-infraestructura". NO es para el
   pipeline (despliegue-continuo). Español (Argentina).
+metadata:
+  seccion: arquitectura
+  rol: puerta
 ---
 
 # Arquitectura e infraestructura — la puerta y el rol del orquestador
@@ -16,6 +19,9 @@ Esta skill es **la puerta** a dos cosas que van juntas: **cómo está armada la 
 decisiones) y **dónde y sobre qué corre** (la infraestructura, escrita como código). No diseña ni programa por sí
 misma: clasifica el pedido por su **objeto**, carga **una** referencia y coordina a quien produce y a quien verifica.
 La IA **escribe y verifica**; lo que toca la nube lo corre el pipeline y lo aprueba una persona.
+
+Las skills de esta sección, con para qué sirve cada una: `references/indice-seccion.md` (lo genera
+`bin/puerta-skills.py`); leelo cuando el pedido no nombra la skill.
 
 **Todos los comandos se corren parados en la raíz del repositorio del Cerebro.**
 

@@ -1,7 +1,9 @@
 ---
 name: cognitive-doc-design
-description: Patrones de diseño de documentación cognitiva para borradores funcionales del proyecto. Prioriza legibilidad, progressive disclosure, tablas de decisión y evita texto denso.
+description: Redactar o corregir un borrador funcional para que se entienda, con patrones de documentación cognitiva. Prioriza legibilidad, progressive disclosure, tablas de decisión y evita texto denso.
 license: Apache-2.0
+metadata:
+  seccion: conocimiento
 ---
 
 # Cognitive Doc Design — Patrones de Documentación Cognitiva

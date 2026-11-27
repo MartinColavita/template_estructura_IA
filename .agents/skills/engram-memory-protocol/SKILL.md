@@ -2,6 +2,8 @@
 name: engram-memory-protocol
 description: Cómo se usa Engram (mem_save, mem_search, mem_context, mem_session_summary) en este proyecto - sólo para la continuidad entre sesiones (en qué estaba, qué quedó a medias, el próximo paso), nunca como fuente de una regla o una decisión, que van al Cerebro. Usar al retomar o cerrar una sesión con Engram instalado.
 license: Apache-2.0
+metadata:
+  seccion: conocimiento
 ---
 
 # Engram — continuidad entre sesiones

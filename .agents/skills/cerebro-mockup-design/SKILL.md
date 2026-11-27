@@ -1,7 +1,7 @@
 ---
 name: cerebro-mockup-design
 description: >
-  Design system y principios visuales para mockups HTML del proyecto.
+  Armar o mejorar un HTML o prototipo de pantalla hecho a mano con el design system del proyecto.
   Prohíbe emojis, define tokens, iconos SVG, y anti-patrones de diseño "AI-generated".
   Trigger: Cuando el usuario pide crear o mejorar un HTML, mockup, prototipo, o diseño visual de una
   pantalla del producto hecho a mano. Si el diseño se genera en Stitch (disenar-con-stitch), esta skill
@@ -10,6 +10,7 @@ license: Apache-2.0
 metadata:
   author: equipo
   version: "2.0"
+  seccion: diseno
 ---
 
 ## Cuándo se usa

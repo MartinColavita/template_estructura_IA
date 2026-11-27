@@ -11,6 +11,8 @@ description: >-
   única escritura que entra en una tarjeta congelada (en un sprint y ya tomada). Leer
   comentarios no requiere permiso; escribir el comentario se hace con confirmación.
   Español (Argentina), sin PHI.
+metadata:
+  seccion: tickets
 ---
 
 # Comentar tarea (comentarios en Azure)

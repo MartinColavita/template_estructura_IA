@@ -10,6 +10,8 @@ description: >-
   eliminar código muerto y subir de versión. Usar cuando se pida "migrá el slice X", "seguí con
   la migración", "refactorizá el módulo X", "cortá el tráfico de X", "/modernizar-slice". La app
   vieja no se toca; nadie se aprueba a sí mismo; sin paridad no hay corte. Español (Argentina).
+metadata:
+  seccion: modernizacion
 ---
 
 # Modernizar un slice

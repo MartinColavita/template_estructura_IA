@@ -10,6 +10,8 @@ description: >-
   X", "qué probamos de punta a punta", "armá el plan de pruebas", "/disenar-pruebas". No
   inventa pasos: lo que el Gherkin no dice vuelve como pregunta a la Historia. Español
   (Argentina).
+metadata:
+  seccion: desarrollo
 ---
 
 # Diseñar las pruebas de una Historia

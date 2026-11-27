@@ -13,6 +13,8 @@ description: >-
   congelada, PHI, borrado) siguen iguales. Usar cuando se pida "armá las tareas de
   estas historias", "planificación con los devs", "derivá las historias de la ficha",
   "bajá el lote", "/planificar-lote". NO inventa. Español (Argentina).
+metadata:
+  seccion: tickets
 ---
 
 # Planificar lote

@@ -10,6 +10,8 @@ description: >-
   una red a este módulo", "grabá cómo responde hoy", "armá el corpus de paridad", "test de
   caracterización", "/caracterizar-comportamiento". No cambia comportamiento ni toca la app
   vieja; nunca graba datos de personas. Español (Argentina).
+metadata:
+  seccion: modernizacion
 ---
 
 # Caracterizar el comportamiento de lo que ya existe

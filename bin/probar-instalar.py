@@ -44,7 +44,8 @@ def armar(raiz):
     escribir(raiz, '.githooks/pre-commit', '#!/usr/bin/env bash\nexit 0\n')
     escribir(raiz, 'AGENTS.md', '# Proyecto\n\n**1 habilidades**\n')   # el conteo lo cuenta verificar-skills
     os.makedirs(os.path.join(raiz, 'bin'))
-    for f in ('instalar.py', 'verificar-skills.py', 'sync-espejos.py'):
+    # verificar-skills carga puerta-skills (la Puerta de Skills) de su misma carpeta: sin el, esa parte es SIN DATOS
+    for f in ('instalar.py', 'verificar-skills.py', 'puerta-skills.py', 'sync-espejos.py'):
         shutil.copy(os.path.join(AQUI, f), os.path.join(raiz, 'bin', f))
 
 

@@ -10,6 +10,8 @@ description: >-
   board", "¿la #NNNN está al día con su doc?", "detectá desfases",
   "/consultar-backlog". NUNCA crea ni edita (solo herramientas de lectura del
   MCP). Español (Argentina); no inventa (los #ID y estados son dato duro).
+metadata:
+  seccion: tickets
 ---
 
 # Consultar backlog (solo lectura)

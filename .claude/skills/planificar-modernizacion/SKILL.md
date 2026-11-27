@@ -1,15 +1,16 @@
 ---
 name: planificar-modernizacion
 description: >-
-  Con el Cerebro ya poblado por absorber-aplicacion, decidir CON EL HUMANO qué se hace con una
-  aplicación existente y dejar el plan listo: compara las estrategias (refactor en el lugar,
-  migración por estrangulador slice por slice, corrida en paralelo, subir de versión de framework
-  o de lenguaje, o no tocarla) con la tabla medida por los scripts, hace la curaduría de cada
-  regla y cada comportamiento raro (migrar / descartar / decide el humano), escribe DEC-004 con el
-  «sí», ordena los slices y arma una ficha por slice con su bloque de derivación. Usar cuando se
-  pida "¿refactorizo o migro?", "planificá la migración de esta app", "armá el plan de
-  modernización", "/planificar-modernizacion". No programa nada; no decide sola: propone con
-  los números a la vista y pregunta. Español (Argentina).
+  Puerta de la modernización de una aplicación existente: absorberla al Cerebro, decidir CON EL
+  HUMANO qué se hace con ella, ponerle red y ejecutar sus slices. Compara las estrategias (refactor
+  en el lugar, estrangulador, corrida en paralelo, subir de versión, no tocarla) con la tabla medida por los scripts, cura cada regla y comportamiento raro, escribe
+  DEC-004 con el «sí» y ordena los slices con su ficha. Usar cuando se pida "absorbé este repo",
+  "¿refactorizo o migro?", "planificá la migración de esta app", "armá el plan de modernización",
+  "migrá el slice X", "/planificar-modernizacion". No programa ni decide sola: propone con los
+  números a la vista y pregunta. Español (Argentina).
+metadata:
+  seccion: modernizacion
+  rol: puerta
 ---
 
 # Planificar la modernización de una aplicación existente
@@ -18,6 +19,10 @@ Arranca donde termina [[absorber-aplicacion]]: el inventario y la radiografía c
 las entidades, reglas confirmadas y candidatas, integraciones, deuda y huecos de la aplicación. Esta
 skill convierte eso en **una decisión escrita** (`DEC-004`) y **un plan por slices** que después ejecuta
 [[modernizar-slice]] con la red de [[caracterizar-comportamiento]].
+
+Es la puerta de la modernización: un pedido de absorber, caracterizar o ejecutar un slice entra por acá y va a su
+skill. Las skills de esta sección, con para qué sirve cada una: `references/indice-seccion.md` (lo genera
+`bin/puerta-skills.py`); leelo cuando el pedido no nombra la skill.
 
 ## Lo que NO hace
 

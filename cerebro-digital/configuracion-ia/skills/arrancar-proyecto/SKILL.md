@@ -10,6 +10,8 @@ description: >-
   parado en una copia del template (o en un núcleo ya instanciado, para enchufar otro proyecto). No
   inventa ningún dato: lo que no se contesta, se pregunta de nuevo o queda pendiente. Español
   (Argentina).
+metadata:
+  seccion: conocimiento
 ---
 
 # Arrancar un proyecto

@@ -8,6 +8,9 @@ description: >-
   "renová el certificado", "parcheá", "se cayó el servicio", "escribí el runbook",
   "/operacion-de-servidores". NO es para la seguridad del servidor (eso es seguridad) ni para
   desplegar una versión (despliegue-continuo). Español (Argentina).
+metadata:
+  seccion: operacion
+  rol: puerta
 ---
 
 # Operación de servidores — la puerta y el rol del orquestador

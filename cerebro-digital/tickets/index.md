@@ -28,7 +28,7 @@ local, según `DEC-006` en [[decisiones]]). Esta portada **sólo apunta**: el m�
 
 ## Las skills del pipeline
 
-Las rutea `cerebro-orquestador`; la lista con una línea cada una está en [[cerebro-digital/index|el índice del
+La puerta es la skill `tickets`: rutea cada pedido, por su objeto, a la skill que corresponde. La lista con una línea cada una está en [[cerebro-digital/index|el índice del
 Cerebro]] («Pipeline del tablero»). Para redactar: `redactar-tarea`, `estimar-story-points`. Para revisar:
 `consultar-backlog`, `analizar-tareas`, `auditar-historia`, `auditar-tarea`. Para escribir en el tablero:
 `sincronizar-backlog`, `planificar-lote`, `cargar-a-azure`, `tomar-tarea`, `comentar-tarea`. Para desarrollar lo

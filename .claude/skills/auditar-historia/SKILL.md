@@ -13,6 +13,8 @@ description: >-
   para derivar Tareas?", "/auditar-historia". OPCIONAL: corre sólo a pedido y NO frena la
   derivación. NO redacta, NO corrige, NO escribe en el board: devuelve hallazgos y preguntas.
   Español (Argentina).
+metadata:
+  seccion: tickets
 ---
 
 # Auditar historia

@@ -124,10 +124,11 @@ check_skills_spec() {
   # El codigo se toma ANTES de cualquier if: despues de un "if ...; fi" sin rama, $? vale 0 y el 2 no se veia nunca.
   IDX="$TMPD/indice"
   mkdir -p "$IDX"
-  # solo los .md: es lo unico que lee (SKILL.md y references/); el resto de una skill vendida pesa y no se mira
+  # solo los .md: es lo unico que lee (SKILL.md y references/); el resto de una skill vendida pesa y no se mira.
+  # Y .claude/settings.json: ahi viven los skillOverrides que la Puerta de Skills exige al dia.
   git ls-files -z -- "$SRC_REL/*.md" ".claude/skills/*.md" ".agents/skills/*.md" "back/.claude/skills/*.md" \
     "back/.agents/skills/*.md" "front/.claude/skills/*.md" "front/.agents/skills/*.md" AGENTS.md README.md \
-    INSTALACION.md cerebro-digital/index.md |
+    INSTALACION.md cerebro-digital/index.md .claude/settings.json |
     git checkout-index -z --stdin --prefix="$IDX/" 2>/dev/null
   "$PY" -I "$ROOT/bin/verificar-skills.py" "$IDX" > "$TMPD/skills.txt" 2>&1
   RC=$?

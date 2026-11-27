@@ -10,6 +10,8 @@ description: >-
   Archify enlazados. Usar cuando se pida "documentá la app", "armá el manual", "la guía de uso", "la
   bitácora técnica", "el entregable de documentación", "/documentar-aplicacion". No inventa. Español
   (Argentina).
+metadata:
+  seccion: conocimiento
 ---
 
 # Documentar la aplicación

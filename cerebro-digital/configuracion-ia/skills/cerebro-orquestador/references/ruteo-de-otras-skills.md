@@ -1,15 +1,11 @@
-# Ruteo de tickets y otras skills
+# Ruteo de otras skills
 
 Parte de la skill `cerebro-orquestador`: se lee cuando el índice de `SKILL.md` no alcanza para elegir la skill (frases típicas, casos borde, qué hace cada destino) o antes de cargar la elegida.
 
-## 🎫 Ruteo del sub-flujo Azure (tickets) — determinista
+## Ruteo por el objeto del pedido — determinista
 
-Cuando el pedido toca Azure DevOps, el **objeto del pedido** decide la skill (no el gusto del modelo), para que la **cantidad** de work items no dependa de qué skill elija el LLM:
+Todo lo de tickets (redactar, cargar, bajar una ficha o un lote, consultar, tomar, comentar, cerrar, auditar, estimar, y el desempate entre árbol e ítem) va a la puerta **`tickets`**, que tiene su ruteo. Acá, el resto:
 
-- Objeto = **una ficha/módulo del Cerebro** ("bajá la ficha X al board", "armá el backlog del módulo Y", "derivá los tickets de esta doc") → **`sincronizar-backlog`** (árbol completo, 1:1 del bloque `## Derivación a backlog` de la ficha). Con más de una Historia, la redacción —y, si se pide, la auditoría— corren con el método de **`planificar-lote`**.
-- Objeto = **las Tareas de una o más Historias**, o **una ficha con sus Tareas** ("armá las tareas de F-04 a F-08", "planificación con los devs") → **`planificar-lote`** (dos turnos humanos, agentes en paralelo; la cardinalidad de las Historias sigue siendo la de `sincronizar-backlog`).
-- Objeto = **un ticket suelto** (texto suelto, "redactá/mejorá esta historia", un `#ID`) → **`redactar-tarea`** (solo redacta) y, si hay que escribirlo, **`cargar-a-azure`** (**un** ítem, nunca un árbol).
-- **Consultar/auditar** el board (solo lectura) → **`consultar-backlog`**. **Tomar/comentar** un `#ID` → **`tomar-tarea`** / **`comentar-tarea`**. **Terminó un desarrollo** → **`comentar-tarea`**, con su molde de cierre. **Cerrar una Tarea** ("cerrá la #NNNN") → **`comentar-tarea`** §«Antes de cerrar una Tarea» (pendientes a la vista) y, si no está congelada, **`cargar-a-azure`** con el GATE de edición destructiva de [[AGENTS]].
 - **Desarrollar Tareas en paralelo** → lo decide el ENTORNO, no la frase del pedido: con la variable `ORCA_APP_VERSION` definida (sesión de Orca) → **`desarrollar-asignadas`**; sin ella (IntelliJ u otra terminal) → **la misma `desarrollar-asignadas` en modo sin Orca** (`cerebro-digital/configuracion-ia/skills/desarrollar-asignadas/references/sin-orca.md`). La skill mira la variable en su paso 0 y elige el modo sola.
 - **Un diagrama** (arquitectura, flujo, secuencia, ERD, estados, "dibujame cómo…") → **`archify`**, con salida en `borrador/diagramas/`; lo que entra al Cerebro es el Mermaid de `bin/radiografiar-codigo.py --mermaid`. Una presentación → **`cerebro-ppt-generator`**. Una pantalla: la línea de abajo.
 - **Arrancar un proyecto** («arrancá un proyecto», «instanciá el template», «agarrá el proyecto X», «sumale el template a mi carpeta») → **`arrancar-proyecto`**: pregunta lo básico en un mensaje y corre `bin/arrancar-proyecto.py` con el «sí».
@@ -22,6 +18,4 @@ Cuando el pedido toca Azure DevOps, el **objeto del pedido** decide la skill (no
 - **Ejecutar un slice** ("migrá el slice X", "seguí con la migración", "refactorizá el módulo X", "cortá el tráfico de X") → **`modernizar-slice`**: contrato, construcción por el pipeline normal, `bin/paridad.py comparar`, corte sólo con `bin/mapa-modernizacion.py corte` en OK.
 - **Los hallazgos del Doctor** («atendé los hallazgos», «arreglá lo que marcó el Doctor») → **`atender-hallazgos`**.
 - **Mejoras al propio ecosistema** ("¿qué mejorarías?", una señal repetida del Doctor o de los cierres) → **`mejorar-ecosistema`**: una propuesta por vez, registrada en `configuracion-ia/mejoras.md`, nunca aplicada sin el "sí".
-- **Un segundo chequeo o una estimación** (a pedido; nunca es requisito para avanzar): la lista de tests de una Tarea → **`auditar-tarea`**; los criterios de una Historia → **`auditar-historia`**; la coherencia del conjunto de Tareas de una Historia → **`analizar-tareas`**; los Puntos de historia → **`estimar-story-points`**.
 - **Una pregunta sobre el dominio, una regla, una decisión, un pendiente o el avance** → **`cerebro-knowledge`** (qué se lee del Cerebro, en qué orden y cómo se cita). **Redactar o corregir un borrador funcional** para que se entienda → **`cognitive-doc-design`**. **Retomar o cerrar una sesión con Engram** → **`engram-memory-protocol`** (continuidad, nunca fuente de reglas: gana el Cerebro).
-- **Desempate:** si el pedido nombra una ficha/módulo/documento del Cerebro → árbol; si nombra o describe **un** work item / `#ID` → 1 ítem. **Ante ambigüedad, preguntar** cuál — nunca asumir árbol ni ítem. Las barreras de escritura (tablero, dedup, confirmación, nivel/cardinalidad) las aplican las skills del pipeline (ver [[AGENTS]] §«Redacción y carga de tickets en Azure DevOps» (las barreras) y [[redaccion-de-tickets]] (el método)).
