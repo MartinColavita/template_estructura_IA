@@ -2,7 +2,7 @@
 
 > Prioridad **MEDIA** — se atiende cuando hay un número que lo pida, no antes.
 > Adaptado de `performance-optimization` y `multi-agent-optimize` de `wshobson/commands`
-> (MIT), [referencias-externas.md](../referencias-externas.md).
+> (MIT), `cerebro-digital/desarrollo/fuentes.md`.
 
 ## La regla
 

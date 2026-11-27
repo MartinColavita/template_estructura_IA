@@ -1,7 +1,7 @@
 # Entregar — el pipeline y el despliegue
 
 > Prioridad **ALTA** por hito. Adaptado de `deploy-checklist` y `workflow-automate` de
-> `wshobson/commands` (MIT), [referencias-externas.md](../referencias-externas.md).
+> `wshobson/commands` (MIT), `cerebro-digital/desarrollo/fuentes.md`.
 
 ## La regla que ordena todo
 

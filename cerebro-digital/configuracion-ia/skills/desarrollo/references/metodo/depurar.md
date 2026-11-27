@@ -1,7 +1,7 @@
 # Depurar — encontrar la causa, no el síntoma
 
 > Prioridad **ALTA**, uso diario. Adaptado de `smart-debug`, `debug-trace`, `error-trace` y
-> `error-analysis` de `wshobson/commands` (MIT), [referencias-externas.md](../referencias-externas.md).
+> `error-analysis` de `wshobson/commands` (MIT), `cerebro-digital/desarrollo/fuentes.md`.
 
 ## La regla que ahorra más tiempo
 

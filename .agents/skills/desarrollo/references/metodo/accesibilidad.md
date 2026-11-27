@@ -1,7 +1,7 @@
 # Accesibilidad en el front
 
 > Prioridad **ALTA** en todas las aplicaciones de front. Adaptado de `accessibility-audit` de
-> `wshobson/commands` (MIT), [referencias-externas.md](../referencias-externas.md).
+> `wshobson/commands` (MIT), `cerebro-digital/desarrollo/fuentes.md`.
 
 ## Por qué acá pesa más que en otros lados
 

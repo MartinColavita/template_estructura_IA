@@ -2,7 +2,7 @@
 
 > Prioridad **MEDIA**, pero es lo primero que hace cualquiera que se suma.
 > Adaptado de `code-explain` y `onboard` de `wshobson/commands` (MIT),
-> [referencias-externas.md](../referencias-externas.md).
+> `cerebro-digital/desarrollo/fuentes.md`.
 
 ## El orden, de afuera hacia adentro
 

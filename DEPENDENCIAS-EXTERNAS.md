@@ -37,8 +37,8 @@ de abajo se completa.
 
 | Origen | Licencia | Qué se tomó |
 |---|---|---|
-| [`wshobson/commands`](https://github.com/wshobson/commands) | **MIT** (permite uso y modificación **con atribución**) | **Ideas y estructura, no texto**, para escribir el método de desarrollo en español y con nuestras reglas. Detalle archivo por archivo en `cerebro-digital/configuracion-ia/skills/desarrollo/references/referencias-externas.md` |
-| [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail) | **MIT** (permite uso y modificación **con atribución**) | **Ideas, no texto**: la escalera antes de escribir código, la revisión más allá del diff, la dimensión «lo que sobra», el hallazgo en cuatro partes y la marca `atajo:` (con `bin/atajos.py`). Qué se tomó y dónde nos quedamos con lo nuestro, en el mismo `referencias-externas.md` |
+| [`wshobson/commands`](https://github.com/wshobson/commands) | **MIT** (permite uso y modificación **con atribución**) | **Ideas y estructura, no texto**, para escribir el método de desarrollo en español y con nuestras reglas. Detalle archivo por archivo en `cerebro-digital/desarrollo/fuentes.md` |
+| [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail) | **MIT** (permite uso y modificación **con atribución**) | **Ideas, no texto**: la escalera antes de escribir código, la revisión más allá del diff, la dimensión «lo que sobra», el hallazgo en cuatro partes y la marca `atajo:` (con `bin/atajos.py`). Qué se tomó y dónde nos quedamos con lo nuestro, en el mismo `cerebro-digital/desarrollo/fuentes.md` |
 
 **No se instala ni se invoca nada de ahí.** Es bibliografía, no una dependencia de ejecución.
 
@@ -101,6 +101,6 @@ páginas de fuentes de cada sección del Cerebro: `cerebro-digital/arquitectura/
 | Qué | Dónde |
 |---|---|
 | El método de desarrollo y sus guardarraíles | `cerebro-digital/configuracion-ia/skills/desarrollo/SKILL.md` |
-| La bibliografía del método | `…/desarrollo/references/referencias-externas.md` |
+| La bibliografía del método | `cerebro-digital/desarrollo/fuentes.md` |
 | Las reglas y las barreras | `AGENTS.md` |
 | De dónde salió cada idea de las funciones de arquitectura, despliegue, operación, seguridad y GitLab, y de la red | Las fuentes de cada sección del Cerebro (`cerebro-digital/arquitectura/`, `cerebro-digital/devops/`, `cerebro-digital/seguridad/`, `cerebro-digital/networking/`); el índice, en `cerebro-digital/configuracion-ia/referencias-externas/00-index.md` |

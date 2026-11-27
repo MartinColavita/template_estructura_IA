@@ -2,7 +2,7 @@
 
 > Método propio.
 > Taxonomía de errores y checklist adaptadas de `wshobson/commands` — **con el orden
-> invertido**, ver abajo. MIT, [referencias-externas.md](../referencias-externas.md).
+> invertido**, ver abajo. MIT, `cerebro-digital/desarrollo/fuentes.md`.
 
 ## El orden, que es lo que más importa
 

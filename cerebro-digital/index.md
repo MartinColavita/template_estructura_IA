@@ -71,11 +71,16 @@ El conocimiento validado se organiza por módulos funcionales dentro de `cerebro
 - **`configuracion-ia/referencias-externas/`**: el índice de las fuentes de cada función (que viven en su sección, abajo) y la bibliografía de los orquestadores por función y de Obsidian.
 
 ### 🧭 Secciones transversales (el método y las fuentes, para todos los módulos)
-Cada una es la portada de una función: qué cubre, cómo se le pide a la IA, las guías del método (que viven en las skills y Obsidian no muestra), los scripts, las decisiones y sus fuentes (bibliografía con su licencia; nada se instala ni se copia). Lo concreto del proyecto sigue en los pilares del módulo.
+Cada una es la portada de una función: qué cubre, cómo se le pide a la IA, las guías del método (que viven en las skills y Obsidian no muestra), los scripts, las decisiones y, donde las hay, sus fuentes (bibliografía con su licencia; nada se instala ni se copia). Lo concreto del proyecto sigue en los pilares del módulo.
 -   **`arquitectura/`**: arquitectura de la aplicación e infraestructura como código ([[cerebro-digital/arquitectura/index|portada]]; fuentes en `fuentes.md`).
 -   **`devops/`**: CI/CD y despliegue, operación de servidores y GitLab ([[cerebro-digital/devops/index|portada]]; fuentes en `fuentes-despliegue.md`, `fuentes-operacion.md` y `fuentes-gitlab.md`).
 -   **`seguridad/`**: seguridad de la aplicación y de los servidores ([[cerebro-digital/seguridad/index|portada]]; fuentes en `fuentes-aplicaciones.md` y `fuentes-servidores.md`).
 -   **`networking/`**: la red: zonas, exposición, DNS, TLS, firewall, acceso administrativo, y el diagnóstico de conectividad ([[cerebro-digital/networking/index|portada]]; fuentes en `fuentes.md`).
+-   **`desarrollo/`**: el método para escribir, revisar y entregar código, y los seis guardarraíles ([[cerebro-digital/desarrollo/index|portada]]; fuentes en `fuentes.md`).
+-   **`qa/`**: el plan de pruebas de aceptación y las pruebas de punta a punta, que viven en `qa/` de la raíz ([[cerebro-digital/qa/index|portada]]).
+-   **`modernizacion/`**: absorber, planificar, caracterizar y modernizar una aplicación existente ([[cerebro-digital/modernizacion/index|portada]]).
+-   **`conocimiento/`**: documentos, reuniones y la conversación hasta el Cerebro, con la Consulta Interactiva de Decisión ([[cerebro-digital/conocimiento/index|portada]]).
+-   **`tickets/`**: portada corta que apunta a `tablero/` (fuera del Cerebro a propósito) y a las skills del pipeline ([[cerebro-digital/tickets/index|portada]]).
 
 ### 📦 Módulo: `modulo-ejemplo` (renombrar al instanciar)
 -   **`modulo-ejemplo/funcional/`**: el **qué**: reglas de negocio, glosario, flujos y pantallas. Una ficha por flujo, con su bloque `## Derivación a backlog`.
@@ -90,6 +95,7 @@ Cada una es la portada de una función: qué cubre, cómo se le pide a la IA, la
 Un segundo módulo se crea copiando esta misma estructura con otro slug y agregándolo acá y en el catálogo de `modulo:`.
 
 ### 🎨 Sistema de diseño visual
+-   **`diseno/index.md`**: la portada del diseño: pantallas en Stitch o a mano, dónde van las maquetas y cómo bajan a especificación técnica ([[cerebro-digital/diseno/index|portada]]).
 -   **`diseno/diseno-sistema.md`**: tokens y componentes visuales del producto (documento descriptivo; la skill `cerebro-mockup-design` es la prescriptiva).
 
 ---

@@ -2,7 +2,7 @@
 
 > Prioridad **ALTA**. **Este es el documento que fija la postura de seguridad del método, y el
 > resto apunta acá.** Adaptado de `security-scan`, `compliance-check` y `security-hardening`
-> de `wshobson/commands` (MIT), [referencias-externas.md](../referencias-externas.md).
+> de `wshobson/commands` (MIT), `cerebro-digital/desarrollo/fuentes.md`.
 
 ## ⚠ El analizador de seguridad (SAST/SCA): a definir por el equipo
 

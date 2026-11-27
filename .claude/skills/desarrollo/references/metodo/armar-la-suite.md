@@ -1,7 +1,7 @@
 # Armar la suite de tests
 
 > Método propio. Categorías, testing basado en propiedades y **mutación** adaptados de
-> `wshobson/commands` (MIT), [referencias-externas.md](../referencias-externas.md).
+> `wshobson/commands` (MIT), `cerebro-digital/desarrollo/fuentes.md`.
 
 ## Las siete categorías, y cuáles usamos
 

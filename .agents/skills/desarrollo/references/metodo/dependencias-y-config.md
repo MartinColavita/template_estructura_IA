@@ -1,7 +1,7 @@
 # Dependencias, configuración y secretos
 
 > Prioridad **ALTA**. Adaptado de `deps-audit`, `deps-upgrade` y `config-validate` de
-> `wshobson/commands` (MIT), [referencias-externas.md](../referencias-externas.md).
+> `wshobson/commands` (MIT), `cerebro-digital/desarrollo/fuentes.md`.
 
 ## Antes de sumar una dependencia
 

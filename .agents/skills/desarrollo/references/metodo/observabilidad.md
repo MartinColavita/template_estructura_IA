@@ -2,7 +2,7 @@
 
 > Prioridad **ALTA**. Las cuatro patas las trae el stack; lo que falta es usarlas bien.
 > Adaptado de `monitor-setup` y `slo-implement` de `wshobson/commands` (MIT),
-> [referencias-externas.md](../referencias-externas.md).
+> `cerebro-digital/desarrollo/fuentes.md`.
 
 ## Ya viene medio resuelto, y conviene saberlo
 

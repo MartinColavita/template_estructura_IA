@@ -13,10 +13,8 @@ invoca; las herramientas que los scripts saben ejecutar se declaran además en `
 | Seguridad de la aplicación | [fuentes-aplicaciones.md](../../seguridad/fuentes-aplicaciones.md) | [Seguridad](../../seguridad/index.md) |
 | Seguridad de los servidores | [fuentes-servidores.md](../../seguridad/fuentes-servidores.md) | [Seguridad](../../seguridad/index.md) |
 | Networking (la red, que entra por dos puertas) | [fuentes.md](../../networking/fuentes.md) | [Networking](../../networking/index.md) |
+| El método de desarrollo | [fuentes.md](../../desarrollo/fuentes.md) | [Desarrollo](../../desarrollo/index.md) |
 | Orquestadores por función y Obsidian | [referencias-orquestacion-y-obsidian.md](referencias-orquestacion-y-obsidian.md) (se queda acá: es del ecosistema, no de una función) | — |
-
-La bibliografía del método de desarrollo sigue en
-`cerebro-digital/configuracion-ia/skills/desarrollo/references/referencias-externas.md`.
 
 **Cómo se usa.** Cuando alguien pregunte «¿de dónde salió esta regla?», la respuesta está en la página de su función.
 Cuando una fuente se actualice, se relee y lo que aprendió se propone de a una en `mejoras.md`, nunca se copia. Las

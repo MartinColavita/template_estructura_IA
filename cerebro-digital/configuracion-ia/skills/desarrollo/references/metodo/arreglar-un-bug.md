@@ -2,7 +2,7 @@
 
 > Prioridad **ALTA**, uso diario.
 > Adaptado de `smart-fix` de `wshobson/commands` (MIT),
-> [referencias-externas.md](../referencias-externas.md).
+> `cerebro-digital/desarrollo/fuentes.md`.
 
 ## El ciclo, que es el mismo de siempre
 

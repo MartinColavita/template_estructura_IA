@@ -2,7 +2,7 @@
 
 > Prioridad **ALTA**, uso diario: es la tercera fase del ciclo.
 > Adaptado de `refactor-clean` y `tech-debt` de `wshobson/commands` (MIT),
-> [referencias-externas.md](../referencias-externas.md).
+> `cerebro-digital/desarrollo/fuentes.md`.
 
 ## La definición, que no es obvia
 

@@ -2,7 +2,7 @@
 
 > Prioridad **MEDIA** mientras no haya producción, **ALTA** el día que la haya.
 > Adaptado de `incident-response` de `wshobson/commands` (MIT),
-> [referencias-externas.md](../referencias-externas.md).
+> `cerebro-digital/desarrollo/fuentes.md`.
 
 ## El orden se invierte
 

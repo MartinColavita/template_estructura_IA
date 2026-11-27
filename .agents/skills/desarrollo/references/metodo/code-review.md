@@ -2,7 +2,7 @@
 
 > Método propio.
 > Estructura de dimensiones y severidades adaptada de `wshobson/commands` (MIT) —
-> ver [referencias-externas.md](../referencias-externas.md).
+> ver `cerebro-digital/desarrollo/fuentes.md`.
 
 ## La regla que ordena todo
 

@@ -34,6 +34,48 @@
       }
     },
     {
+      "query": "path:cerebro-digital/desarrollo",
+      "color": {
+        "a": 1,
+        "rgb": 3049182
+      }
+    },
+    {
+      "query": "path:cerebro-digital/qa",
+      "color": {
+        "a": 1,
+        "rgb": 1092740
+      }
+    },
+    {
+      "query": "path:cerebro-digital/diseno",
+      "color": {
+        "a": 1,
+        "rgb": 15952096
+      }
+    },
+    {
+      "query": "path:cerebro-digital/modernizacion",
+      "color": {
+        "a": 1,
+        "rgb": 15618643
+      }
+    },
+    {
+      "query": "path:cerebro-digital/conocimiento",
+      "color": {
+        "a": 1,
+        "rgb": 16697943
+      }
+    },
+    {
+      "query": "path:cerebro-digital/tickets",
+      "color": {
+        "a": 1,
+        "rgb": 8623527
+      }
+    },
+    {
       "query": "[tipo:decisiones]",
       "color": {
         "a": 1,

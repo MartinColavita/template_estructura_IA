@@ -2,7 +2,7 @@
 
 > Prioridad **MEDIA-ALTA**. Complementa el **GATE de WORKTREE** de `AGENTS.md`, que manda.
 > Adaptado de `git-workflow` de `wshobson/commands` (MIT),
-> [referencias-externas.md](../referencias-externas.md).
+> `cerebro-digital/desarrollo/fuentes.md`.
 
 ## Lo que ya está mandado y no se toca
 

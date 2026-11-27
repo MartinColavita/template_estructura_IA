@@ -2,7 +2,7 @@
 
 > Prioridad **ALTA** por hito. Es el documento que ordena a todos los demás.
 > Adaptado de `feature-development` y `full-stack-feature` de `wshobson/commands` (MIT),
-> [referencias-externas.md](../referencias-externas.md).
+> `cerebro-digital/desarrollo/fuentes.md`.
 
 ## Dónde empieza — y dónde NO
 

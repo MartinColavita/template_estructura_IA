@@ -2,7 +2,7 @@
 
 > Prioridad **ALTA** cuando toca, y es de lo más caro de arreglar mal.
 > Adaptado de `db-migrate` de `wshobson/commands` (MIT),
-> [referencias-externas.md](../referencias-externas.md).
+> `cerebro-digital/desarrollo/fuentes.md`.
 
 ## El motor, y el piso que manda sobre todo el SQL
 

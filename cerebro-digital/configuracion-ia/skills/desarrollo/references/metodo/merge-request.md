@@ -1,7 +1,7 @@
 # El Merge Request
 
 > Método propio. Límites de tamaño y estructura de la descripción adaptados de
-> `wshobson/commands` (MIT), [referencias-externas.md](../referencias-externas.md).
+> `wshobson/commands` (MIT), `cerebro-digital/desarrollo/fuentes.md`.
 
 ## Uno por Tarea
 

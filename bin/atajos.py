@@ -24,7 +24,7 @@ LA MARCA (desarrollo/references/metodo/refactor.md, seccion Deuda tecnica), en u
 POR QUE EXISTE. Un atajo tomado a sabiendas esta bien; uno que nadie vuelve a mirar se pudre. La marca deja el limite
 a la vista donde esta el codigo, y esto las junta todas: las que no dicen cuando se mejoran (las que se pudren), y las
 que citan una deuda que el Cerebro no tiene abierta. Idea tomada de DietrichGebert/ponytail (MIT), ver
-desarrollo/references/referencias-externas.md.
+cerebro-digital/desarrollo/fuentes.md.
 
 QUE NO HACE. No escribe en deuda.md (eso es de cerebro-curator, con el "si" de una persona), no juzga si el limite
 declarado es cierto ni si la carga real ya lo paso (eso es criterio de la revision), no lee documentacion (.md, .txt):

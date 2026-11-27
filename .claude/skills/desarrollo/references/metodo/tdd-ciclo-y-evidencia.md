@@ -1,7 +1,7 @@
 # El ciclo rojo-verde, y qué cuenta como evidencia
 
 > Método propio.
-> Adaptado en parte de `wshobson/commands` (MIT) — ver [referencias-externas.md](../referencias-externas.md).
+> Adaptado en parte de `wshobson/commands` (MIT) — ver `cerebro-digital/desarrollo/fuentes.md`.
 
 ## Por qué existe esta página
 

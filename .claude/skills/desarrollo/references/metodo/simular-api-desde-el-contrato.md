@@ -3,7 +3,7 @@
 > Método propio. La herramienta con la que se simula la provee el stack del front (⚠ a
 > definir, se anota en `arquitectura/esqueleto-proyectos.md`); nada de lo que sigue depende de
 > cuál sea. Prácticas adaptadas de `wshobson/commands` (MIT),
-> [referencias-externas.md](../referencias-externas.md).
+> `cerebro-digital/desarrollo/fuentes.md`.
 
 ## La regla dura
 

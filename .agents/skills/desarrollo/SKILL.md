@@ -134,7 +134,7 @@ No aplica al repositorio del Cerebro: ahí `bin/` es Python a propósito.
   token). No se improvisa lo que esa fuente diría. Todo `metodo/` funciona igual: es propio y no
   depende de nada.
 - **Nunca se pega contenido de terceros dentro de este repositorio.** Se lee, se usa, se descarta
-  (G5). Las citas mínimas con atribución van en `references/referencias-externas.md`.
+  (G5). Las citas mínimas con atribución van en `cerebro-digital/desarrollo/fuentes.md`.
 - **Los comentarios del código, en español** (back y front). Se comenta poco —el código se explica
   por sus nombres, donde sólo los sustantivos del negocio que están en la base van en español y
   los verbos, roles técnicos y técnica en inglés (`arquitectura/esqueleto-proyectos.md`)—, pero el
@@ -183,7 +183,7 @@ puerta de cada función cuando el código es infraestructura, un pipeline o toca
 ([[arquitectura-e-infraestructura]], [[despliegue-continuo]], [[operacion-de-servidores]], [[seguridad]],
 [[gestion-de-gitlab]])— está en `references/indice-del-metodo.md`: se lee **antes de empezar** cualquiera de esos trabajos.
 
-Bibliografía (ideas tomadas con atribución, nunca texto): [referencias-externas.md](references/referencias-externas.md).
+Bibliografía (ideas tomadas con atribución, nunca texto): `cerebro-digital/desarrollo/fuentes.md`.
 
 Lo que este método exige y una guía genérica no (evidencia del rojo, verificador distinto, tres estados, regla del
 cero, límites de módulo, PHI): `references/lo-que-exige-el-metodo.md`, cuando haya que justificarlo.
@@ -199,4 +199,4 @@ cero, límites de módulo, PHI): `references/lo-que-exige-el-metodo.md`, cuando 
 | `references/skills-de-los-repos.md` | Se trabaja en `back/` o `front/`, o se arma la misión de un worker o verificador |
 | `references/tabla-de-precedencia.md` | Una guía externa y el proyecto chocan (G3) |
 | `references/lo-que-exige-el-metodo.md` | Hay que justificar por qué el método pide más que una guía genérica |
-| `references/referencias-externas.md` | Se cita una idea ajena (con atribución, nunca texto) |
+| `cerebro-digital/desarrollo/fuentes.md` | Se cita una idea ajena (con atribución, nunca texto) |
